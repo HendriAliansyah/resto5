@@ -1,3 +1,4 @@
+// lib/providers/menu_provider.dart
 import 'dart:io';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/menu_model.dart';
@@ -49,8 +50,11 @@ class MenuState {
 final menuServiceProvider = Provider((ref) => MenuService());
 
 final menusStreamProvider = StreamProvider.autoDispose<List<MenuModel>>((ref) {
-  final restaurantId =
-      ref.watch(currentUserProvider).asData?.value?.restaurantId;
+  final restaurantId = ref
+      .watch(currentUserProvider)
+      .asData
+      ?.value
+      ?.restaurantId;
   if (restaurantId != null) {
     return ref.watch(menuServiceProvider).getMenusStream(restaurantId);
   }
@@ -81,6 +85,7 @@ class MenuController extends StateNotifier<MenuState> {
     required String name,
     required String description,
     required double price,
+    required int preparationTime,
     required String courseId,
     required String orderTypeId,
     required List<String> menuItems,
@@ -95,8 +100,11 @@ class MenuController extends StateNotifier<MenuState> {
       );
       return;
     }
-    final restaurantId =
-        _ref.read(currentUserProvider).asData?.value?.restaurantId;
+    final restaurantId = _ref
+        .read(currentUserProvider)
+        .asData
+        ?.value
+        ?.restaurantId;
     if (restaurantId == null) {
       state = MenuState(
         status: MenuActionStatus.error,
@@ -115,6 +123,7 @@ class MenuController extends StateNotifier<MenuState> {
         orderTypeId: orderTypeId,
         menuItems: menuItems,
         inventoryItems: inventoryItems,
+        preparationTime: preparationTime,
       );
 
       final docRef = await _ref
@@ -143,6 +152,7 @@ class MenuController extends StateNotifier<MenuState> {
     required String name,
     required String description,
     required double price,
+    required int preparationTime,
     required String courseId,
     required String orderTypeId,
     required List<String> menuItems,
@@ -174,6 +184,7 @@ class MenuController extends StateNotifier<MenuState> {
         'imageUrl': finalImageUrl,
         'menuItems': menuItems,
         'inventoryItems': inventoryItems,
+        'preparationTime': preparationTime,
       };
 
       await _ref.read(menuServiceProvider).updateMenu(id, updatedData);
@@ -203,15 +214,14 @@ final sortedMenusProvider = Provider.autoDispose<List<MenuModel>>((ref) {
   final filter = ref.watch(menuFilterProvider);
 
   // Apply search and course filters
-  final filteredList =
-      menuList.where((menu) {
-        final searchMatch =
-            filter.searchQuery.isEmpty ||
-            menu.name.toLowerCase().contains(filter.searchQuery.toLowerCase());
-        final courseMatch =
-            filter.courseId == null || menu.courseId == filter.courseId;
-        return searchMatch && courseMatch;
-      }).toList();
+  final filteredList = menuList.where((menu) {
+    final searchMatch =
+        filter.searchQuery.isEmpty ||
+        menu.name.toLowerCase().contains(filter.searchQuery.toLowerCase());
+    final courseMatch =
+        filter.courseId == null || menu.courseId == filter.courseId;
+    return searchMatch && courseMatch;
+  }).toList();
 
   // Apply sorting
   filteredList.sort((a, b) {

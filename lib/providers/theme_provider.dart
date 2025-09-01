@@ -7,13 +7,19 @@ import 'package:resto2/providers/auth_providers.dart';
 // It is null when the user is not on the settings page.
 final previewThemeModeProvider = StateProvider<ThemeMode?>((ref) => null);
 
-// This provider continues to represent the SAVED theme preference from Firestore.
 final userSettingsProvider = StreamProvider.autoDispose<UserSettings>((ref) {
-  final user = ref.watch(currentUserProvider).asData?.value;
-  if (user != null) {
-    return ref.watch(firestoreServiceProvider).watchUserSettings(user.uid);
-  }
-  return Stream.value(UserSettings());
+  final userAsyncValue = ref.watch(currentUserProvider);
+
+  return userAsyncValue.when(
+    data: (user) {
+      if (user != null) {
+        return ref.watch(firestoreServiceProvider).watchUserSettings(user.uid);
+      }
+      return Stream.value(UserSettings());
+    },
+    loading: () => Stream.value(UserSettings()),
+    error: (err, stack) => Stream.value(UserSettings()),
+  );
 });
 
 // This notifier now ONLY handles SAVING the theme to the database.

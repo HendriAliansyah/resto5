@@ -1,3 +1,4 @@
+// lib/providers/table_provider.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/table_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
@@ -31,16 +32,14 @@ final sortedTablesProvider = Provider.autoDispose<List<TableModel>>((ref) {
   final filter = ref.watch(tableFilterProvider);
 
   // Apply search and type filters
-  final filteredList =
-      tables.where((table) {
-        final searchMatch =
-            filter.searchQuery.isEmpty ||
-            table.name.toLowerCase().contains(filter.searchQuery.toLowerCase());
-        final typeMatch =
-            filter.tableTypeId == null ||
-            table.tableTypeId == filter.tableTypeId;
-        return searchMatch && typeMatch;
-      }).toList();
+  final filteredList = tables.where((table) {
+    final searchMatch =
+        filter.searchQuery.isEmpty ||
+        table.name.toLowerCase().contains(filter.searchQuery.toLowerCase());
+    final typeMatch =
+        filter.tableTypeId == null || table.tableTypeId == filter.tableTypeId;
+    return searchMatch && typeMatch;
+  }).toList();
 
   // Apply sorting
   filteredList.sort((a, b) {
@@ -83,6 +82,7 @@ class TableController extends StateNotifier<TableState> {
     required String name,
     required String tableTypeId,
     required int capacity,
+    required String? orderTypeId,
   }) async {
     state = TableState(status: TableActionStatus.loading);
     if (!_isNameUnique(name, null)) {
@@ -93,8 +93,11 @@ class TableController extends StateNotifier<TableState> {
       return;
     }
 
-    final restaurantId =
-        _ref.read(currentUserProvider).asData?.value?.restaurantId;
+    final restaurantId = _ref
+        .read(currentUserProvider)
+        .asData
+        ?.value
+        ?.restaurantId;
     if (restaurantId == null) {
       state = TableState(
         status: TableActionStatus.error,
@@ -108,6 +111,7 @@ class TableController extends StateNotifier<TableState> {
       'tableTypeId': tableTypeId,
       'capacity': capacity,
       'restaurantId': restaurantId,
+      'orderTypeId': orderTypeId,
     };
 
     try {
@@ -126,6 +130,7 @@ class TableController extends StateNotifier<TableState> {
     required String name,
     required String tableTypeId,
     required int capacity,
+    required String? orderTypeId,
   }) async {
     state = TableState(status: TableActionStatus.loading);
     if (!_isNameUnique(name, tableId)) {
@@ -140,6 +145,7 @@ class TableController extends StateNotifier<TableState> {
       'name': name,
       'tableTypeId': tableTypeId,
       'capacity': capacity,
+      'orderTypeId': orderTypeId,
     };
 
     try {

@@ -44,96 +44,92 @@ class MenuManagementPage extends ConsumerWidget {
           child: Column(
             children: [
               coursesAsync.when(
-                data:
-                    (courses) => FilterExpansionTile(
+                data: (courses) => FilterExpansionTile(
+                  children: [
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Search by Name',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) => ref
+                          .read(menuFilterProvider.notifier)
+                          .setSearchQuery(value),
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField2<String>(
+                      value: filterState.courseId,
+                      decoration: const InputDecoration(
+                        labelText: 'Filter by Course',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      buttonStyleData: const ButtonStyleData(
+                        height: 50,
+                        padding: EdgeInsets.only(right: 10),
+                      ),
+                      items: [
+                        const DropdownMenuItem(
+                          value: null,
+                          child: Text('All Courses'),
+                        ),
+                        ...courses.map(
+                          (course) => DropdownMenuItem(
+                            value: course.id,
+                            child: Text(course.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: (courseId) => ref
+                          .read(menuFilterProvider.notifier)
+                          .setCourseFilter(courseId),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Search by Name',
-                            prefixIcon: Icon(Icons.search),
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged:
-                              (value) => ref
-                                  .read(menuFilterProvider.notifier)
-                                  .setSearchQuery(value),
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField2<String>(
-                          value: filterState.courseId,
-                          decoration: const InputDecoration(
-                            labelText: 'Filter by Course',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                          buttonStyleData: const ButtonStyleData(
-                            height: 50,
-                            padding: EdgeInsets.only(right: 10),
-                          ),
-                          items: [
-                            const DropdownMenuItem(
-                              value: null,
-                              child: Text('All Courses'),
+                        Expanded(
+                          child: DropdownButtonFormField2<MenuSortOption>(
+                            value: filterState.sortOption,
+                            decoration: const InputDecoration(
+                              labelText: 'Sort by',
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.zero,
                             ),
-                            ...courses.map(
-                              (course) => DropdownMenuItem(
-                                value: course.id,
-                                child: Text(course.name),
+                            buttonStyleData: const ButtonStyleData(
+                              height: 50,
+                              padding: EdgeInsets.only(right: 10),
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: MenuSortOption.byName,
+                                child: Text('Name'),
                               ),
-                            ),
-                          ],
-                          onChanged:
-                              (courseId) => ref
-                                  .read(menuFilterProvider.notifier)
-                                  .setCourseFilter(courseId),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: DropdownButtonFormField2<MenuSortOption>(
-                                value: filterState.sortOption,
-                                decoration: const InputDecoration(
-                                  labelText: 'Sort by',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.zero,
-                                ),
-                                buttonStyleData: const ButtonStyleData(
-                                  height: 50,
-                                  padding: EdgeInsets.only(right: 10),
-                                ),
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: MenuSortOption.byName,
-                                    child: Text('Name'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: MenuSortOption.byPrice,
-                                    child: Text('Price'),
-                                  ),
-                                ],
-                                onChanged: (option) {
-                                  if (option != null) {
-                                    ref
-                                        .read(menuFilterProvider.notifier)
-                                        .setSortOption(option);
-                                  }
-                                },
+                              DropdownMenuItem(
+                                value: MenuSortOption.byPrice,
+                                child: Text('Price'),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            SortOrderToggle(
-                              currentOrder: filterState.sortOrder,
-                              onOrderChanged:
-                                  (order) => ref
-                                      .read(menuFilterProvider.notifier)
-                                      .setSortOrder(order),
-                            ),
-                          ],
+                            ],
+                            onChanged: (option) {
+                              if (option != null) {
+                                ref
+                                    .read(menuFilterProvider.notifier)
+                                    .setSortOption(option);
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        SortOrderToggle(
+                          currentOrder: filterState.sortOrder,
+                          onOrderChanged: (order) => ref
+                              .read(menuFilterProvider.notifier)
+                              .setSortOrder(order),
                         ),
                       ],
                     ),
+                  ],
+                ),
                 loading: () => const SizedBox.shrink(),
                 error: (e, st) => const SizedBox.shrink(),
               ),
@@ -162,8 +158,6 @@ class MenuManagementPage extends ConsumerWidget {
                       itemBuilder: (_, index) {
                         final menu = sortedMenus[index];
                         final courseName = courseMap[menu.courseId] ?? 'N/A';
-                        final orderTypeName =
-                            orderTypeMap[menu.orderTypeId] ?? 'N/A';
                         return Card(
                           clipBehavior: Clip.antiAlias,
                           margin: const EdgeInsets.symmetric(
@@ -177,18 +171,17 @@ class MenuManagementPage extends ConsumerWidget {
                               height: 56,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child:
-                                    menu.imageUrl != null
-                                        ? Image.network(
-                                          menu.imageUrl!,
-                                          fit: BoxFit.cover,
-                                        )
-                                        : Container(
-                                          color: Colors.grey.shade300,
-                                          child: const Icon(
-                                            Icons.image_not_supported,
-                                          ),
+                                child: menu.imageUrl != null
+                                    ? Image.network(
+                                        menu.imageUrl!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        color: Colors.grey.shade300,
+                                        child: const Icon(
+                                          Icons.image_not_supported,
                                         ),
+                                      ),
                               ),
                             ),
                             title: Text(
@@ -198,7 +191,7 @@ class MenuManagementPage extends ConsumerWidget {
                               ),
                             ),
                             subtitle: Text(
-                              '$courseName • $orderTypeName',
+                              '$courseName • ${menu.preparationTime} min',
                               overflow: TextOverflow.ellipsis,
                             ),
                             trailing: Text(
@@ -213,8 +206,8 @@ class MenuManagementPage extends ConsumerWidget {
                       },
                     );
                   },
-                  loading:
-                      () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Center(child: Text(e.toString())),
                 ),
               ),

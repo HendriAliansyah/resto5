@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:resto2/models/table_model.dart';
+import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/providers/table_provider.dart';
 import 'package:resto2/providers/table_type_provider.dart';
 
@@ -20,9 +21,11 @@ class TableDialog extends HookConsumerWidget {
       text: table?.capacity.toString(),
     );
     final selectedTableTypeId = useState<String?>(table?.tableTypeId);
+    final selectedOrderTypeId = useState<String?>(table?.orderTypeId);
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final tableTypes = ref.watch(tableTypesStreamProvider).asData?.value ?? [];
+    final orderTypes = ref.watch(orderTypesStreamProvider).asData?.value ?? [];
 
     void submit() {
       if (formKey.currentState?.validate() ?? false) {
@@ -38,15 +41,16 @@ class TableDialog extends HookConsumerWidget {
             name: name,
             tableTypeId: tableTypeId,
             capacity: capacity,
+            orderTypeId: selectedOrderTypeId.value,
           );
         } else {
           controller.addTable(
             name: name,
             tableTypeId: tableTypeId,
             capacity: capacity,
+            orderTypeId: selectedOrderTypeId.value,
           );
         }
-        Navigator.of(context).pop();
       }
     }
 
@@ -82,15 +86,12 @@ class TableDialog extends HookConsumerWidget {
               const SizedBox(height: 16),
               DropdownButtonFormField2<String>(
                 value: selectedTableTypeId.value,
-                items:
-                    tableTypes
-                        .map(
-                          (tt) => DropdownMenuItem(
-                            value: tt.id,
-                            child: Text(tt.name),
-                          ),
-                        )
-                        .toList(),
+                items: tableTypes
+                    .map(
+                      (tt) =>
+                          DropdownMenuItem(value: tt.id, child: Text(tt.name)),
+                    )
+                    .toList(),
                 onChanged: (v) => selectedTableTypeId.value = v,
                 decoration: const InputDecoration(
                   labelText: 'Table Type',
@@ -102,6 +103,30 @@ class TableDialog extends HookConsumerWidget {
                   padding: EdgeInsets.only(right: 10),
                 ),
                 validator: (v) => v == null ? 'Required' : null,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField2<String?>(
+                value: selectedOrderTypeId.value,
+                items: [
+                  const DropdownMenuItem(
+                    value: null,
+                    child: Text('All Order Types'),
+                  ),
+                  ...orderTypes.map(
+                    (ot) =>
+                        DropdownMenuItem(value: ot.id, child: Text(ot.name)),
+                  ),
+                ],
+                onChanged: (v) => selectedOrderTypeId.value = v,
+                decoration: const InputDecoration(
+                  labelText: 'Order Type',
+                  contentPadding: EdgeInsets.zero,
+                  border: OutlineInputBorder(),
+                ),
+                buttonStyleData: const ButtonStyleData(
+                  height: 50,
+                  padding: EdgeInsets.only(right: 10),
+                ),
               ),
             ],
           ),

@@ -1,3 +1,4 @@
+// lib/models/table_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TableModel {
@@ -6,6 +7,7 @@ class TableModel {
   final String tableTypeId;
   final int capacity;
   final String restaurantId;
+  final String? orderTypeId; // Added
 
   TableModel({
     required this.id,
@@ -13,6 +15,7 @@ class TableModel {
     required this.tableTypeId,
     required this.capacity,
     required this.restaurantId,
+    this.orderTypeId, // Added
   });
 
   factory TableModel.fromFirestore(DocumentSnapshot doc) {
@@ -23,6 +26,7 @@ class TableModel {
       tableTypeId: data['tableTypeId'] ?? '',
       capacity: data['capacity'] ?? 0,
       restaurantId: data['restaurantId'] ?? '',
+      orderTypeId: data['orderTypeId'], // Added
     );
   }
 
@@ -32,6 +36,7 @@ class TableModel {
       'tableTypeId': tableTypeId,
       'capacity': capacity,
       'restaurantId': restaurantId,
+      'orderTypeId': orderTypeId, // Added
     };
   }
 }

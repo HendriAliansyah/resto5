@@ -27,6 +27,9 @@ class MenuBottomSheet extends HookConsumerWidget {
     final priceController = useTextEditingController(
       text: menu?.price.toString(),
     );
+    final preparationTimeController = useTextEditingController(
+      text: menu?.preparationTime.toString(),
+    );
     final selectedCourseId = useState<String?>(menu?.courseId);
     final selectedOrderTypeId = useState<String?>(menu?.orderTypeId);
     final selectedMenuItems = useState<List<String>>(menu?.menuItems ?? []);
@@ -81,6 +84,8 @@ class MenuBottomSheet extends HookConsumerWidget {
         }
         final controller = ref.read(menuControllerProvider.notifier);
         final price = double.tryParse(priceController.text) ?? 0.0;
+        final preparationTime =
+            int.tryParse(preparationTimeController.text) ?? 0;
         if (isEditing) {
           controller.updateMenu(
             id: menu!.id,
@@ -93,6 +98,7 @@ class MenuBottomSheet extends HookConsumerWidget {
             inventoryItems: selectedInventoryItems.value,
             imageFile: localImageFile.value,
             existingImageUrl: menu?.imageUrl,
+            preparationTime: preparationTime,
           );
         } else {
           controller.addMenu(
@@ -104,6 +110,7 @@ class MenuBottomSheet extends HookConsumerWidget {
             menuItems: selectedMenuItems.value,
             inventoryItems: selectedInventoryItems.value,
             imageFile: localImageFile.value,
+            preparationTime: preparationTime,
           );
         }
       }
@@ -147,39 +154,38 @@ class MenuBottomSheet extends HookConsumerWidget {
                               border: Border.all(
                                 color: Theme.of(context).dividerColor,
                               ),
-                              image:
-                                  localImageFile.value != null
-                                      ? DecorationImage(
-                                        image: FileImage(localImageFile.value!),
-                                        fit: BoxFit.cover,
-                                      )
-                                      : (menu?.imageUrl != null
-                                          ? DecorationImage(
+                              image: localImageFile.value != null
+                                  ? DecorationImage(
+                                      image: FileImage(localImageFile.value!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : (menu?.imageUrl != null
+                                        ? DecorationImage(
                                             image: NetworkImage(
                                               menu!.imageUrl!,
                                             ),
                                             fit: BoxFit.cover,
                                           )
-                                          : null),
+                                        : null),
                             ),
                             child:
                                 localImageFile.value == null &&
-                                        menu?.imageUrl == null
-                                    ? const Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.add_a_photo_outlined,
-                                            size: 48,
-                                          ),
-                                          SizedBox(height: 8),
-                                          Text('Tap to add image'),
-                                        ],
-                                      ),
-                                    )
-                                    : null,
+                                    menu?.imageUrl == null
+                                ? const Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add_a_photo_outlined,
+                                          size: 48,
+                                        ),
+                                        SizedBox(height: 8),
+                                        Text('Tap to add image'),
+                                      ],
+                                    ),
+                                  )
+                                : null,
                           ),
                         ),
                       ),
@@ -216,17 +222,29 @@ class MenuBottomSheet extends HookConsumerWidget {
                         validator: (v) => v!.isEmpty ? 'Required' : null,
                       ),
                       const SizedBox(height: 16),
+                      TextFormField(
+                        controller: preparationTimeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Preparation Time (minutes)',
+                          prefixIcon: Icon(Icons.timer_outlined),
+                        ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                      ),
+                      const SizedBox(height: 16),
                       DropdownButtonFormField2<String>(
                         value: selectedCourseId.value,
-                        items:
-                            courses
-                                .map(
-                                  (c) => DropdownMenuItem(
-                                    value: c.id,
-                                    child: Text(c.name),
-                                  ),
-                                )
-                                .toList(),
+                        items: courses
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c.id,
+                                child: Text(c.name),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (v) => selectedCourseId.value = v,
                         decoration: const InputDecoration(
                           labelText: 'Course',
@@ -242,15 +260,14 @@ class MenuBottomSheet extends HookConsumerWidget {
                       const SizedBox(height: 16),
                       DropdownButtonFormField2<String>(
                         value: selectedOrderTypeId.value,
-                        items:
-                            orderTypes
-                                .map(
-                                  (ot) => DropdownMenuItem(
-                                    value: ot.id,
-                                    child: Text(ot.name),
-                                  ),
-                                )
-                                .toList(),
+                        items: orderTypes
+                            .map(
+                              (ot) => DropdownMenuItem(
+                                value: ot.id,
+                                child: Text(ot.name),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (v) => selectedOrderTypeId.value = v,
                         decoration: const InputDecoration(
                           labelText: 'Order Type',
@@ -265,12 +282,11 @@ class MenuBottomSheet extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       MultiSelectBottomSheetField<MenuModel>(
-                        initialValue:
-                            menus
-                                .where(
-                                  (m) => selectedMenuItems.value.contains(m.id),
-                                )
-                                .toList(),
+                        initialValue: menus
+                            .where(
+                              (m) => selectedMenuItems.value.contains(m.id),
+                            )
+                            .toList(),
                         items: menus,
                         dialogTitle: 'Menu Items',
                         searchHint: 'Search for menu items',
@@ -283,14 +299,12 @@ class MenuBottomSheet extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       MultiSelectBottomSheetField<InventoryItem>(
-                        initialValue:
-                            inventories
-                                .where(
-                                  (i) => selectedInventoryItems.value.contains(
-                                    i.id,
-                                  ),
-                                )
-                                .toList(),
+                        initialValue: inventories
+                            .where(
+                              (i) =>
+                                  selectedInventoryItems.value.contains(i.id),
+                            )
+                            .toList(),
                         items: inventories,
                         dialogTitle: 'Inventory Items',
                         searchHint: 'Search for inventory items',
@@ -314,17 +328,16 @@ class MenuBottomSheet extends HookConsumerWidget {
                   minimumSize: const Size(double.infinity, 48),
                 ),
                 onPressed: isLoading ? null : submit,
-                child:
-                    isLoading
-                        ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 3,
-                            color: Colors.white,
-                          ),
-                        )
-                        : const Text('Save'),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Save'),
               ),
             ),
           ],

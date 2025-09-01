@@ -10,8 +10,9 @@ class MenuModel {
   final String restaurantId;
   final String courseId;
   final String orderTypeId;
-  final List<String> menuItems; // Added
-  final List<String> inventoryItems; // Added
+  final List<String> menuItems;
+  final List<String> inventoryItems;
+  final int preparationTime; // Renamed
 
   MenuModel({
     required this.id,
@@ -22,8 +23,9 @@ class MenuModel {
     required this.restaurantId,
     required this.courseId,
     required this.orderTypeId,
-    this.menuItems = const [], // Added
-    this.inventoryItems = const [], // Added
+    this.menuItems = const [],
+    this.inventoryItems = const [],
+    this.preparationTime = 0, // Renamed
   });
 
   factory MenuModel.fromFirestore(DocumentSnapshot doc) {
@@ -37,8 +39,9 @@ class MenuModel {
       restaurantId: data['restaurantId'] ?? '',
       courseId: data['courseId'] ?? '',
       orderTypeId: data['orderTypeId'] ?? '',
-      menuItems: List<String>.from(data['menuItems'] ?? []), // Added
-      inventoryItems: List<String>.from(data['inventoryItems'] ?? []), // Added
+      menuItems: List<String>.from(data['menuItems'] ?? []),
+      inventoryItems: List<String>.from(data['inventoryItems'] ?? []),
+      preparationTime: data['preparationTime'] ?? 0, // Renamed
     );
   }
 
@@ -51,8 +54,9 @@ class MenuModel {
       'restaurantId': restaurantId,
       'courseId': courseId,
       'orderTypeId': orderTypeId,
-      'menuItems': menuItems, // Added
-      'inventoryItems': inventoryItems, // Added
+      'menuItems': menuItems,
+      'inventoryItems': inventoryItems,
+      'preparationTime': preparationTime, // Renamed
     };
   }
 }
