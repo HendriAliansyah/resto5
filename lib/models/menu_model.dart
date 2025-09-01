@@ -12,7 +12,7 @@ class MenuModel {
   final String orderTypeId;
   final List<String> menuItems;
   final List<String> inventoryItems;
-  final int preparationTime; // Renamed
+  final int preparationTime;
 
   MenuModel({
     required this.id,
@@ -25,7 +25,7 @@ class MenuModel {
     required this.orderTypeId,
     this.menuItems = const [],
     this.inventoryItems = const [],
-    this.preparationTime = 0, // Renamed
+    this.preparationTime = 0,
   });
 
   factory MenuModel.fromFirestore(DocumentSnapshot doc) {
@@ -41,7 +41,7 @@ class MenuModel {
       orderTypeId: data['orderTypeId'] ?? '',
       menuItems: List<String>.from(data['menuItems'] ?? []),
       inventoryItems: List<String>.from(data['inventoryItems'] ?? []),
-      preparationTime: data['preparationTime'] ?? 0, // Renamed
+      preparationTime: data['preparationTime'] ?? 0,
     );
   }
 
@@ -56,7 +56,15 @@ class MenuModel {
       'orderTypeId': orderTypeId,
       'menuItems': menuItems,
       'inventoryItems': inventoryItems,
-      'preparationTime': preparationTime, // Renamed
+      'preparationTime': preparationTime,
     };
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MenuModel && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

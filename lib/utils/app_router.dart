@@ -11,6 +11,7 @@ import 'package:resto2/views/inventory/stock_movement_history_page.dart';
 import 'package:resto2/views/menu/menu_management_page.dart';
 import 'package:resto2/views/notifications/notification_page.dart';
 import 'package:resto2/views/onboarding/onboarding_screen.dart';
+import 'package:resto2/views/order/order_page.dart';
 import 'package:resto2/views/order_type/order_type_management_page.dart';
 import 'package:resto2/views/purchase/purchase_history_page.dart';
 import 'package:resto2/views/purchase/purchase_page.dart'; // Added
@@ -118,6 +119,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.stockMovementHistory,
         builder: (context, state) => const StockMovementHistoryPage(),
+      ),
+      GoRoute(
+        // Added
+        path: AppRoutes.order,
+        builder: (context, state) => const OrderPage(),
       ),
     ],
     redirect: (BuildContext context, GoRouterState state) {

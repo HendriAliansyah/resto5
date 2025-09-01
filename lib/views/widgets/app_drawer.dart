@@ -21,99 +21,90 @@ class AppDrawer extends ConsumerWidget {
     final userRole = currentUser.role;
 
     // Permission checks using the logic from YOUR file
-    final bool canAccessMasterRestaurant =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessMasterRestaurant,
-                ) ??
-                false
-            : false;
+    final bool canAccessMasterRestaurant = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessMasterRestaurant,
+              ) ??
+              false
+        : false;
 
-    final bool canAccessStaffManagement =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessStaffManagement,
-                ) ??
-                false
-            : false;
+    final bool canAccessStaffManagement = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessStaffManagement,
+              ) ??
+              false
+        : false;
 
-    final bool canAccessCourseMaster =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessCourseMaster,
-                ) ??
-                false
-            : false;
+    final bool canAccessCourseMaster = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessCourseMaster,
+              ) ??
+              false
+        : false;
 
-    final bool canAccessTableTypeMaster =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessTableTypeMaster,
-                ) ??
-                false
-            : false;
+    final bool canAccessTableTypeMaster = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessTableTypeMaster,
+              ) ??
+              false
+        : false;
 
-    final bool canAccessTableMaster =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessTableMaster,
-                ) ??
-                false
-            : false;
+    final bool canAccessTableMaster = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessTableMaster,
+              ) ??
+              false
+        : false;
 
-    final bool canAccessOrderTypeMaster =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessOrderTypeMaster,
-                ) ??
-                false
-            : false;
+    final bool canAccessOrderTypeMaster = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessOrderTypeMaster,
+              ) ??
+              false
+        : false;
 
-    final bool canAccessMenuMaster =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessMenuMaster,
-                ) ??
-                false
-            : false;
+    final bool canAccessMenuMaster = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessMenuMaster,
+              ) ??
+              false
+        : false;
 
-    final bool canAccessInventoryMaster =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessInventoryMaster,
-                ) ??
-                false
-            : false;
+    final bool canAccessInventoryMaster = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessInventoryMaster,
+              ) ??
+              false
+        : false;
 
-    final bool canAccessPurchasePage =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessPurchasePage,
-                ) ??
-                false
-            : false;
-    final bool canAccessPurchaseHistory =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessPurchaseHistory,
-                ) ??
-                false
-            : false;
-    final bool canAccessStockEdit =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessStockEdit,
-                ) ??
-                false
-            : false;
+    final bool canAccessPurchasePage = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessPurchasePage,
+              ) ??
+              false
+        : false;
+    final bool canAccessPurchaseHistory = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessPurchaseHistory,
+              ) ??
+              false
+        : false;
+    final bool canAccessStockEdit = userRole != null
+        ? rolePermissions[userRole]?.contains(PagePermission.accessStockEdit) ??
+              false
+        : false;
 
-    final bool canAccessStockMovementHistory =
-        userRole != null
-            ? rolePermissions[userRole]?.contains(
-                  PagePermission.accessStockMovementHistory,
-                ) ??
-                false
-            : false;
+    final bool canAccessStockMovementHistory = userRole != null
+        ? rolePermissions[userRole]?.contains(
+                PagePermission.accessStockMovementHistory,
+              ) ??
+              false
+        : false;
+    final bool canAccessOrderPage = // Added
+    userRole != null
+        ? rolePermissions[userRole]?.contains(PagePermission.accessOrderPage) ??
+              false
+        : false;
 
     return Drawer(
       child: ListView(
@@ -144,6 +135,15 @@ class AppDrawer extends ConsumerWidget {
               context.go(AppRoutes.home);
             },
           ),
+          if (canAccessOrderPage) // Added
+            ListTile(
+              leading: const Icon(Icons.point_of_sale_outlined),
+              title: const Text('POS / New Order'),
+              onTap: () {
+                Navigator.pop(context);
+                context.push(AppRoutes.order);
+              },
+            ),
           if (canAccessMasterRestaurant)
             ListTile(
               leading: const Icon(Icons.storefront_outlined),

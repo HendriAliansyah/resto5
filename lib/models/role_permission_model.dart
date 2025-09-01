@@ -16,6 +16,7 @@ enum PagePermission {
   accessPurchaseHistory,
   accessStockEdit,
   accessStockMovementHistory,
+  accessOrderPage,
 }
 
 // Maps each user role to a list of pages they are allowed to access.
@@ -33,6 +34,7 @@ const Map<UserRole, List<PagePermission>> rolePermissions = {
     PagePermission.accessPurchaseHistory,
     PagePermission.accessStockEdit,
     PagePermission.accessStockMovementHistory,
+    PagePermission.accessOrderPage,
   ],
   UserRole.admin: [
     PagePermission.accessStaffManagement,
@@ -46,6 +48,7 @@ const Map<UserRole, List<PagePermission>> rolePermissions = {
     PagePermission.accessPurchaseHistory,
     PagePermission.accessStockEdit,
     PagePermission.accessStockMovementHistory,
+    PagePermission.accessOrderPage,
   ],
   UserRole.manager: [
     PagePermission.accessTableTypeMaster,
@@ -55,8 +58,10 @@ const Map<UserRole, List<PagePermission>> rolePermissions = {
     PagePermission.accessPurchaseHistory,
     PagePermission.accessStockEdit,
     PagePermission.accessStockMovementHistory,
+    PagePermission.accessOrderPage,
   ],
   UserRole.cashier: [
+    PagePermission.accessOrderPage,
     // Cashier has no page-level permissions
   ],
 };

@@ -23,6 +23,7 @@ class AppRoutes {
   static const String purchaseHistory = '/purchase-history';
   static const String editStock = '/edit-stock';
   static const String stockMovementHistory = '/stock-movement-history';
+  static const String order = '/order';
 }
 
 // UI String Constants

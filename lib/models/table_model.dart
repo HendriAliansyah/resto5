@@ -7,7 +7,8 @@ class TableModel {
   final String tableTypeId;
   final int capacity;
   final String restaurantId;
-  final String? orderTypeId; // Added
+  final String? orderTypeId;
+  final bool isOccupied; // Added
 
   TableModel({
     required this.id,
@@ -15,7 +16,8 @@ class TableModel {
     required this.tableTypeId,
     required this.capacity,
     required this.restaurantId,
-    this.orderTypeId, // Added
+    this.orderTypeId,
+    this.isOccupied = false, // Added
   });
 
   factory TableModel.fromFirestore(DocumentSnapshot doc) {
@@ -26,7 +28,8 @@ class TableModel {
       tableTypeId: data['tableTypeId'] ?? '',
       capacity: data['capacity'] ?? 0,
       restaurantId: data['restaurantId'] ?? '',
-      orderTypeId: data['orderTypeId'], // Added
+      orderTypeId: data['orderTypeId'],
+      isOccupied: data['isOccupied'] ?? false, // Added
     );
   }
 
@@ -36,7 +39,8 @@ class TableModel {
       'tableTypeId': tableTypeId,
       'capacity': capacity,
       'restaurantId': restaurantId,
-      'orderTypeId': orderTypeId, // Added
+      'orderTypeId': orderTypeId,
+      'isOccupied': isOccupied, // Added
     };
   }
 }
