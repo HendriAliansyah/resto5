@@ -22,8 +22,7 @@ class ReceivingInventoryPage extends HookConsumerWidget {
     final priceController = useTextEditingController();
     final notesController = useTextEditingController();
 
-    final inventoryAvailable =
-        (ref.watch(inventoryStreamProvider).asData?.value ?? []).isNotEmpty;
+    final inventoryAsync = ref.watch(inventoryStreamProvider);
     final purchaseState = ref.watch(purchaseControllerProvider);
     final isLoading = purchaseState.status == PurchaseActionStatus.loading;
 
@@ -61,82 +60,92 @@ class ReceivingInventoryPage extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Receiving Inventory')),
       drawer: const AppDrawer(),
-      body:
-          !inventoryAvailable
-              ? const LoadingIndicator()
-              : SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      InventoryItemSelector(
-                        initialValue: selectedInventoryItem.value,
-                        validator:
-                            (item) =>
-                                item == null ? 'Please select an item.' : null,
-                        onSaved: (item) => selectedInventoryItem.value = item,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: quantityController,
-                        decoration: const InputDecoration(
-                          labelText: 'Quantity Received',
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
-                          ),
-                        ],
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: priceController,
-                        decoration: const InputDecoration(
-                          labelText: 'Total Cost',
-                          prefixText: '\$ ',
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
-                          ),
-                        ],
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: notesController,
-                        decoration: const InputDecoration(
-                          labelText: 'Notes (e.g., Invoice #)',
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 48),
-                        ),
-                        onPressed: isLoading ? null : submit,
-                        child:
-                            isLoading
-                                ? const CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation(
-                                    Colors.white,
-                                  ),
-                                )
-                                : const Text('Record Stock Entry'),
-                      ),
-                    ],
-                  ),
+      body: inventoryAsync.when(
+        data: (inventoryItems) {
+          if (inventoryItems.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Text(
+                  'There are no inventory items to receive. Please add an item in the "Inventory & Stock" page first.',
+                  textAlign: TextAlign.center,
                 ),
               ),
+            );
+          }
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  InventoryItemSelector(
+                    initialValue: selectedInventoryItem.value,
+                    validator: (item) =>
+                        item == null ? 'Please select an item.' : null,
+                    onSaved: (item) => selectedInventoryItem.value = item,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: quantityController,
+                    decoration: const InputDecoration(
+                      labelText: 'Quantity Received',
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,2}'),
+                      ),
+                    ],
+                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: priceController,
+                    decoration: const InputDecoration(
+                      labelText: 'Total Cost',
+                      prefixText: '\$ ',
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,2}'),
+                      ),
+                    ],
+                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: notesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Notes (e.g., Invoice #)',
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                    onPressed: isLoading ? null : submit,
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          )
+                        : const Text('Record Stock Entry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        loading: () => const LoadingIndicator(),
+        error: (e, st) => Center(child: Text('Error: ${e.toString()}')),
+      ),
     );
   }
 }

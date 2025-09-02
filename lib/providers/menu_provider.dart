@@ -90,6 +90,8 @@ class MenuController extends StateNotifier<MenuState> {
     required String orderTypeId,
     required List<String> menuItems,
     required List<String> inventoryItems,
+    required double itemTaxPercentage,
+    required bool isTaxFixed,
     File? imageFile,
   }) async {
     state = MenuState(status: MenuActionStatus.loading);
@@ -124,6 +126,8 @@ class MenuController extends StateNotifier<MenuState> {
         menuItems: menuItems,
         inventoryItems: inventoryItems,
         preparationTime: preparationTime,
+        itemTaxPercentage: itemTaxPercentage,
+        isTaxFixed: isTaxFixed,
       );
 
       final docRef = await _ref
@@ -157,6 +161,8 @@ class MenuController extends StateNotifier<MenuState> {
     required String orderTypeId,
     required List<String> menuItems,
     required List<String> inventoryItems,
+    required double itemTaxPercentage,
+    required bool isTaxFixed,
     File? imageFile,
     String? existingImageUrl,
   }) async {
@@ -185,6 +191,8 @@ class MenuController extends StateNotifier<MenuState> {
         'menuItems': menuItems,
         'inventoryItems': inventoryItems,
         'preparationTime': preparationTime,
+        'itemTaxPercentage': itemTaxPercentage,
+        'isTaxFixed': isTaxFixed,
       };
 
       await _ref.read(menuServiceProvider).updateMenu(id, updatedData);

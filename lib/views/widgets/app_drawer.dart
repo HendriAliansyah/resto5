@@ -20,91 +20,12 @@ class AppDrawer extends ConsumerWidget {
 
     final userRole = currentUser.role;
 
-    // Permission checks using the logic from YOUR file
-    final bool canAccessMasterRestaurant = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessMasterRestaurant,
-              ) ??
-              false
-        : false;
-
-    final bool canAccessStaffManagement = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessStaffManagement,
-              ) ??
-              false
-        : false;
-
-    final bool canAccessCourseMaster = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessCourseMaster,
-              ) ??
-              false
-        : false;
-
-    final bool canAccessTableTypeMaster = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessTableTypeMaster,
-              ) ??
-              false
-        : false;
-
-    final bool canAccessTableMaster = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessTableMaster,
-              ) ??
-              false
-        : false;
-
-    final bool canAccessOrderTypeMaster = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessOrderTypeMaster,
-              ) ??
-              false
-        : false;
-
-    final bool canAccessMenuMaster = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessMenuMaster,
-              ) ??
-              false
-        : false;
-
-    final bool canAccessInventoryMaster = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessInventoryMaster,
-              ) ??
-              false
-        : false;
-
-    final bool canAccessPurchasePage = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessPurchasePage,
-              ) ??
-              false
-        : false;
-    final bool canAccessPurchaseHistory = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessPurchaseHistory,
-              ) ??
-              false
-        : false;
-    final bool canAccessStockEdit = userRole != null
-        ? rolePermissions[userRole]?.contains(PagePermission.accessStockEdit) ??
-              false
-        : false;
-
-    final bool canAccessStockMovementHistory = userRole != null
-        ? rolePermissions[userRole]?.contains(
-                PagePermission.accessStockMovementHistory,
-              ) ??
-              false
-        : false;
-    final bool canAccessOrderPage = // Added
-    userRole != null
-        ? rolePermissions[userRole]?.contains(PagePermission.accessOrderPage) ??
-              false
-        : false;
+    // Helper function to check permissions
+    bool canAccess(PagePermission permission) {
+      return userRole != null
+          ? rolePermissions[userRole]?.contains(permission) ?? false
+          : false;
+    }
 
     return Drawer(
       child: ListView(
@@ -135,7 +56,7 @@ class AppDrawer extends ConsumerWidget {
               context.go(AppRoutes.home);
             },
           ),
-          if (canAccessOrderPage) // Added
+          if (canAccess(PagePermission.accessOrderPage))
             ListTile(
               leading: const Icon(Icons.point_of_sale_outlined),
               title: const Text('POS / New Order'),
@@ -144,7 +65,7 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.order);
               },
             ),
-          if (canAccessMasterRestaurant)
+          if (canAccess(PagePermission.accessMasterRestaurant))
             ListTile(
               leading: const Icon(Icons.storefront_outlined),
               title: const Text('Manage Restaurant'),
@@ -153,7 +74,16 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.manageRestaurant);
               },
             ),
-          if (canAccessStaffManagement)
+          if (canAccess(PagePermission.accessChargesAndTaxes)) // Added
+            ListTile(
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: const Text('Charges & Taxes'),
+              onTap: () {
+                Navigator.pop(context);
+                context.push(AppRoutes.chargesAndTaxes);
+              },
+            ),
+          if (canAccess(PagePermission.accessStaffManagement))
             ListTile(
               leading: const Icon(Icons.people_outline),
               title: const Text('Manage Staff'),
@@ -162,7 +92,7 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.manageStaff);
               },
             ),
-          if (canAccessCourseMaster)
+          if (canAccess(PagePermission.accessCourseMaster))
             ListTile(
               leading: const Icon(Icons.book_outlined),
               title: const Text('Course Master'),
@@ -171,7 +101,7 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.manageCourses);
               },
             ),
-          if (canAccessTableTypeMaster)
+          if (canAccess(PagePermission.accessTableTypeMaster))
             ListTile(
               leading: const Icon(Icons.category_outlined),
               title: const Text('Table Type Master'),
@@ -180,7 +110,7 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.manageTableTypes);
               },
             ),
-          if (canAccessTableMaster)
+          if (canAccess(PagePermission.accessTableMaster))
             ListTile(
               leading: const Icon(Icons.table_restaurant_outlined),
               title: const Text('Table Master'),
@@ -189,7 +119,7 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.manageTables);
               },
             ),
-          if (canAccessOrderTypeMaster)
+          if (canAccess(PagePermission.accessOrderTypeMaster))
             ListTile(
               leading: const Icon(Icons.receipt_long_outlined),
               title: const Text('Order Type Master'),
@@ -198,7 +128,7 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.manageOrderTypes);
               },
             ),
-          if (canAccessMenuMaster)
+          if (canAccess(PagePermission.accessMenuMaster))
             ListTile(
               leading: const Icon(Icons.restaurant_menu_outlined),
               title: const Text('Menu Master'),
@@ -207,27 +137,25 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.manageMenu);
               },
             ),
-          if (canAccessInventoryMaster)
+          if (canAccess(PagePermission.accessInventoryMaster))
             ListTile(
               leading: const Icon(Icons.inventory_2_outlined),
-              title: const Text('Inventory & Stock'), // Updated Title
+              title: const Text('Inventory & Stock'),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.manageInventory);
               },
             ),
-          if (canAccessPurchasePage)
+          if (canAccess(PagePermission.accessPurchasePage))
             ListTile(
-              leading: const Icon(
-                Icons.inventory_outlined,
-              ), // A more fitting icon
-              title: const Text('Receiving Inventory'), // Updated Text
+              leading: const Icon(Icons.inventory_outlined),
+              title: const Text('Receiving Inventory'),
               onTap: () {
                 Navigator.pop(context);
-                context.push(AppRoutes.receivingInventory); // Updated route
+                context.push(AppRoutes.receivingInventory);
               },
             ),
-          if (canAccessPurchaseHistory) // Add this block
+          if (canAccess(PagePermission.accessPurchaseHistory))
             ListTile(
               leading: const Icon(Icons.history_outlined),
               title: const Text('Purchase History'),
@@ -236,7 +164,7 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.purchaseHistory);
               },
             ),
-          if (canAccessStockEdit)
+          if (canAccess(PagePermission.accessStockEdit))
             ListTile(
               leading: const Icon(Icons.edit_note),
               title: const Text('Edit Stock'),
@@ -245,7 +173,7 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.editStock);
               },
             ),
-          if (canAccessStockMovementHistory)
+          if (canAccess(PagePermission.accessStockMovementHistory))
             ListTile(
               leading: const Icon(Icons.sync_alt),
               title: const Text('Stock Movement History'),

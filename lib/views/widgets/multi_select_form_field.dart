@@ -63,24 +63,23 @@ class MultiSelectBottomSheetField<T> extends FormField<List<T>> {
                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                  children: <Widget>[
                    Expanded(
-                     child:
-                         selectedItems.isEmpty
-                             ? Text(
-                               'Select items',
-                               style: Theme.of(
-                                 state.context,
-                               ).textTheme.titleMedium?.copyWith(
-                                 color: Theme.of(state.context).hintColor,
-                                 fontWeight: FontWeight.w400,
-                               ),
-                             )
-                             : Text(
-                               '${selectedItems.length} items selected',
-                               style:
-                                   Theme.of(
-                                     state.context,
-                                   ).textTheme.titleMedium,
-                             ),
+                     child: selectedItems.isEmpty
+                         ? Text(
+                             'Select items',
+                             style: Theme.of(state.context)
+                                 .textTheme
+                                 .titleMedium
+                                 ?.copyWith(
+                                   color: Theme.of(state.context).hintColor,
+                                   fontWeight: FontWeight.w400,
+                                 ),
+                           )
+                         : Text(
+                             '${selectedItems.length} items selected',
+                             style: Theme.of(
+                               state.context,
+                             ).textTheme.titleMedium,
+                           ),
                    ),
                    const Icon(Icons.arrow_drop_down),
                  ],
@@ -132,32 +131,30 @@ class _MultiSelectBottomSheetState<T>
     if (query.isEmpty) {
       _filteredItems = widget.items;
     } else {
-      _filteredItems =
-          widget.items.where((item) {
-            String itemText = '';
-            if (widget.tileLabelBuilder != null) {
-              final tileWidget = widget.tileLabelBuilder!(item);
-              if (tileWidget is Text) {
-                itemText = tileWidget.data ?? '';
-              }
-            }
-            if (itemText.isEmpty) {
-              itemText = item.toString();
-            }
-            return itemText.toLowerCase().contains(query.toLowerCase());
-          }).toList();
+      _filteredItems = widget.items.where((item) {
+        String itemText = '';
+        if (widget.tileLabelBuilder != null) {
+          final tileWidget = widget.tileLabelBuilder!(item);
+          if (tileWidget is Text) {
+            itemText = tileWidget.data ?? '';
+          }
+        }
+        if (itemText.isEmpty) {
+          itemText = item.toString();
+        }
+        return itemText.toLowerCase().contains(query.toLowerCase());
+      }).toList();
     }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Get the current theme
+    final theme = Theme.of(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Drag handle and header
         Padding(
           padding: const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
           child: Column(
@@ -166,7 +163,7 @@ class _MultiSelectBottomSheetState<T>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.dividerColor, // Use theme color
+                  color: theme.dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -174,9 +171,12 @@ class _MultiSelectBottomSheetState<T>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    widget.dialogTitle,
-                    style: theme.textTheme.headlineSmall,
+                  Expanded(
+                    // This is the fix
+                    child: Text(
+                      widget.dialogTitle,
+                      style: theme.textTheme.headlineSmall,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -187,13 +187,11 @@ class _MultiSelectBottomSheetState<T>
             ],
           ),
         ),
-        // Search bar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: TextField(
             controller: _searchController,
             onChanged: _onSearchChanged,
-            // THE FIX IS HERE: Using theme colors for perfect contrast
             style: TextStyle(color: theme.colorScheme.onSurface),
             decoration: InputDecoration(
               hintText: widget.searchHint,
@@ -209,16 +207,12 @@ class _MultiSelectBottomSheetState<T>
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor:
-                  theme
-                      .colorScheme
-                      .surfaceContainerHighest, // Theme-aware background
+              fillColor: theme.colorScheme.surfaceContainerHighest,
             ),
           ),
         ),
         const SizedBox(height: 8),
         const Divider(height: 1),
-        // List of items
         Expanded(
           child: ListView.builder(
             controller: widget.scrollController,
@@ -243,7 +237,6 @@ class _MultiSelectBottomSheetState<T>
             },
           ),
         ),
-        // Sticky footer with Confirm button
         Container(
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(

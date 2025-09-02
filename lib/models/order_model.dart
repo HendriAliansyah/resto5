@@ -8,12 +8,14 @@ class OrderItemModel {
   final String menuName;
   final int quantity;
   final double price;
+  final double itemTax; // Added to store calculated tax for this item line
 
   OrderItemModel({
     required this.menuId,
     required this.menuName,
     required this.quantity,
     required this.price,
+    this.itemTax = 0.0,
   });
 
   Map<String, dynamic> toJson() {
@@ -22,6 +24,7 @@ class OrderItemModel {
       'menuName': menuName,
       'quantity': quantity,
       'price': price,
+      'itemTax': itemTax,
     };
   }
 
@@ -30,7 +33,8 @@ class OrderItemModel {
       menuId: json['menuId'],
       menuName: json['menuName'],
       quantity: json['quantity'],
-      price: json['price'],
+      price: (json['price'] ?? 0.0).toDouble(),
+      itemTax: (json['itemTax'] ?? 0.0).toDouble(),
     );
   }
 }
@@ -45,7 +49,10 @@ class OrderModel {
   final String staffId;
   final String staffName;
   final List<OrderItemModel> items;
-  final double totalPrice;
+  final double subtotal;
+  final double serviceCharge;
+  final double itemSpecificTaxes; // Sum of all item-specific taxes
+  final double grandTotal;
   final OrderStatus status;
   final Timestamp createdAt;
   final Timestamp? updatedAt;
@@ -60,7 +67,10 @@ class OrderModel {
     required this.staffId,
     required this.staffName,
     required this.items,
-    required this.totalPrice,
+    required this.subtotal,
+    required this.serviceCharge,
+    required this.itemSpecificTaxes,
+    required this.grandTotal,
     this.status = OrderStatus.pending,
     required this.createdAt,
     this.updatedAt,
@@ -76,7 +86,10 @@ class OrderModel {
       'staffId': staffId,
       'staffName': staffName,
       'items': items.map((item) => item.toJson()).toList(),
-      'totalPrice': totalPrice,
+      'subtotal': subtotal,
+      'serviceCharge': serviceCharge,
+      'itemSpecificTaxes': itemSpecificTaxes,
+      'grandTotal': grandTotal,
       'status': status.name,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
@@ -97,7 +110,10 @@ class OrderModel {
       items: (data['items'] as List)
           .map((item) => OrderItemModel.fromJson(item))
           .toList(),
-      totalPrice: data['totalPrice'],
+      subtotal: (data['subtotal'] ?? 0.0).toDouble(),
+      serviceCharge: (data['serviceCharge'] ?? 0.0).toDouble(),
+      itemSpecificTaxes: (data['itemSpecificTaxes'] ?? 0.0).toDouble(),
+      grandTotal: (data['grandTotal'] ?? 0.0).toDouble(),
       status: OrderStatus.values.firstWhere(
         (e) => e.name == data['status'],
         orElse: () => OrderStatus.pending,

@@ -1,4 +1,6 @@
+// lib/services/restaurant_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:resto2/models/charge_tax_rule_model.dart';
 import 'package:resto2/models/join_request_model.dart';
 import '../models/restaurant_model.dart';
 
@@ -50,28 +52,59 @@ class RestaurantService {
     });
   }
 
-  /// Saves a join request to a subcollection within the restaurant document.
   Future<void> submitJoinRequest({
     required String restaurantId,
     required JoinRequestModel request,
   }) async {
-    // **THE FIX IS HERE:**
-    // First, check if the restaurant document actually exists.
-    final restaurantDoc =
-        await _db.collection(_collectionPath).doc(restaurantId).get();
+    final restaurantDoc = await _db
+        .collection(_collectionPath)
+        .doc(restaurantId)
+        .get();
     if (!restaurantDoc.exists) {
-      // If the document does not exist, throw an error.
       throw Exception(
         "A restaurant with this ID does not exist. Please check the ID and try again.",
       );
     }
 
-    // If the document exists, proceed with creating the join request.
     await _db
         .collection(_collectionPath)
         .doc(restaurantId)
         .collection('joinRequests')
-        .doc(request.userId) // Use user's ID to prevent duplicate requests
+        .doc(request.userId)
         .set(request.toJson());
+  }
+
+  // New methods for Charge & Tax Rules
+  Stream<List<ChargeTaxRuleModel>> getChargeTaxRulesStream(
+    String restaurantId,
+  ) {
+    return _db
+        .collection(_collectionPath)
+        .doc(restaurantId)
+        .collection('chargeTaxRules')
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ChargeTaxRuleModel.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
+  Future<void> saveChargeTaxRule(String restaurantId, ChargeTaxRuleModel rule) {
+    return _db
+        .collection(_collectionPath)
+        .doc(restaurantId)
+        .collection('chargeTaxRules')
+        .doc(rule.id)
+        .set(rule.toJson(), SetOptions(merge: true));
+  }
+
+  Future<void> deleteChargeTaxRule(String restaurantId, String ruleId) {
+    return _db
+        .collection(_collectionPath)
+        .doc(restaurantId)
+        .collection('chargeTaxRules')
+        .doc(ruleId)
+        .delete();
   }
 }

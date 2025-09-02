@@ -30,6 +30,10 @@ class MenuBottomSheet extends HookConsumerWidget {
     final preparationTimeController = useTextEditingController(
       text: menu?.preparationTime.toString(),
     );
+    final itemTaxController = useTextEditingController(
+      text: menu?.itemTaxPercentage.toString(),
+    );
+    final isTaxFixed = useState(menu?.isTaxFixed ?? false);
     final selectedCourseId = useState<String?>(menu?.courseId);
     final selectedOrderTypeId = useState<String?>(menu?.orderTypeId);
     final selectedMenuItems = useState<List<String>>(menu?.menuItems ?? []);
@@ -86,6 +90,8 @@ class MenuBottomSheet extends HookConsumerWidget {
         final price = double.tryParse(priceController.text) ?? 0.0;
         final preparationTime =
             int.tryParse(preparationTimeController.text) ?? 0;
+        final itemTaxValue = double.tryParse(itemTaxController.text) ?? 0.0;
+
         if (isEditing) {
           controller.updateMenu(
             id: menu!.id,
@@ -99,6 +105,8 @@ class MenuBottomSheet extends HookConsumerWidget {
             imageFile: localImageFile.value,
             existingImageUrl: menu?.imageUrl,
             preparationTime: preparationTime,
+            itemTaxPercentage: itemTaxValue,
+            isTaxFixed: isTaxFixed.value,
           );
         } else {
           controller.addMenu(
@@ -111,6 +119,8 @@ class MenuBottomSheet extends HookConsumerWidget {
             inventoryItems: selectedInventoryItems.value,
             imageFile: localImageFile.value,
             preparationTime: preparationTime,
+            itemTaxPercentage: itemTaxValue,
+            isTaxFixed: isTaxFixed.value,
           );
         }
       }
@@ -234,7 +244,31 @@ class MenuBottomSheet extends HookConsumerWidget {
                         ],
                         validator: (v) => v!.isEmpty ? 'Required' : null,
                       ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Item-Specific Tax',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                       const SizedBox(height: 16),
+                      TextFormField(
+                        controller: itemTaxController,
+                        decoration: InputDecoration(
+                          labelText: isTaxFixed.value
+                              ? 'Tax Fixed Value (\$)'
+                              : 'Tax Percentage (%)',
+                          border: const OutlineInputBorder(),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      ),
+                      SwitchListTile(
+                        title: const Text('Is Tax a Fixed Value?'),
+                        value: isTaxFixed.value,
+                        onChanged: (value) => isTaxFixed.value = value,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      const Divider(height: 32),
                       DropdownButtonFormField2<String>(
                         value: selectedCourseId.value,
                         items: courses
@@ -248,12 +282,7 @@ class MenuBottomSheet extends HookConsumerWidget {
                         onChanged: (v) => selectedCourseId.value = v,
                         decoration: const InputDecoration(
                           labelText: 'Course',
-                          contentPadding: EdgeInsets.zero,
                           border: OutlineInputBorder(),
-                        ),
-                        buttonStyleData: const ButtonStyleData(
-                          height: 50,
-                          padding: EdgeInsets.only(right: 10),
                         ),
                         validator: (v) => v == null ? 'Required' : null,
                       ),
@@ -271,12 +300,7 @@ class MenuBottomSheet extends HookConsumerWidget {
                         onChanged: (v) => selectedOrderTypeId.value = v,
                         decoration: const InputDecoration(
                           labelText: 'Order Type',
-                          contentPadding: EdgeInsets.zero,
                           border: OutlineInputBorder(),
-                        ),
-                        buttonStyleData: const ButtonStyleData(
-                          height: 50,
-                          padding: EdgeInsets.only(right: 10),
                         ),
                         validator: (v) => v == null ? 'Required' : null,
                       ),
@@ -287,7 +311,7 @@ class MenuBottomSheet extends HookConsumerWidget {
                               (m) => selectedMenuItems.value.contains(m.id),
                             )
                             .toList(),
-                        items: menus,
+                        items: menus, // This line is the fix
                         dialogTitle: 'Menu Items',
                         searchHint: 'Search for menu items',
                         chipLabelBuilder: (menu) => Text(menu.name),
@@ -305,7 +329,7 @@ class MenuBottomSheet extends HookConsumerWidget {
                                   selectedInventoryItems.value.contains(i.id),
                             )
                             .toList(),
-                        items: inventories,
+                        items: inventories, // This line is the fix
                         dialogTitle: 'Inventory Items',
                         searchHint: 'Search for inventory items',
                         chipLabelBuilder: (inventory) => Text(inventory.name),

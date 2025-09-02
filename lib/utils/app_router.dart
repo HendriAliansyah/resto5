@@ -14,7 +14,8 @@ import 'package:resto2/views/onboarding/onboarding_screen.dart';
 import 'package:resto2/views/order/order_page.dart';
 import 'package:resto2/views/order_type/order_type_management_page.dart';
 import 'package:resto2/views/purchase/purchase_history_page.dart';
-import 'package:resto2/views/purchase/purchase_page.dart'; // Added
+import 'package:resto2/views/purchase/purchase_page.dart';
+import 'package:resto2/views/restaurant/charges_and_taxes_page.dart';
 import 'package:resto2/views/restaurant/master_restaurant_page.dart';
 import 'package:resto2/views/settings/settings_page.dart';
 import 'package:resto2/views/staff/edit_staff_page.dart';
@@ -108,7 +109,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ReceivingInventoryPage(),
       ),
       GoRoute(
-        // Add this route
         path: AppRoutes.purchaseHistory,
         builder: (context, state) => const PurchaseHistoryPage(),
       ),
@@ -121,9 +121,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const StockMovementHistoryPage(),
       ),
       GoRoute(
-        // Added
         path: AppRoutes.order,
         builder: (context, state) => const OrderPage(),
+      ),
+      GoRoute(
+        // Added
+        path: AppRoutes.chargesAndTaxes,
+        builder: (context, state) => const ChargesAndTaxesPage(),
       ),
     ],
     redirect: (BuildContext context, GoRouterState state) {
@@ -133,7 +137,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == AppRoutes.register ||
           state.matchedLocation == AppRoutes.forgotPassword;
 
-      // While providers are loading, stay on the splash screen.
       if (authState.isLoading ||
           (authState.value != null && appUser.isLoading)) {
         return onSplash ? null : '/';
@@ -141,35 +144,28 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final loggedIn = authState.hasValue && authState.value != null;
 
-      // If the user is logged in, we need to determine where to go.
       if (loggedIn) {
         final hasRole =
             appUser.value?.role != null && appUser.value?.restaurantId != null;
 
         if (hasRole) {
-          // If user has a role, redirect away from auth/onboarding/splash pages to home.
           if (userIsAuthenticating ||
               state.matchedLocation == AppRoutes.onboarding ||
               onSplash) {
             return AppRoutes.home;
           }
         } else {
-          // If user has no role, redirect to onboarding unless they are already there or creating a restaurant.
           if (state.matchedLocation != AppRoutes.onboarding &&
               state.matchedLocation != AppRoutes.manageRestaurant) {
             return AppRoutes.onboarding;
           }
         }
-      }
-      // If the user is not logged in
-      else {
-        // Redirect from any protected page to the login screen.
+      } else {
         if (!userIsAuthenticating) {
           return AppRoutes.login;
         }
       }
 
-      // No redirect needed for the current location.
       return null;
     },
   );

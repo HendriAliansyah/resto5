@@ -1,5 +1,4 @@
 // lib/views/order/widgets/order_bottom_sheet.dart
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -17,6 +16,7 @@ import 'package:resto2/views/order/widgets/order_confirmation_dialog.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class OrderBottomSheet extends HookConsumerWidget {
   final TableModel table;
@@ -53,11 +53,16 @@ class OrderBottomSheet extends HookConsumerWidget {
 
     void handlePlaceOrder() {
       final items = orderedItems.value.entries.map((entry) {
+        final itemTax = entry.key.isTaxFixed
+            ? entry.key.itemTaxPercentage
+            : entry.key.price * (entry.key.itemTaxPercentage / 100);
+
         return OrderItemModel(
           menuId: entry.key.id,
           menuName: entry.key.name,
           quantity: entry.value,
           price: entry.key.price,
+          itemTax: itemTax * entry.value,
         );
       }).toList();
 
@@ -68,11 +73,15 @@ class OrderBottomSheet extends HookConsumerWidget {
 
     void showConfirmationDialog() {
       final items = orderedItems.value.entries.map((entry) {
+        final itemTax = entry.key.isTaxFixed
+            ? entry.key.itemTaxPercentage
+            : entry.key.price * (entry.key.itemTaxPercentage / 100);
         return OrderItemModel(
           menuId: entry.key.id,
           menuName: entry.key.name,
           quantity: entry.value,
           price: entry.key.price,
+          itemTax: itemTax * entry.value,
         );
       }).toList();
 
@@ -80,6 +89,7 @@ class OrderBottomSheet extends HookConsumerWidget {
         context: context,
         builder: (_) => OrderConfirmationDialog(
           items: items,
+          orderType: orderType, // This line was missing
           onSubmit: handlePlaceOrder,
           isLoading: isLoading,
         ),

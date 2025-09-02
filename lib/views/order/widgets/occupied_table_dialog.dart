@@ -75,18 +75,26 @@ class OccupiedTableDialog extends ConsumerWidget {
               ),
             ),
             const Divider(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Total:', style: theme.textTheme.titleLarge),
-                Text(
-                  '\$${order.totalPrice.toStringAsFixed(2)}',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ],
+            // Display full breakdown
+            _buildChargeRow('Subtotal', order.subtotal, theme: theme),
+            if (order.serviceCharge > 0)
+              _buildChargeRow(
+                'Service Charge',
+                order.serviceCharge,
+                theme: theme,
+              ),
+            if (order.itemSpecificTaxes > 0)
+              _buildChargeRow(
+                'Item Taxes',
+                order.itemSpecificTaxes,
+                theme: theme,
+              ),
+            const Divider(height: 16),
+            _buildChargeRow(
+              'Grand Total',
+              order.grandTotal,
+              theme: theme,
+              isTotal: true,
             ),
           ],
         ),
@@ -124,6 +132,39 @@ class OccupiedTableDialog extends ConsumerWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildChargeRow(
+    String label,
+    double amount, {
+    required ThemeData theme,
+    bool isTotal = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: isTotal
+                ? theme.textTheme.titleMedium
+                : theme.textTheme.bodyLarge,
+          ),
+          Text(
+            '\$${amount.toStringAsFixed(2)}',
+            style:
+                (isTotal
+                        ? theme.textTheme.titleLarge
+                        : theme.textTheme.bodyLarge)
+                    ?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isTotal ? theme.colorScheme.primary : null,
+                    ),
+          ),
+        ],
+      ),
     );
   }
 }

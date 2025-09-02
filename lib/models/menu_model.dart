@@ -13,6 +13,8 @@ class MenuModel {
   final List<String> menuItems;
   final List<String> inventoryItems;
   final int preparationTime;
+  final double itemTaxPercentage;
+  final bool isTaxFixed;
 
   MenuModel({
     required this.id,
@@ -26,6 +28,8 @@ class MenuModel {
     this.menuItems = const [],
     this.inventoryItems = const [],
     this.preparationTime = 0,
+    this.itemTaxPercentage = 0.0,
+    this.isTaxFixed = false,
   });
 
   factory MenuModel.fromFirestore(DocumentSnapshot doc) {
@@ -42,6 +46,8 @@ class MenuModel {
       menuItems: List<String>.from(data['menuItems'] ?? []),
       inventoryItems: List<String>.from(data['inventoryItems'] ?? []),
       preparationTime: data['preparationTime'] ?? 0,
+      itemTaxPercentage: (data['itemTaxPercentage'] ?? 0.0).toDouble(),
+      isTaxFixed: data['isTaxFixed'] ?? false,
     );
   }
 
@@ -57,6 +63,8 @@ class MenuModel {
       'menuItems': menuItems,
       'inventoryItems': inventoryItems,
       'preparationTime': preparationTime,
+      'itemTaxPercentage': itemTaxPercentage,
+      'isTaxFixed': isTaxFixed,
     };
   }
 

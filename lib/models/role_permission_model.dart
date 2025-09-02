@@ -1,8 +1,6 @@
 // lib/models/role_permission_model.dart
-// Defines the different roles a user can have in the application.
 enum UserRole { owner, admin, manager, cashier }
 
-// Defines permissions based on page access.
 enum PagePermission {
   accessMasterRestaurant,
   accessStaffManagement,
@@ -17,9 +15,9 @@ enum PagePermission {
   accessStockEdit,
   accessStockMovementHistory,
   accessOrderPage,
+  accessChargesAndTaxes, // Added
 }
 
-// Maps each user role to a list of pages they are allowed to access.
 const Map<UserRole, List<PagePermission>> rolePermissions = {
   UserRole.owner: [
     PagePermission.accessMasterRestaurant,
@@ -35,6 +33,7 @@ const Map<UserRole, List<PagePermission>> rolePermissions = {
     PagePermission.accessStockEdit,
     PagePermission.accessStockMovementHistory,
     PagePermission.accessOrderPage,
+    PagePermission.accessChargesAndTaxes, // Added
   ],
   UserRole.admin: [
     PagePermission.accessStaffManagement,
@@ -49,6 +48,7 @@ const Map<UserRole, List<PagePermission>> rolePermissions = {
     PagePermission.accessStockEdit,
     PagePermission.accessStockMovementHistory,
     PagePermission.accessOrderPage,
+    PagePermission.accessChargesAndTaxes, // Added
   ],
   UserRole.manager: [
     PagePermission.accessTableTypeMaster,
@@ -60,8 +60,5 @@ const Map<UserRole, List<PagePermission>> rolePermissions = {
     PagePermission.accessStockMovementHistory,
     PagePermission.accessOrderPage,
   ],
-  UserRole.cashier: [
-    PagePermission.accessOrderPage,
-    // Cashier has no page-level permissions
-  ],
+  UserRole.cashier: [PagePermission.accessOrderPage],
 };
