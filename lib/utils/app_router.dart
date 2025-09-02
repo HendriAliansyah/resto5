@@ -8,6 +8,7 @@ import 'package:resto2/views/course/course_management_page.dart';
 import 'package:resto2/views/inventory/edit_stock_page.dart';
 import 'package:resto2/views/inventory/inventory_management_page.dart';
 import 'package:resto2/views/inventory/stock_movement_history_page.dart';
+import 'package:resto2/views/kitchen/kitchen_page.dart';
 import 'package:resto2/views/menu/menu_management_page.dart';
 import 'package:resto2/views/notifications/notification_page.dart';
 import 'package:resto2/views/onboarding/onboarding_screen.dart';
@@ -128,6 +129,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         // Added
         path: AppRoutes.chargesAndTaxes,
         builder: (context, state) => const ChargesAndTaxesPage(),
+      ),
+      GoRoute(
+        // Added
+        path: AppRoutes.kitchen,
+        builder: (context, state) => const KitchenPage(),
       ),
     ],
     redirect: (BuildContext context, GoRouterState state) {

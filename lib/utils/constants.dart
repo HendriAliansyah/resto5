@@ -25,6 +25,7 @@ class AppRoutes {
   static const String stockMovementHistory = '/stock-movement-history';
   static const String order = '/order';
   static const String chargesAndTaxes = '/charges-and-taxes';
+  static const String kitchen = '/kitchen';
 }
 
 // UI String Constants

@@ -16,7 +16,7 @@ class OrderService {
   }) async {
     final query = await _db
         .collection(_collectionPath)
-        .where('restaurantId', isEqualTo: restaurantId) // This line is crucial
+        .where('restaurantId', isEqualTo: restaurantId)
         .where('tableId', isEqualTo: tableId)
         .where(
           'status',
@@ -33,5 +33,35 @@ class OrderService {
       return OrderModel.fromFirestore(query.docs.first);
     }
     return null;
+  }
+
+  // Get all active orders for the KDS (excludes 'completed' and 'cancelled')
+  Stream<List<OrderModel>> getActiveOrdersStream(String restaurantId) {
+    return _db
+        .collection(_collectionPath)
+        .where('restaurantId', isEqualTo: restaurantId)
+        .where(
+          'status',
+          whereIn: [
+            OrderStatus.pending.name,
+            OrderStatus.preparing.name,
+            OrderStatus.ready.name,
+          ],
+        )
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => OrderModel.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
+  // Update an order's status from the KDS
+  Future<void> updateOrderStatus(String orderId, OrderStatus newStatus) {
+    return _db.collection(_collectionPath).doc(orderId).update({
+      'status': newStatus.name,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 }

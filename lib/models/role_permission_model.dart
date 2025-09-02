@@ -15,7 +15,8 @@ enum PagePermission {
   accessStockEdit,
   accessStockMovementHistory,
   accessOrderPage,
-  accessChargesAndTaxes, // Added
+  accessChargesAndTaxes,
+  accessKitchenPage, // Added
 }
 
 const Map<UserRole, List<PagePermission>> rolePermissions = {
@@ -33,7 +34,8 @@ const Map<UserRole, List<PagePermission>> rolePermissions = {
     PagePermission.accessStockEdit,
     PagePermission.accessStockMovementHistory,
     PagePermission.accessOrderPage,
-    PagePermission.accessChargesAndTaxes, // Added
+    PagePermission.accessChargesAndTaxes,
+    PagePermission.accessKitchenPage, // Added
   ],
   UserRole.admin: [
     PagePermission.accessStaffManagement,
@@ -48,7 +50,8 @@ const Map<UserRole, List<PagePermission>> rolePermissions = {
     PagePermission.accessStockEdit,
     PagePermission.accessStockMovementHistory,
     PagePermission.accessOrderPage,
-    PagePermission.accessChargesAndTaxes, // Added
+    PagePermission.accessChargesAndTaxes,
+    PagePermission.accessKitchenPage, // Added
   ],
   UserRole.manager: [
     PagePermission.accessTableTypeMaster,
@@ -59,6 +62,7 @@ const Map<UserRole, List<PagePermission>> rolePermissions = {
     PagePermission.accessStockEdit,
     PagePermission.accessStockMovementHistory,
     PagePermission.accessOrderPage,
+    PagePermission.accessKitchenPage, // Added
   ],
   UserRole.cashier: [PagePermission.accessOrderPage],
 };
