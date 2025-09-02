@@ -43,7 +43,7 @@ class OrderConfirmationDialog extends ConsumerWidget {
       if (_isRuleApplicable(rule, subtotal, orderType.id)) {
         final amount = _calculateRuleAmount(rule, subtotal);
         totalServiceCharge += amount;
-        chargeWidgets.add(_buildChargeRow(rule.name, amount));
+        chargeWidgets.add(_buildChargeRow('Service: ${rule.name}', amount));
       }
     }
 
@@ -51,12 +51,12 @@ class OrderConfirmationDialog extends ConsumerWidget {
     final taxRules = rules.where((r) => r.ruleType == RuleType.tax).toList();
     for (var rule in taxRules) {
       if (_isRuleApplicable(rule, subtotal, orderType.id)) {
-        final amount = _calculateRuleAmount(
-          rule,
-          subtotal + totalServiceCharge,
-        );
+        final baseAmountForTax = rule.valueType == ValueType.percentage
+            ? subtotal + totalServiceCharge
+            : subtotal;
+        final amount = _calculateRuleAmount(rule, baseAmountForTax);
         totalGeneralTax += amount;
-        chargeWidgets.add(_buildChargeRow(rule.name, amount));
+        chargeWidgets.add(_buildChargeRow('Tax: ${rule.name}', amount));
       }
     }
 
@@ -79,23 +79,61 @@ class OrderConfirmationDialog extends ConsumerWidget {
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildChargeRow('Subtotal', subtotal, isBold: true),
-              const Divider(height: 16),
-              ...chargeWidgets,
-              const Divider(height: 16),
-              _buildChargeRow(
-                'Grand Total',
-                grandTotal,
-                isBold: true,
-                isTotal: true,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // This Flexible/Expanded structure is the definitive fix.
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.menuName,
+                                style: theme.textTheme.bodyLarge,
+                              ),
+                              Text(
+                                '${item.quantity} x \$${item.price.toStringAsFixed(2)}',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          '\$${(item.quantity * item.price).toStringAsFixed(2)}',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+            const Divider(height: 24),
+            _buildChargeRow('Subtotal', subtotal),
+            ...chargeWidgets,
+            const Divider(height: 16),
+            _buildChargeRow(
+              'Grand Total',
+              grandTotal,
+              isBold: true,
+              isTotal: true,
+            ),
+          ],
         ),
       ),
       actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -138,10 +176,12 @@ class OrderConfirmationDialog extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              ),
             ),
           ),
           Text(
