@@ -17,6 +17,7 @@ import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:uuid/uuid.dart'; // Import the uuid package
 
 class OrderBottomSheet extends HookConsumerWidget {
   final TableModel table;
@@ -58,6 +59,7 @@ class OrderBottomSheet extends HookConsumerWidget {
             : entry.key.price * (entry.key.itemTaxPercentage / 100);
 
         return OrderItemModel(
+          id: const Uuid().v4(), // THE FIX IS HERE
           menuId: entry.key.id,
           menuName: entry.key.name,
           quantity: entry.value,
@@ -77,6 +79,7 @@ class OrderBottomSheet extends HookConsumerWidget {
             ? entry.key.itemTaxPercentage
             : entry.key.price * (entry.key.itemTaxPercentage / 100);
         return OrderItemModel(
+          id: const Uuid().v4(), // THE FIX IS HERE
           menuId: entry.key.id,
           menuName: entry.key.name,
           quantity: entry.value,
@@ -89,7 +92,7 @@ class OrderBottomSheet extends HookConsumerWidget {
         context: context,
         builder: (_) => OrderConfirmationDialog(
           items: items,
-          orderType: orderType, // This line was missing
+          orderType: orderType,
           onSubmit: handlePlaceOrder,
           isLoading: isLoading,
         ),

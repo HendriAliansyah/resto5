@@ -1,44 +1,59 @@
 // lib/models/order_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 
 enum OrderStatus { pending, preparing, ready, completed, cancelled }
 
+enum OrderItemStatus { pending, preparing, ready, served } // "served" is added
+
 class OrderItemModel {
+  final String id;
   final String menuId;
   final String menuName;
   final int quantity;
   final double price;
-  final double itemTax; // Added to store calculated tax for this item line
+  final double itemTax;
+  final OrderItemStatus status;
 
   OrderItemModel({
+    required this.id,
     required this.menuId,
     required this.menuName,
     required this.quantity,
     required this.price,
     this.itemTax = 0.0,
+    this.status = OrderItemStatus.pending,
   });
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'menuId': menuId,
       'menuName': menuName,
       'quantity': quantity,
       'price': price,
       'itemTax': itemTax,
+      'status': status.name,
     };
   }
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
+      id: json['id'] ?? const Uuid().v4(),
       menuId: json['menuId'],
       menuName: json['menuName'],
       quantity: json['quantity'],
       price: (json['price'] ?? 0.0).toDouble(),
       itemTax: (json['itemTax'] ?? 0.0).toDouble(),
+      status: OrderItemStatus.values.firstWhere(
+        (e) => e.name == json['status'],
+        orElse: () => OrderItemStatus.pending,
+      ),
     );
   }
 }
 
+// ... (rest of the file is unchanged)
 class OrderModel {
   final String id;
   final String restaurantId;
@@ -51,7 +66,7 @@ class OrderModel {
   final List<OrderItemModel> items;
   final double subtotal;
   final double serviceCharge;
-  final double itemSpecificTaxes; // Sum of all item-specific taxes
+  final double itemSpecificTaxes;
   final double grandTotal;
   final OrderStatus status;
   final Timestamp createdAt;

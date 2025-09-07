@@ -20,15 +20,36 @@ class KitchenPage extends ConsumerWidget {
       drawer: const AppDrawer(),
       body: activeOrdersAsync.when(
         data: (orders) {
-          final newOrders = orders
-              .where((o) => o.overallStatus == OrderStatus.pending)
-              .toList();
-          final preparingOrders = orders
-              .where((o) => o.overallStatus == OrderStatus.preparing)
-              .toList();
-          final readyOrders = orders
-              .where((o) => o.overallStatus == OrderStatus.ready)
-              .toList();
+          final List<KitchenOrderModel> newOrders = [];
+          final List<KitchenOrderModel> preparingOrders = [];
+          final List<KitchenOrderModel> readyOrders = [];
+
+          for (final order in orders) {
+            final pendingItems = order.items
+                .where((item) => item.status == OrderItemStatus.pending)
+                .toList();
+            final preparingItems = order.items
+                .where((item) => item.status == OrderItemStatus.preparing)
+                .toList();
+            // THE FIX IS HERE: The "Ready" column now includes both ready AND served items.
+            final readyAndServedItems = order.items
+                .where(
+                  (item) =>
+                      item.status == OrderItemStatus.ready ||
+                      item.status == OrderItemStatus.served,
+                )
+                .toList();
+
+            if (pendingItems.isNotEmpty) {
+              newOrders.add(order.copyWith(items: pendingItems));
+            }
+            if (preparingItems.isNotEmpty) {
+              preparingOrders.add(order.copyWith(items: preparingItems));
+            }
+            if (readyAndServedItems.isNotEmpty) {
+              readyOrders.add(order.copyWith(items: readyAndServedItems));
+            }
+          }
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -108,7 +129,7 @@ class _OrderColumn extends StatelessWidget {
   const _OrderColumn({
     required this.title,
     required this.orders,
-    this.showTitle = false, // Title is hidden by default
+    this.showTitle = false,
   });
 
   @override
@@ -121,7 +142,7 @@ class _OrderColumn extends StatelessWidget {
       ),
       child: Column(
         children: [
-          if (showTitle) // Conditionally show the title
+          if (showTitle)
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Text(
@@ -131,16 +152,18 @@ class _OrderColumn extends StatelessWidget {
             ),
           if (showTitle) const Divider(height: 1),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 4.0,
-                vertical: 8.0,
-              ),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                return OrderTicket(order: orders[index]);
-              },
-            ),
+            child: orders.isEmpty
+                ? const Center(child: Text('No orders in this stage.'))
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4.0,
+                      vertical: 8.0,
+                    ),
+                    itemCount: orders.length,
+                    itemBuilder: (context, index) {
+                      return OrderTicket(order: orders[index]);
+                    },
+                  ),
           ),
         ],
       ),

@@ -2,16 +2,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:resto2/models/order_model.dart';
 
-enum KitchenOrderItemStatus { pending, preparing, ready }
-
-// A model representing a single item within a kitchen order, with its own status.
 class KitchenOrderItemModel {
-  final String id; // Unique ID for this specific line item in the order
+  final String id;
   final String menuId;
   final String menuName;
   final int quantity;
-  final int preparationTime; // in minutes
-  final KitchenOrderItemStatus status;
+  final int preparationTime;
+  final OrderItemStatus status;
 
   KitchenOrderItemModel({
     required this.id,
@@ -19,25 +16,24 @@ class KitchenOrderItemModel {
     required this.menuName,
     required this.quantity,
     required this.preparationTime,
-    this.status = KitchenOrderItemStatus.pending,
+    required this.status,
   });
 
   factory KitchenOrderItemModel.fromOrderItem(
-    String id,
     OrderItemModel item,
     int prepTime,
   ) {
     return KitchenOrderItemModel(
-      id: id,
+      id: item.id,
       menuId: item.menuId,
       menuName: item.menuName,
       quantity: item.quantity,
       preparationTime: prepTime,
+      status: item.status,
     );
   }
 }
 
-// The main model for an order as it appears on the KDS.
 class KitchenOrderModel {
   final String orderId;
   final String tableName;
@@ -66,6 +62,25 @@ class KitchenOrderModel {
       createdAt: order.createdAt,
       items: kitchenItems,
       overallStatus: order.status,
+    );
+  }
+
+  // THE FIX IS HERE: The missing copyWith method is added.
+  KitchenOrderModel copyWith({
+    String? orderId,
+    String? tableName,
+    String? orderTypeName,
+    Timestamp? createdAt,
+    List<KitchenOrderItemModel>? items,
+    OrderStatus? overallStatus,
+  }) {
+    return KitchenOrderModel(
+      orderId: orderId ?? this.orderId,
+      tableName: tableName ?? this.tableName,
+      orderTypeName: orderTypeName ?? this.orderTypeName,
+      createdAt: createdAt ?? this.createdAt,
+      items: items ?? this.items,
+      overallStatus: overallStatus ?? this.overallStatus,
     );
   }
 }
