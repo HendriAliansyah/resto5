@@ -1,16 +1,14 @@
 // lib/providers/kitchen_provider.dart
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/kitchen_order_model.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
 import 'package:resto2/providers/menu_provider.dart';
 import 'package:resto2/providers/order_provider.dart';
-import 'package:flutter/material.dart'; // Import for ScaffoldMessenger
 
-// THE FIX IS HERE: New provider to track the IDs of items being processed.
 final processingItemsProvider = StateProvider<Set<String>>((ref) => {});
 
-// Provider to get a stream of all active orders for the kitchen
 final activeOrdersStreamProvider =
     StreamProvider.autoDispose<List<KitchenOrderModel>>((ref) {
       final restaurantId = ref
@@ -39,30 +37,16 @@ final activeOrdersStreamProvider =
       });
     });
 
-// THE FIX IS HERE: The controller is now a simple class, not a StateNotifier.
-final kitchenControllerProvider = Provider.autoDispose((ref) {
-  return KitchenController(ref);
-});
+final kitchenControllerProvider =
+    StateNotifierProvider.autoDispose<KitchenController, AsyncValue<void>>((
+      ref,
+    ) {
+      return KitchenController(ref);
+    });
 
-class KitchenController {
+class KitchenController extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
-  KitchenController(this._ref);
-
-  Future<void> updateOrderStatus(String orderId, OrderStatus newStatus) async {
-    final processingNotifier = _ref.read(processingItemsProvider.notifier);
-    processingNotifier.update((state) => {...state, orderId});
-
-    try {
-      await _ref
-          .read(orderServiceProvider)
-          .updateOrderStatus(orderId, newStatus);
-    } catch (e) {
-      // You can handle errors here, e.g., by showing a SnackBar
-      debugPrint("Error updating order status: $e");
-    } finally {
-      processingNotifier.update((state) => state..remove(orderId));
-    }
-  }
+  KitchenController(this._ref) : super(const AsyncData(null));
 
   Future<void> updateOrderItemStatus({
     required String orderId,
@@ -70,20 +54,62 @@ class KitchenController {
     required OrderItemStatus newStatus,
   }) async {
     final processingNotifier = _ref.read(processingItemsProvider.notifier);
-    // Use a unique key for the item to track its state
     final itemKey = '$orderId-$itemId';
+
+    state = const AsyncLoading();
     processingNotifier.update((state) => {...state, itemKey});
 
     try {
+      final user = _ref.read(currentUserProvider).asData?.value;
+      if (user == null) throw Exception("User not found");
+
       await _ref
           .read(orderServiceProvider)
           .updateOrderItemStatus(
             orderId: orderId,
             itemId: itemId,
             newStatus: newStatus,
+            userId: user.uid,
+            userDisplayName: user.displayName ?? 'Unknown',
           );
-    } catch (e) {
-      debugPrint("Error updating item status: $e");
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    } finally {
+      processingNotifier.update((state) => state..remove(itemKey));
+    }
+  }
+
+  Future<void> resetOrderItemStatus({
+    required String orderId,
+    required String itemId,
+    required bool wasWasted,
+  }) async {
+    final processingNotifier = _ref.read(processingItemsProvider.notifier);
+    final itemKey = '$orderId-$itemId';
+
+    state = const AsyncLoading();
+    processingNotifier.update((state) => {...state, itemKey});
+
+    try {
+      final user = _ref.read(currentUserProvider).asData?.value;
+      if (user == null) throw Exception("User not found");
+
+      // THE FIX IS HERE: This now calls the new, dedicated reset method
+      // in the OrderService, which contains the stock return logic.
+      await _ref
+          .read(orderServiceProvider)
+          .resetOrderItem(
+            orderId: orderId,
+            itemId: itemId,
+            wasWasted: wasWasted,
+            userId: user.uid,
+            userDisplayName: user.displayName ?? 'Unknown',
+          );
+
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
     } finally {
       processingNotifier.update((state) => state..remove(itemKey));
     }

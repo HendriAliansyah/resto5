@@ -6,7 +6,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/kitchen_order_model.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/providers/kitchen_provider.dart';
+import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/kitchen/widgets/item_countdown_timer.dart';
+import 'package:resto2/views/kitchen/widgets/reset_approval_dialog.dart';
 
 class OrderTicket extends HookConsumerWidget {
   final KitchenOrderModel order;
@@ -14,6 +16,15 @@ class OrderTicket extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // THE FIX IS HERE: Listen for errors from the controller
+    ref.listen<AsyncValue<void>>(kitchenControllerProvider, (previous, next) {
+      next.whenOrNull(
+        error: (error, stackTrace) {
+          showSnackBar(context, error.toString(), isError: true);
+        },
+      );
+    });
+
     final timeSinceOrder = useState(Duration.zero);
     final theme = Theme.of(context);
 
@@ -42,7 +53,7 @@ class OrderTicket extends HookConsumerWidget {
         side: BorderSide(color: getBorderColor(), width: 2),
         borderRadius: BorderRadius.circular(8.0),
       ),
-      clipBehavior: Clip.antiAlias, // Ensures InkWell ripple is clipped
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -82,12 +93,12 @@ class OrderTicket extends HookConsumerWidget {
     KitchenOrderItemModel item,
   ) {
     final theme = Theme.of(context);
-    final controller = ref.read(kitchenControllerProvider);
+    // THE FIX IS HERE: Read the notifier to call methods
+    final controller = ref.read(kitchenControllerProvider.notifier);
     final itemStatus = item.status;
     final itemKey = '${order.orderId}-${item.id}';
     final isProcessing = ref.watch(processingItemsProvider).contains(itemKey);
 
-    // Determine the next status when the item is tapped
     OrderItemStatus? nextStatus;
     switch (itemStatus) {
       case OrderItemStatus.pending:
@@ -100,8 +111,23 @@ class OrderTicket extends HookConsumerWidget {
         nextStatus = OrderItemStatus.served;
         break;
       case OrderItemStatus.served:
-        nextStatus = null; // Cannot be tapped further
+        nextStatus = null;
         break;
+    }
+
+    void showResetDialog() {
+      showDialog(
+        context: context,
+        builder: (_) => ResetApprovalDialog(
+          onApproved: (wasWasted) {
+            controller.resetOrderItemStatus(
+              orderId: order.orderId,
+              itemId: item.id,
+              wasWasted: wasWasted,
+            );
+          },
+        ),
+      );
     }
 
     return Material(
@@ -111,7 +137,6 @@ class OrderTicket extends HookConsumerWidget {
                 ? Colors.green.withOpacity(0.15)
                 : Colors.transparent),
       child: InkWell(
-        // Disable tap if processing or already served
         onTap: (isProcessing || nextStatus == null)
             ? null
             : () {
@@ -147,22 +172,34 @@ class OrderTicket extends HookConsumerWidget {
                   ],
                 ),
               ),
-              // Show a loading indicator or a status icon
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: isProcessing
-                    ? const Center(
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : (itemStatus == OrderItemStatus.served
-                          ? const Icon(Icons.check_circle, color: Colors.green)
-                          : null),
-              ),
+              if (isProcessing)
+                const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                )
+              else
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'reset') {
+                      showResetDialog();
+                    }
+                  },
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<String>>[
+                        if (itemStatus != OrderItemStatus.pending)
+                          const PopupMenuItem<String>(
+                            value: 'reset',
+                            child: Text('Reset Status'),
+                          ),
+                      ],
+                ),
             ],
           ),
         ),

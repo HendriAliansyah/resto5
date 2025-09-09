@@ -1,10 +1,12 @@
 // lib/models/stock_movement_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum StockMovementType { manualEdit, purchase, sale, waste }
+// THE FIX IS HERE: Added 'reset' and updated 'waste' for clarity
+enum StockMovementType { manualEdit, purchase, sale, waste, reset }
 
 class StockMovementModel {
   final String id;
+  // ... (rest of the class is unchanged)
   final String inventoryItemId;
   final String userId;
   final String userDisplayName;
