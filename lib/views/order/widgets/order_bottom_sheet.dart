@@ -17,7 +17,7 @@ import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:uuid/uuid.dart'; // Import the uuid package
+import 'package:uuid/uuid.dart';
 
 class OrderBottomSheet extends HookConsumerWidget {
   final TableModel table;
@@ -31,7 +31,8 @@ class OrderBottomSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final orderedItems = useState<Map<MenuModel, int>>({});
+    final orderedItems = useState<List<OrderItemModel>>([]);
+    final orderNote = useState<String?>(null);
     final orderState = ref.watch(orderControllerProvider);
     final isLoading = orderState.status == OrderActionStatus.loading;
 
@@ -53,46 +54,23 @@ class OrderBottomSheet extends HookConsumerWidget {
     });
 
     void handlePlaceOrder() {
-      final items = orderedItems.value.entries.map((entry) {
-        final itemTax = entry.key.isTaxFixed
-            ? entry.key.itemTaxPercentage
-            : entry.key.price * (entry.key.itemTaxPercentage / 100);
-
-        return OrderItemModel(
-          id: const Uuid().v4(), // THE FIX IS HERE
-          menuId: entry.key.id,
-          menuName: entry.key.name,
-          quantity: entry.value,
-          price: entry.key.price,
-          itemTax: itemTax * entry.value,
-        );
-      }).toList();
-
       ref
           .read(orderControllerProvider.notifier)
-          .placeOrder(table: table, orderType: orderType, items: items);
+          .placeOrder(
+            table: table,
+            orderType: orderType,
+            items: orderedItems.value,
+            orderNote: orderNote.value,
+          );
     }
 
     void showConfirmationDialog() {
-      final items = orderedItems.value.entries.map((entry) {
-        final itemTax = entry.key.isTaxFixed
-            ? entry.key.itemTaxPercentage
-            : entry.key.price * (entry.key.itemTaxPercentage / 100);
-        return OrderItemModel(
-          id: const Uuid().v4(), // THE FIX IS HERE
-          menuId: entry.key.id,
-          menuName: entry.key.name,
-          quantity: entry.value,
-          price: entry.key.price,
-          itemTax: itemTax * entry.value,
-        );
-      }).toList();
-
       showDialog(
         context: context,
         builder: (_) => OrderConfirmationDialog(
-          items: items,
+          items: orderedItems.value,
           orderType: orderType,
+          orderNote: orderNote.value,
           onSubmit: handlePlaceOrder,
           isLoading: isLoading,
         ),
@@ -121,6 +99,7 @@ class OrderBottomSheet extends HookConsumerWidget {
             if (orderedItems.value.isNotEmpty)
               _OrderSummary(
                 orderedItems: orderedItems.value,
+                orderNote: orderNote,
                 onPlaceOrder: showConfirmationDialog,
                 isLoading: isLoading,
               ),
@@ -132,9 +111,44 @@ class OrderBottomSheet extends HookConsumerWidget {
 }
 
 class _MenuList extends HookConsumerWidget {
-  final ValueNotifier<Map<MenuModel, int>> orderedItems;
+  final ValueNotifier<List<OrderItemModel>> orderedItems;
 
   const _MenuList({required this.orderedItems});
+
+  void _showNoteDialog(
+    BuildContext context,
+    OrderItemModel item,
+    Function(String) onSave,
+  ) {
+    final noteController = TextEditingController(text: item.note);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Note for ${item.menuName}'),
+          content: TextField(
+            controller: noteController,
+            autofocus: true,
+            decoration: const InputDecoration(hintText: 'e.g., Extra spicy'),
+            maxLines: 3,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                onSave(noteController.text);
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -148,13 +162,40 @@ class _MenuList extends HookConsumerWidget {
     final sortOrder = useState(SortOrder.asc);
 
     void updateQuantity(MenuModel item, int newQuantity) {
-      final newMap = Map<MenuModel, int>.from(orderedItems.value);
-      if (newQuantity <= 0) {
-        newMap.remove(item);
-      } else {
-        newMap[item] = newQuantity;
+      final newList = List<OrderItemModel>.from(orderedItems.value);
+      final index = newList.indexWhere((i) => i.menuId == item.id);
+
+      if (index != -1) {
+        if (newQuantity <= 0) {
+          newList.removeAt(index);
+        } else {
+          newList[index] = newList[index].copyWith(quantity: newQuantity);
+        }
+      } else if (newQuantity > 0) {
+        final itemTax = item.isTaxFixed
+            ? item.itemTaxPercentage
+            : item.price * (item.itemTaxPercentage / 100);
+        newList.add(
+          OrderItemModel(
+            id: const Uuid().v4(),
+            menuId: item.id,
+            menuName: item.name,
+            quantity: newQuantity,
+            price: item.price,
+            itemTax: itemTax,
+          ),
+        );
       }
-      orderedItems.value = newMap;
+      orderedItems.value = newList;
+    }
+
+    void updateNote(String menuId, String note) {
+      final newList = List<OrderItemModel>.from(orderedItems.value);
+      final index = newList.indexWhere((i) => i.menuId == menuId);
+      if (index != -1) {
+        newList[index] = newList[index].copyWith(note: note);
+        orderedItems.value = newList;
+      }
     }
 
     return menusAsync.when(
@@ -270,7 +311,17 @@ class _MenuList extends HookConsumerWidget {
                 itemCount: filteredMenus.length,
                 itemBuilder: (context, index) {
                   final menu = filteredMenus[index];
-                  final currentQuantity = orderedItems.value[menu] ?? 0;
+                  final orderedItem = orderedItems.value.firstWhere(
+                    (item) => item.menuId == menu.id,
+                    orElse: () => OrderItemModel(
+                      id: '',
+                      menuId: '',
+                      menuName: '',
+                      quantity: 0,
+                      price: 0,
+                    ),
+                  );
+                  final currentQuantity = orderedItem.quantity;
 
                   return ListTile(
                     title: Text(menu.name),
@@ -278,6 +329,23 @@ class _MenuList extends HookConsumerWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.note_add_outlined,
+                            color:
+                                orderedItem.note != null &&
+                                    orderedItem.note!.isNotEmpty
+                                ? Theme.of(context).colorScheme.primary
+                                : null,
+                          ),
+                          onPressed: currentQuantity > 0
+                              ? () => _showNoteDialog(
+                                  context,
+                                  orderedItem,
+                                  (note) => updateNote(menu.id, note),
+                                )
+                              : null,
+                        ),
                         IconButton(
                           icon: const Icon(Icons.remove_circle_outline),
                           onPressed: currentQuantity > 0
@@ -309,21 +377,54 @@ class _MenuList extends HookConsumerWidget {
 }
 
 class _OrderSummary extends StatelessWidget {
-  final Map<MenuModel, int> orderedItems;
+  final List<OrderItemModel> orderedItems;
+  final ValueNotifier<String?> orderNote;
   final VoidCallback onPlaceOrder;
   final bool isLoading;
 
   const _OrderSummary({
     required this.orderedItems,
+    required this.orderNote,
     required this.onPlaceOrder,
     required this.isLoading,
   });
 
+  void _showOrderNoteDialog(BuildContext context) {
+    final noteController = TextEditingController(text: orderNote.value);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Note to Order'),
+          content: TextField(
+            controller: noteController,
+            autofocus: true,
+            decoration: const InputDecoration(hintText: 'e.g., Allergy alert'),
+            maxLines: 3,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                orderNote.value = noteController.text;
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final totalPrice = orderedItems.entries.fold(
+    final totalPrice = orderedItems.fold(
       0.0,
-      (sum, item) => sum + (item.key.price * item.value),
+      (sum, item) => sum + (item.price * item.quantity),
     );
 
     return Container(
@@ -355,18 +456,36 @@ class _OrderSummary extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: isLoading ? null : onPlaceOrder,
-            child: isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text('Place Order'),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : onPlaceOrder,
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Place Order'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              IconButton.filled(
+                icon: const Icon(Icons.note_add),
+                tooltip: 'Add Order Note',
+                onPressed: () => _showOrderNoteDialog(context),
+                style: IconButton.styleFrom(
+                  backgroundColor:
+                      orderNote.value != null && orderNote.value!.isNotEmpty
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : null,
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -9,6 +9,7 @@ class KitchenOrderItemModel {
   final int quantity;
   final int preparationTime;
   final OrderItemStatus status;
+  final String? note; // ADDED
 
   KitchenOrderItemModel({
     required this.id,
@@ -17,6 +18,7 @@ class KitchenOrderItemModel {
     required this.quantity,
     required this.preparationTime,
     required this.status,
+    this.note, // ADDED
   });
 
   factory KitchenOrderItemModel.fromOrderItem(
@@ -30,6 +32,7 @@ class KitchenOrderItemModel {
       quantity: item.quantity,
       preparationTime: prepTime,
       status: item.status,
+      note: item.note, // ADDED
     );
   }
 }
@@ -41,6 +44,7 @@ class KitchenOrderModel {
   final Timestamp createdAt;
   final List<KitchenOrderItemModel> items;
   final OrderStatus overallStatus;
+  final String? note; // ADDED
 
   KitchenOrderModel({
     required this.orderId,
@@ -49,6 +53,7 @@ class KitchenOrderModel {
     required this.createdAt,
     required this.items,
     required this.overallStatus,
+    this.note, // ADDED
   });
 
   factory KitchenOrderModel.fromOrderModel(
@@ -62,10 +67,10 @@ class KitchenOrderModel {
       createdAt: order.createdAt,
       items: kitchenItems,
       overallStatus: order.status,
+      note: order.note, // ADDED
     );
   }
 
-  // THE FIX IS HERE: The missing copyWith method is added.
   KitchenOrderModel copyWith({
     String? orderId,
     String? tableName,
@@ -73,6 +78,7 @@ class KitchenOrderModel {
     Timestamp? createdAt,
     List<KitchenOrderItemModel>? items,
     OrderStatus? overallStatus,
+    String? note,
   }) {
     return KitchenOrderModel(
       orderId: orderId ?? this.orderId,
@@ -81,6 +87,7 @@ class KitchenOrderModel {
       createdAt: createdAt ?? this.createdAt,
       items: items ?? this.items,
       overallStatus: overallStatus ?? this.overallStatus,
+      note: note ?? this.note,
     );
   }
 }

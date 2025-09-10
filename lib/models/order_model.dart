@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 
 enum OrderStatus { pending, preparing, ready, completed, cancelled }
 
-enum OrderItemStatus { pending, preparing, ready, served } // "served" is added
+enum OrderItemStatus { pending, preparing, ready, served }
 
 class OrderItemModel {
   final String id;
@@ -14,6 +14,7 @@ class OrderItemModel {
   final double price;
   final double itemTax;
   final OrderItemStatus status;
+  final String? note;
 
   OrderItemModel({
     required this.id,
@@ -23,6 +24,7 @@ class OrderItemModel {
     required this.price,
     this.itemTax = 0.0,
     this.status = OrderItemStatus.pending,
+    this.note,
   });
 
   Map<String, dynamic> toJson() {
@@ -34,6 +36,7 @@ class OrderItemModel {
       'price': price,
       'itemTax': itemTax,
       'status': status.name,
+      'note': note,
     };
   }
 
@@ -49,11 +52,34 @@ class OrderItemModel {
         (e) => e.name == json['status'],
         orElse: () => OrderItemStatus.pending,
       ),
+      note: json['note'],
+    );
+  }
+
+  // THE FIX IS HERE: The copyWith method is now complete.
+  OrderItemModel copyWith({
+    String? id,
+    String? menuId,
+    String? menuName,
+    int? quantity,
+    double? price,
+    double? itemTax,
+    OrderItemStatus? status,
+    String? note,
+  }) {
+    return OrderItemModel(
+      id: id ?? this.id,
+      menuId: menuId ?? this.menuId,
+      menuName: menuName ?? this.menuName,
+      quantity: quantity ?? this.quantity,
+      price: price ?? this.price,
+      itemTax: itemTax ?? this.itemTax,
+      status: status ?? this.status,
+      note: note ?? this.note,
     );
   }
 }
 
-// ... (rest of the file is unchanged)
 class OrderModel {
   final String id;
   final String restaurantId;
@@ -71,6 +97,7 @@ class OrderModel {
   final OrderStatus status;
   final Timestamp createdAt;
   final Timestamp? updatedAt;
+  final String? note;
 
   OrderModel({
     required this.id,
@@ -89,6 +116,7 @@ class OrderModel {
     this.status = OrderStatus.pending,
     required this.createdAt,
     this.updatedAt,
+    this.note,
   });
 
   Map<String, dynamic> toJson() {
@@ -108,6 +136,7 @@ class OrderModel {
       'status': status.name,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'note': note,
     };
   }
 
@@ -135,6 +164,7 @@ class OrderModel {
       ),
       createdAt: data['createdAt'],
       updatedAt: data['updatedAt'],
+      note: data['note'],
     );
   }
 }

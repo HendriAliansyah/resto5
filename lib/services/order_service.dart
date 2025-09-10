@@ -13,6 +13,13 @@ class OrderService {
   final String _menusCollectionPath = 'menus';
   final String _stockMovementsCollectionPath = 'stockMovements';
 
+  /// Saves a new order to the database.
+  Future<void> createOrder(OrderModel order) {
+    // THE FIX IS HERE: The redundant and error-prone mapping has been removed.
+    // We now directly convert the incoming order object to JSON, preserving all fields.
+    return _db.collection(_collectionPath).add(order.toJson());
+  }
+
   /// Updates a list of order items to a new status in a single batch write.
   Future<void> batchUpdateOrderItemStatus({
     required List<OrderItemSource> sources,
@@ -44,9 +51,6 @@ class OrderService {
           if (itemIds.contains(item.id) &&
               item.status == OrderItemStatus.pending) {
             needsUpdate = true;
-            // Here you would also handle stock deduction if needed, just like in the
-            // single update method. For brevity, that logic is omitted here but
-            // should be included for a complete implementation.
             return item.toJson()..['status'] = newStatus.name;
           }
           return item.toJson();
@@ -59,41 +63,6 @@ class OrderService {
     }
 
     await batch.commit();
-
-    // After the batch commits, you would log any stock movements if your
-    // logic creates them.
-  }
-
-  Future<void> createOrder(OrderModel order) {
-    final itemsWithIds = order.items.map((item) {
-      return OrderItemModel(
-        id: item.id,
-        menuId: item.menuId,
-        menuName: item.menuName,
-        quantity: item.quantity,
-        price: item.price,
-        itemTax: item.itemTax,
-        status: item.status,
-      );
-    }).toList();
-    final newOrder = OrderModel(
-      id: order.id,
-      restaurantId: order.restaurantId,
-      tableId: order.tableId,
-      tableName: order.tableName,
-      orderTypeId: order.orderTypeId,
-      orderTypeName: order.orderTypeName,
-      staffId: order.staffId,
-      staffName: order.staffName,
-      items: itemsWithIds,
-      subtotal: order.subtotal,
-      serviceCharge: order.serviceCharge,
-      itemSpecificTaxes: order.itemSpecificTaxes,
-      grandTotal: order.grandTotal,
-      createdAt: order.createdAt,
-    );
-
-    return _db.collection(_collectionPath).add(newOrder.toJson());
   }
 
   Future<OrderModel?> getActiveOrderByTableId({
@@ -218,15 +187,7 @@ class OrderService {
 
       final updatedItems = order.items.map((item) {
         if (item.id == itemId) {
-          return OrderItemModel(
-            id: item.id,
-            menuId: item.menuId,
-            menuName: item.menuName,
-            quantity: item.quantity,
-            price: item.price,
-            itemTax: item.itemTax,
-            status: newStatus,
-          );
+          return item.copyWith(status: newStatus);
         }
         return item;
       }).toList();
@@ -354,15 +315,7 @@ class OrderService {
 
       final updatedItems = order.items.map((item) {
         if (item.id == itemId) {
-          return OrderItemModel(
-            id: item.id,
-            menuId: item.menuId,
-            menuName: item.menuName,
-            quantity: item.quantity,
-            price: item.price,
-            itemTax: item.itemTax,
-            status: OrderItemStatus.pending,
-          );
+          return item.copyWith(status: OrderItemStatus.pending);
         }
         return item;
       }).toList();

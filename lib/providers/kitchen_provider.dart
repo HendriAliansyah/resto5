@@ -31,8 +31,10 @@ final activeOrdersStreamProvider =
         return orders.map((order) {
           final kitchenItems = order.items.map((item) {
             final prepTime = menuMap[item.menuId]?.preparationTime ?? 0;
+            // THE FIX IS HERE: Ensure item notes are passed through
             return KitchenOrderItemModel.fromOrderItem(item, prepTime);
           }).toList();
+          // THE FIX IS HERE: Pass the overall order note to the factory
           return KitchenOrderModel.fromOrderModel(order, kitchenItems);
         }).toList();
       });

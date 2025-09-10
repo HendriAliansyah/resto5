@@ -20,7 +20,7 @@ class TableOrderArgs {
 enum OrderActionStatus { initial, loading, success, error }
 
 class OrderState {
-  final OrderActionStatus status; // Corrected line
+  final OrderActionStatus status;
   final String? errorMessage;
 
   OrderState({this.status = OrderActionStatus.initial, this.errorMessage});
@@ -51,6 +51,7 @@ class OrderController extends StateNotifier<OrderState> {
     required TableModel table,
     required OrderType orderType,
     required List<OrderItemModel> items,
+    String? orderNote, // ADDED
   }) async {
     state = OrderState(status: OrderActionStatus.loading);
     final user = _ref.read(currentUserProvider).asData?.value;
@@ -123,6 +124,7 @@ class OrderController extends StateNotifier<OrderState> {
         itemSpecificTaxes: totalItemTaxes,
         grandTotal: grandTotal,
         createdAt: Timestamp.now(),
+        note: orderNote, // ADDED
       );
 
       await _ref.read(orderServiceProvider).createOrder(newOrder);

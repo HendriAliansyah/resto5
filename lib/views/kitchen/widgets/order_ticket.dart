@@ -16,7 +16,6 @@ class OrderTicket extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // THE FIX IS HERE: Listen for errors from the controller
     ref.listen<AsyncValue<void>>(kitchenControllerProvider, (previous, next) {
       next.whenOrNull(
         error: (error, stackTrace) {
@@ -59,24 +58,47 @@ class OrderTicket extends HookConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    order.tableName.isNotEmpty
-                        ? order.tableName
-                        : order.orderTypeName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        order.tableName.isNotEmpty
+                            ? order.tableName
+                            : order.orderTypeName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
+                    Text(
+                      formatDuration(timeSinceOrder.value),
+                      style: theme.textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+                if (order.note != null && order.note!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.yellow.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      "Note: ${order.note}",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                ),
-                Text(
-                  formatDuration(timeSinceOrder.value),
-                  style: theme.textTheme.titleMedium,
-                ),
+                ],
               ],
             ),
           ),
@@ -93,7 +115,6 @@ class OrderTicket extends HookConsumerWidget {
     KitchenOrderItemModel item,
   ) {
     final theme = Theme.of(context);
-    // THE FIX IS HERE: Read the notifier to call methods
     final controller = ref.read(kitchenControllerProvider.notifier);
     final itemStatus = item.status;
     final itemKey = '${order.orderId}-${item.id}';
@@ -156,7 +177,7 @@ class OrderTicket extends HookConsumerWidget {
                   children: [
                     Text(
                       '${item.quantity}x ${item.menuName}',
-                      style: theme.textTheme.bodyLarge?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         decoration: itemStatus == OrderItemStatus.served
                             ? TextDecoration.lineThrough
                             : TextDecoration.none,
@@ -165,6 +186,19 @@ class OrderTicket extends HookConsumerWidget {
                             : null,
                       ),
                     ),
+                    if (item.note != null && item.note!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Text(
+                          "↳ Note: ${item.note}",
+                          // THE FIX IS HERE: Changed the color for better contrast.
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface.withOpacity(0.8),
+                          ),
+                        ),
+                      ),
                     ItemCountdownTimer(
                       preparationTime: Duration(minutes: item.preparationTime),
                       orderCreatedAt: order.createdAt,

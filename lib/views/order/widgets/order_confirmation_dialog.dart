@@ -9,6 +9,7 @@ import 'package:resto2/providers/charge_tax_rule_provider.dart';
 class OrderConfirmationDialog extends ConsumerWidget {
   final List<OrderItemModel> items;
   final OrderType orderType;
+  final String? orderNote;
   final VoidCallback onSubmit;
   final bool isLoading;
 
@@ -16,6 +17,7 @@ class OrderConfirmationDialog extends ConsumerWidget {
     super.key,
     required this.items,
     required this.orderType,
+    this.orderNote,
     required this.onSubmit,
     required this.isLoading,
   });
@@ -79,61 +81,70 @@ class OrderConfirmationDialog extends ConsumerWidget {
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // This Flexible/Expanded structure is the definitive fix.
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.menuName,
-                                style: theme.textTheme.bodyLarge,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (orderNote != null && orderNote!.isNotEmpty) ...[
+                Text('Order Note:', style: theme.textTheme.titleSmall),
+                Text(orderNote!),
+                const Divider(height: 24),
+              ],
+              ...items.map((item) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.menuName,
+                              style: theme.textTheme.bodyLarge,
+                            ),
+                            Text(
+                              '${item.quantity} x \$${item.price.toStringAsFixed(2)}',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                            if (item.note != null && item.note!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0),
+                                child: Text(
+                                  'Note: ${item.note}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
                               ),
-                              Text(
-                                '${item.quantity} x \$${item.price.toStringAsFixed(2)}',
-                                style: theme.textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        Text(
-                          '\$${(item.quantity * item.price).toStringAsFixed(2)}',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        '\$${(item.quantity * item.price).toStringAsFixed(2)}',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                  );
-                },
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              const Divider(height: 24),
+              _buildChargeRow('Subtotal', subtotal),
+              ...chargeWidgets,
+              const Divider(height: 16),
+              _buildChargeRow(
+                'Grand Total',
+                grandTotal,
+                isBold: true,
+                isTotal: true,
               ),
-            ),
-            const Divider(height: 24),
-            _buildChargeRow('Subtotal', subtotal),
-            ...chargeWidgets,
-            const Divider(height: 16),
-            _buildChargeRow(
-              'Grand Total',
-              grandTotal,
-              isBold: true,
-              isTotal: true,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
