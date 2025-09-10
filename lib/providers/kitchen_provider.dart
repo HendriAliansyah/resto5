@@ -1,6 +1,7 @@
 // lib/providers/kitchen_provider.dart
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:resto2/models/aggregated_kitchen_item_model.dart';
 import 'package:resto2/models/kitchen_order_model.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
@@ -37,16 +38,99 @@ final activeOrdersStreamProvider =
       });
     });
 
+/// A new provider that transforms the active orders stream into a list of
+/// aggregated items that are ready to be cooked.
+final aggregatedItemsProvider =
+    Provider.autoDispose<List<AggregatedKitchenItem>>((ref) {
+      // Watch the original stream of orders
+      final activeOrders =
+          ref.watch(activeOrdersStreamProvider).asData?.value ?? [];
+
+      // Use a map to aggregate items by their menuId
+      final Map<String, AggregatedKitchenItem> itemMap = {};
+
+      // Loop through each order
+      for (final order in activeOrders) {
+        // Loop through each item in the order
+        for (final item in order.items) {
+          // We only want to aggregate items that are 'pending'
+          if (item.status == OrderItemStatus.pending) {
+            // If we've seen this menu item before, update it
+            if (itemMap.containsKey(item.menuId)) {
+              final existing = itemMap[item.menuId]!;
+              itemMap[item.menuId] = AggregatedKitchenItem(
+                menuId: existing.menuId,
+                menuName: existing.menuName,
+                totalQuantity: existing.totalQuantity + item.quantity,
+                sources: [
+                  ...existing.sources,
+                  OrderItemSource(orderId: order.orderId, itemId: item.id),
+                ],
+              );
+            } else {
+              // Otherwise, add a new entry to the map
+              itemMap[item.menuId] = AggregatedKitchenItem(
+                menuId: item.menuId,
+                menuName: item.menuName,
+                totalQuantity: item.quantity,
+                sources: [
+                  OrderItemSource(orderId: order.orderId, itemId: item.id),
+                ],
+              );
+            }
+          }
+        }
+      }
+
+      // Return the aggregated values from the map as a list, sorted by name
+      return itemMap.values.toList()
+        ..sort((a, b) => a.menuName.compareTo(b.menuName));
+    });
+
+// THE FIX: Changed from .autoDispose to a regular StateNotifierProvider
+// This ties the controller's lifecycle to the page, not the widget.
 final kitchenControllerProvider =
-    StateNotifierProvider.autoDispose<KitchenController, AsyncValue<void>>((
-      ref,
-    ) {
+    StateNotifierProvider<KitchenController, AsyncValue<void>>((ref) {
       return KitchenController(ref);
     });
 
 class KitchenController extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
   KitchenController(this._ref) : super(const AsyncData(null));
+
+  /// Updates all items in a group to "Preparing" status in a single batch.
+  Future<void> startPreparingAggregatedItems(
+    AggregatedKitchenItem aggregatedItem,
+  ) async {
+    state = const AsyncLoading();
+    final user = _ref.read(currentUserProvider).asData?.value;
+    if (user == null) {
+      if (mounted) {
+        state = AsyncError(Exception("User not found"), StackTrace.current);
+      }
+      return;
+    }
+
+    try {
+      // Use the batch update method from OrderService for efficiency
+      await _ref
+          .read(orderServiceProvider)
+          .batchUpdateOrderItemStatus(
+            sources: aggregatedItem.sources,
+            newStatus: OrderItemStatus.preparing,
+            userId: user.uid,
+            userDisplayName: user.displayName ?? 'Unknown',
+          );
+
+      if (mounted) {
+        state = const AsyncData(null);
+      }
+    } catch (e, st) {
+      if (mounted) {
+        state = AsyncError(e, st);
+      }
+    }
+  }
 
   Future<void> updateOrderItemStatus({
     required String orderId,
@@ -72,11 +156,17 @@ class KitchenController extends StateNotifier<AsyncValue<void>> {
             userId: user.uid,
             userDisplayName: user.displayName ?? 'Unknown',
           );
-      state = const AsyncData(null);
+      if (mounted) {
+        state = const AsyncData(null);
+      }
     } catch (e, st) {
-      state = AsyncError(e, st);
+      if (mounted) {
+        state = AsyncError(e, st);
+      }
     } finally {
-      processingNotifier.update((state) => state..remove(itemKey));
+      if (mounted) {
+        processingNotifier.update((state) => state..remove(itemKey));
+      }
     }
   }
 
@@ -95,8 +185,6 @@ class KitchenController extends StateNotifier<AsyncValue<void>> {
       final user = _ref.read(currentUserProvider).asData?.value;
       if (user == null) throw Exception("User not found");
 
-      // THE FIX IS HERE: This now calls the new, dedicated reset method
-      // in the OrderService, which contains the stock return logic.
       await _ref
           .read(orderServiceProvider)
           .resetOrderItem(
@@ -106,12 +194,17 @@ class KitchenController extends StateNotifier<AsyncValue<void>> {
             userId: user.uid,
             userDisplayName: user.displayName ?? 'Unknown',
           );
-
-      state = const AsyncData(null);
+      if (mounted) {
+        state = const AsyncData(null);
+      }
     } catch (e, st) {
-      state = AsyncError(e, st);
+      if (mounted) {
+        state = AsyncError(e, st);
+      }
     } finally {
-      processingNotifier.update((state) => state..remove(itemKey));
+      if (mounted) {
+        processingNotifier.update((state) => state..remove(itemKey));
+      }
     }
   }
 }
