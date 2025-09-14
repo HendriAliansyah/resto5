@@ -6,17 +6,17 @@ import 'package:resto2/models/table_model.dart';
 import 'package:resto2/models/order_type_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
 import 'package:resto2/providers/charge_tax_rule_provider.dart';
+import 'package:resto2/providers/order_summary_filter_provider.dart';
+import 'package:resto2/providers/staff_filter_provider.dart';
 import 'package:resto2/providers/table_provider.dart';
 import 'package:resto2/services/order_calculation_service.dart';
 import 'package:resto2/services/order_service.dart';
 
-// THE FIX IS HERE: The helper class is now correctly defined in this file.
 class TableOrderArgs {
   final String tableId;
   final String restaurantId;
   TableOrderArgs({required this.tableId, required this.restaurantId});
 
-  // Add equals and hashCode for the provider to correctly cache results.
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -54,6 +54,59 @@ final activeOrderProvider = FutureProvider.autoDispose
             tableId: args.tableId,
           );
     });
+
+final completedOrdersStreamProvider =
+    StreamProvider.autoDispose<List<OrderModel>>((ref) {
+      final restaurantId = ref
+          .watch(currentUserProvider)
+          .asData
+          ?.value
+          ?.restaurantId;
+      if (restaurantId == null) {
+        return Stream.value([]);
+      }
+      return ref
+          .watch(orderServiceProvider)
+          .getCompletedOrdersStream(restaurantId);
+    });
+
+final sortedAndFilteredOrdersProvider = Provider.autoDispose<List<OrderModel>>((
+  ref,
+) {
+  final orders = ref.watch(completedOrdersStreamProvider).asData?.value ?? [];
+  final filterState = ref.watch(orderSummaryFilterProvider);
+
+  final filteredList = orders.where((order) {
+    final statusMatch =
+        filterState.status == null || order.status == filterState.status;
+
+    final dateMatch =
+        filterState.dateRange == null ||
+        (order.createdAt.toDate().isAfter(
+              filterState.dateRange!.start.subtract(const Duration(seconds: 1)),
+            ) &&
+            order.createdAt.toDate().isBefore(
+              filterState.dateRange!.end.add(const Duration(days: 1)),
+            ));
+
+    return statusMatch && dateMatch;
+  }).toList();
+
+  filteredList.sort((a, b) {
+    int comparison;
+    switch (filterState.sortOption) {
+      case OrderSortOption.byDate:
+        comparison = a.createdAt.compareTo(b.createdAt);
+        break;
+      case OrderSortOption.byTotal:
+        comparison = a.grandTotal.compareTo(b.grandTotal);
+        break;
+    }
+    return filterState.sortOrder == SortOrder.asc ? comparison : -comparison;
+  });
+
+  return filteredList;
+});
 
 final orderControllerProvider =
     StateNotifierProvider.autoDispose<OrderController, OrderState>(

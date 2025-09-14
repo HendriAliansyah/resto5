@@ -26,7 +26,9 @@ class AppRoutes {
   static const String order = '/order';
   static const String chargesAndTaxes = '/charges-and-taxes';
   static const String kitchen = '/kitchen';
-  static const String payment = '/payment'; // ADD THIS
+  static const String payment = '/payment';
+  static const String orderSummary = '/order-summary';
+  static const String orderDetail = '/order-detail';
 }
 
 // UI String Constants

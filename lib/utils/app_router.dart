@@ -15,7 +15,7 @@ import 'package:resto2/views/notifications/notification_page.dart';
 import 'package:resto2/views/onboarding/onboarding_screen.dart';
 import 'package:resto2/views/order/order_page.dart';
 import 'package:resto2/views/order_type/order_type_management_page.dart';
-import 'package:resto2/views/payment/payment_page.dart'; // ADD THIS
+import 'package:resto2/views/payment/payment_page.dart';
 import 'package:resto2/views/purchase/purchase_history_page.dart';
 import 'package:resto2/views/purchase/purchase_page.dart';
 import 'package:resto2/views/restaurant/charges_and_taxes_page.dart';
@@ -23,6 +23,8 @@ import 'package:resto2/views/restaurant/master_restaurant_page.dart';
 import 'package:resto2/views/settings/settings_page.dart';
 import 'package:resto2/views/staff/edit_staff_page.dart';
 import 'package:resto2/views/staff/staff_management_page.dart';
+import 'package:resto2/views/summary/order_detail_page.dart';
+import 'package:resto2/views/summary/order_summary_page.dart';
 import 'package:resto2/views/table/table_management_page.dart';
 import 'package:resto2/views/table_type/table_type_management_page.dart';
 import '../providers/auth_providers.dart';
@@ -135,12 +137,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.kitchen,
         builder: (context, state) => const KitchenPage(),
       ),
-      // ADD THIS NEW ROUTE
       GoRoute(
         path: AppRoutes.payment,
         builder: (context, state) {
           final order = state.extra as OrderModel;
           return PaymentPage(order: order);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.orderSummary,
+        builder: (context, state) => const OrderSummaryPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.orderDetail,
+        builder: (context, state) {
+          final order = state.extra as OrderModel;
+          return OrderDetailPage(order: order);
         },
       ),
     ],

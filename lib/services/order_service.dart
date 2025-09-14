@@ -115,6 +115,23 @@ class OrderService {
         );
   }
 
+  Stream<List<OrderModel>> getCompletedOrdersStream(String restaurantId) {
+    return _db
+        .collection(_collectionPath)
+        .where('restaurantId', isEqualTo: restaurantId)
+        .where(
+          'status',
+          whereIn: [OrderStatus.paid.name, OrderStatus.cancelled.name],
+        )
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => OrderModel.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
   Future<void> updateOrderStatus(String orderId, OrderStatus newStatus) {
     return _db.collection(_collectionPath).doc(orderId).update({
       'status': newStatus.name,

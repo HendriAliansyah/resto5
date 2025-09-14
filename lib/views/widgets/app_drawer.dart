@@ -74,6 +74,15 @@ class AppDrawer extends ConsumerWidget {
                 context.push(AppRoutes.kitchen);
               },
             ),
+          if (canAccess(PagePermission.accessOrderSummary))
+            ListTile(
+              leading: const Icon(Icons.summarize_outlined),
+              title: const Text('Order Summary'),
+              onTap: () {
+                Navigator.pop(context);
+                context.push(AppRoutes.orderSummary);
+              },
+            ),
           if (canAccess(PagePermission.accessMasterRestaurant))
             ListTile(
               leading: const Icon(Icons.storefront_outlined),
