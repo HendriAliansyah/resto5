@@ -1,4 +1,4 @@
-// lib/utils/constants.dart (Corrected)
+// lib/utils/constants.dart
 import 'package:flutter/material.dart';
 
 // Route Constants
@@ -26,6 +26,7 @@ class AppRoutes {
   static const String order = '/order';
   static const String chargesAndTaxes = '/charges-and-taxes';
   static const String kitchen = '/kitchen';
+  static const String payment = '/payment'; // ADD THIS
 }
 
 // UI String Constants

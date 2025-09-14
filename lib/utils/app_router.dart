@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:resto2/models/order_model.dart';
 import 'package:resto2/models/staff_model.dart';
 import 'package:resto2/views/auth/splash_screen.dart';
 import 'package:resto2/views/course/course_management_page.dart';
@@ -14,6 +15,7 @@ import 'package:resto2/views/notifications/notification_page.dart';
 import 'package:resto2/views/onboarding/onboarding_screen.dart';
 import 'package:resto2/views/order/order_page.dart';
 import 'package:resto2/views/order_type/order_type_management_page.dart';
+import 'package:resto2/views/payment/payment_page.dart'; // ADD THIS
 import 'package:resto2/views/purchase/purchase_history_page.dart';
 import 'package:resto2/views/purchase/purchase_page.dart';
 import 'package:resto2/views/restaurant/charges_and_taxes_page.dart';
@@ -126,14 +128,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const OrderPage(),
       ),
       GoRoute(
-        // Added
         path: AppRoutes.chargesAndTaxes,
         builder: (context, state) => const ChargesAndTaxesPage(),
       ),
       GoRoute(
-        // Added
         path: AppRoutes.kitchen,
         builder: (context, state) => const KitchenPage(),
+      ),
+      // ADD THIS NEW ROUTE
+      GoRoute(
+        path: AppRoutes.payment,
+        builder: (context, state) {
+          final order = state.extra as OrderModel;
+          return PaymentPage(order: order);
+        },
       ),
     ],
     redirect: (BuildContext context, GoRouterState state) {

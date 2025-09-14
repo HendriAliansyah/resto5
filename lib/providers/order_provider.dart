@@ -1,22 +1,41 @@
 // lib/providers/order_provider.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:resto2/models/charge_tax_rule_model.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/models/table_model.dart';
 import 'package:resto2/models/order_type_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
 import 'package:resto2/providers/charge_tax_rule_provider.dart';
 import 'package:resto2/providers/table_provider.dart';
+import 'package:resto2/services/order_calculation_service.dart';
 import 'package:resto2/services/order_service.dart';
 
-// Helper class to pass multiple arguments to the provider family
+// THE FIX IS HERE: The helper class is now correctly defined in this file.
 class TableOrderArgs {
   final String tableId;
   final String restaurantId;
   TableOrderArgs({required this.tableId, required this.restaurantId});
+
+  // Add equals and hashCode for the provider to correctly cache results.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TableOrderArgs &&
+          runtimeType == other.runtimeType &&
+          tableId == other.tableId &&
+          restaurantId == other.restaurantId;
+
+  @override
+  int get hashCode => tableId.hashCode ^ restaurantId.hashCode;
 }
 
+// Service Providers
+final orderServiceProvider = Provider((ref) => OrderService());
+final orderCalculationServiceProvider = Provider(
+  (ref) => OrderCalculationService(),
+);
+
+// State & Status
 enum OrderActionStatus { initial, loading, success, error }
 
 class OrderState {
@@ -25,8 +44,6 @@ class OrderState {
 
   OrderState({this.status = OrderActionStatus.initial, this.errorMessage});
 }
-
-final orderServiceProvider = Provider((ref) => OrderService());
 
 final activeOrderProvider = FutureProvider.autoDispose
     .family<OrderModel?, TableOrderArgs>((ref, args) {
@@ -43,6 +60,7 @@ final orderControllerProvider =
       (ref) => OrderController(ref),
     );
 
+// Controller
 class OrderController extends StateNotifier<OrderState> {
   final Ref _ref;
   OrderController(this._ref) : super(OrderState());
@@ -51,7 +69,7 @@ class OrderController extends StateNotifier<OrderState> {
     required TableModel table,
     required OrderType orderType,
     required List<OrderItemModel> items,
-    String? orderNote, // ADDED
+    String? orderNote,
   }) async {
     state = OrderState(status: OrderActionStatus.loading);
     final user = _ref.read(currentUserProvider).asData?.value;
@@ -65,49 +83,15 @@ class OrderController extends StateNotifier<OrderState> {
       return;
     }
 
-    if (items.isEmpty) {
-      state = OrderState(
-        status: OrderActionStatus.error,
-        errorMessage: "Cannot place an empty order.",
-      );
-      return;
-    }
-
     try {
-      final subtotal = items.fold(
-        0.0,
-        (sum, item) => sum + (item.price * item.quantity),
-      );
-      double totalServiceCharge = 0.0;
-      double totalItemTaxes = items.fold(
-        0.0,
-        (sum, item) => sum + item.itemTax,
-      );
-
-      // Apply service charges
-      final serviceChargeRules = rules
-          .where((r) => r.ruleType == RuleType.serviceCharge)
-          .toList();
-      for (var rule in serviceChargeRules) {
-        if (_isRuleApplicable(rule, subtotal, orderType.id)) {
-          totalServiceCharge += _calculateRuleAmount(rule, subtotal);
-        }
-      }
-
-      // Apply general taxes
-      double totalGeneralTax = 0.0;
-      final taxRules = rules.where((r) => r.ruleType == RuleType.tax).toList();
-      for (var rule in taxRules) {
-        if (_isRuleApplicable(rule, subtotal, orderType.id)) {
-          totalGeneralTax += _calculateRuleAmount(
-            rule,
-            subtotal + totalServiceCharge,
+      // Use the calculation service
+      final calcResult = _ref
+          .read(orderCalculationServiceProvider)
+          .calculateTotals(
+            items: items,
+            rules: rules,
+            orderTypeId: orderType.id,
           );
-        }
-      }
-
-      final grandTotal =
-          subtotal + totalServiceCharge + totalItemTaxes + totalGeneralTax;
 
       final newOrder = OrderModel(
         id: '',
@@ -119,12 +103,11 @@ class OrderController extends StateNotifier<OrderState> {
         staffId: user.uid,
         staffName: user.displayName ?? 'Unknown',
         items: items,
-        subtotal: subtotal,
-        serviceCharge: totalServiceCharge,
-        itemSpecificTaxes: totalItemTaxes,
-        grandTotal: grandTotal,
+        subtotal: calcResult.subtotal,
+        grandTotal: calcResult.grandTotal,
+        appliedCharges: calcResult.appliedCharges,
         createdAt: Timestamp.now(),
-        note: orderNote, // ADDED
+        note: orderNote,
       );
 
       await _ref.read(orderServiceProvider).createOrder(newOrder);
@@ -141,34 +124,44 @@ class OrderController extends StateNotifier<OrderState> {
     }
   }
 
-  bool _isRuleApplicable(
-    ChargeTaxRuleModel rule,
-    double subtotal,
-    String orderTypeId,
-  ) {
-    if (rule.applyToOrderTypeIds.isNotEmpty &&
-        !rule.applyToOrderTypeIds.contains(orderTypeId)) {
-      return false;
-    }
-    switch (rule.conditionType) {
-      case ConditionType.equalTo:
-        return subtotal == rule.conditionValue1;
-      case ConditionType.between:
-        return subtotal >= rule.conditionValue1 &&
-            subtotal <= (rule.conditionValue2 ?? double.infinity);
-      case ConditionType.lessThan:
-        return subtotal < rule.conditionValue1;
-      case ConditionType.moreThan:
-        return subtotal > rule.conditionValue1;
-      case ConditionType.none:
-        return true;
-    }
-  }
+  // New method to add items and recalculate totals
+  Future<void> addItemsToOrder({
+    required OrderModel order,
+    required List<OrderItemModel> newItems,
+  }) async {
+    state = OrderState(status: OrderActionStatus.loading);
+    final rules = _ref.read(chargeTaxRulesStreamProvider).asData?.value ?? [];
 
-  double _calculateRuleAmount(ChargeTaxRuleModel rule, double baseAmount) {
-    if (rule.valueType == ValueType.fixed) {
-      return rule.value;
+    try {
+      final combinedItems = List<OrderItemModel>.from(order.items)
+        ..addAll(newItems);
+
+      final calcResult = _ref
+          .read(orderCalculationServiceProvider)
+          .calculateTotals(
+            items: combinedItems,
+            rules: rules,
+            orderTypeId: order.orderTypeId,
+          );
+
+      final updateData = {
+        'items': combinedItems.map((item) => item.toJson()).toList(),
+        'subtotal': calcResult.subtotal,
+        'grandTotal': calcResult.grandTotal,
+        'appliedCharges': calcResult.appliedCharges
+            .map((c) => c.toJson())
+            .toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      await _ref.read(orderServiceProvider).updateOrder(order.id, updateData);
+
+      state = OrderState(status: OrderActionStatus.success);
+    } catch (e) {
+      state = OrderState(
+        status: OrderActionStatus.error,
+        errorMessage: e.toString(),
+      );
     }
-    return baseAmount * (rule.value / 100);
   }
 }

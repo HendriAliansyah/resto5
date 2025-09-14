@@ -1,8 +1,11 @@
 // lib/views/order/widgets/occupied_table_dialog.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:resto2/models/order_model.dart';
+import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/order/widgets/add_to_order_bottom_sheet.dart';
 
 class OccupiedTableDialog extends ConsumerWidget {
   final OrderModel order;
@@ -25,19 +28,17 @@ class OccupiedTableDialog extends ConsumerWidget {
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Placed by: ${order.staffName}'),
-            Text('Time: $formattedDate'),
-            const Divider(height: 24),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.3,
-              ),
-              child: ListView.builder(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Placed by: ${order.staffName}'),
+              Text('Time: $formattedDate'),
+              const Divider(height: 24),
+              ListView.builder(
                 shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: order.items.length,
                 itemBuilder: (context, index) {
                   final item = order.items[index];
@@ -73,30 +74,21 @@ class OccupiedTableDialog extends ConsumerWidget {
                   );
                 },
               ),
-            ),
-            const Divider(height: 24),
-            // Display full breakdown
-            _buildChargeRow('Subtotal', order.subtotal, theme: theme),
-            if (order.serviceCharge > 0)
-              _buildChargeRow(
-                'Service Charge',
-                order.serviceCharge,
-                theme: theme,
+              const Divider(height: 24),
+              _buildChargeRow('Subtotal', order.subtotal, theme: theme),
+              ...order.appliedCharges.map(
+                (charge) =>
+                    _buildChargeRow(charge.name, charge.amount, theme: theme),
               ),
-            if (order.itemSpecificTaxes > 0)
+              const Divider(height: 16),
               _buildChargeRow(
-                'Item Taxes',
-                order.itemSpecificTaxes,
+                'Grand Total',
+                order.grandTotal,
                 theme: theme,
+                isTotal: true,
               ),
-            const Divider(height: 16),
-            _buildChargeRow(
-              'Grand Total',
-              order.grandTotal,
-              theme: theme,
-              isTotal: true,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -106,22 +98,28 @@ class OccupiedTableDialog extends ConsumerWidget {
           children: [
             ElevatedButton.icon(
               onPressed: () {
-                // TODO: Implement Add to Order functionality
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Close the dialog first
+                context.push(AppRoutes.payment, extra: order);
               },
-              icon: const Icon(Icons.add_shopping_cart),
-              label: const Text('Add to Order'),
+              icon: const Icon(Icons.payment_outlined),
+              label: const Text('Go to Payment'),
             ),
             const SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: () {
-                // TODO: Implement Print Bill functionality
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Close the dialog
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  builder: (_) => AddToOrderBottomSheet(order: order),
+                );
               },
-              icon: const Icon(Icons.print_outlined),
-              label: const Text('Print Bill'),
+              icon: const Icon(Icons.add_shopping_cart),
+              label: const Text('Add to Order'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.secondary,
+                backgroundColor: theme.colorScheme.secondaryContainer,
+                foregroundColor: theme.colorScheme.onSecondaryContainer,
               ),
             ),
             const SizedBox(height: 12),

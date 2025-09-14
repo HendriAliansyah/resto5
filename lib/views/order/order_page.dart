@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/order_type_model.dart';
 import 'package:resto2/models/table_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
-import 'package:resto2/providers/order_provider.dart';
+import 'package:resto2/providers/order_provider.dart'; // THE FIX IS HERE: Add this import
 import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/providers/table_provider.dart';
 import 'package:resto2/views/order/widgets/occupied_table_dialog.dart';
@@ -96,7 +96,8 @@ class _TableSelectionView extends ConsumerWidget {
           );
           final order = await ref.read(activeOrderProvider(args).future);
 
-          Navigator.of(context).pop(); // Dismiss loading indicator
+          if (context.mounted)
+            Navigator.of(context).pop(); // Dismiss loading indicator
 
           if (order != null) {
             showDialog(
@@ -104,17 +105,23 @@ class _TableSelectionView extends ConsumerWidget {
               builder: (_) => OccupiedTableDialog(order: order),
             );
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Could not find an active order for this table.'),
-              ),
-            );
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Could not find an active order for this table.',
+                  ),
+                ),
+              );
+            }
           }
         } catch (e) {
-          Navigator.of(context).pop(); // Dismiss loading indicator
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error loading order: ${e.toString()}')),
-          );
+          if (context.mounted) {
+            Navigator.of(context).pop(); // Dismiss loading indicator
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error loading order: ${e.toString()}')),
+            );
+          }
         }
       } else {
         showModalBottomSheet(

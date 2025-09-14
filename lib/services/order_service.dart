@@ -15,9 +15,12 @@ class OrderService {
 
   /// Saves a new order to the database.
   Future<void> createOrder(OrderModel order) {
-    // THE FIX IS HERE: The redundant and error-prone mapping has been removed.
-    // We now directly convert the incoming order object to JSON, preserving all fields.
     return _db.collection(_collectionPath).add(order.toJson());
+  }
+
+  /// Adds a generic update method for orders.
+  Future<void> updateOrder(String orderId, Map<String, dynamic> data) {
+    return _db.collection(_collectionPath).doc(orderId).update(data);
   }
 
   /// Updates a list of order items to a new status in a single batch write.
@@ -79,6 +82,7 @@ class OrderService {
             OrderStatus.pending.name,
             OrderStatus.preparing.name,
             OrderStatus.ready.name,
+            OrderStatus.completed.name,
           ],
         )
         .limit(1)

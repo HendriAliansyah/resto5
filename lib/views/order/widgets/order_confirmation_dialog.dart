@@ -53,9 +53,8 @@ class OrderConfirmationDialog extends ConsumerWidget {
     final taxRules = rules.where((r) => r.ruleType == RuleType.tax).toList();
     for (var rule in taxRules) {
       if (_isRuleApplicable(rule, subtotal, orderType.id)) {
-        final baseAmountForTax = rule.valueType == ValueType.percentage
-            ? subtotal + totalServiceCharge
-            : subtotal;
+        // THE FIX IS HERE: The base amount for tax is now correctly the subtotal.
+        final baseAmountForTax = subtotal;
         final amount = _calculateRuleAmount(rule, baseAmountForTax);
         totalGeneralTax += amount;
         chargeWidgets.add(_buildChargeRow('Tax: ${rule.name}', amount));

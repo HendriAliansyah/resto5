@@ -2,9 +2,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
-enum OrderStatus { pending, preparing, ready, completed, cancelled }
+enum OrderStatus { pending, preparing, ready, completed, paid, cancelled }
 
 enum OrderItemStatus { pending, preparing, ready, served }
+
+// New class to hold a breakdown of charges
+class AppliedCharge {
+  final String name;
+  final double amount;
+
+  AppliedCharge({required this.name, required this.amount});
+
+  factory AppliedCharge.fromJson(Map<String, dynamic> json) {
+    return AppliedCharge(
+      name: json['name'] ?? 'Unknown Charge',
+      amount: (json['amount'] ?? 0.0).toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'amount': amount};
+  }
+}
 
 class OrderItemModel {
   final String id;
@@ -56,7 +75,6 @@ class OrderItemModel {
     );
   }
 
-  // THE FIX IS HERE: The copyWith method is now complete.
   OrderItemModel copyWith({
     String? id,
     String? menuId,
@@ -91,13 +109,13 @@ class OrderModel {
   final String staffName;
   final List<OrderItemModel> items;
   final double subtotal;
-  final double serviceCharge;
-  final double itemSpecificTaxes;
   final double grandTotal;
   final OrderStatus status;
   final Timestamp createdAt;
   final Timestamp? updatedAt;
   final String? note;
+  // New field for the charge breakdown
+  final List<AppliedCharge> appliedCharges;
 
   OrderModel({
     required this.id,
@@ -110,13 +128,12 @@ class OrderModel {
     required this.staffName,
     required this.items,
     required this.subtotal,
-    required this.serviceCharge,
-    required this.itemSpecificTaxes,
     required this.grandTotal,
     this.status = OrderStatus.pending,
     required this.createdAt,
     this.updatedAt,
     this.note,
+    this.appliedCharges = const [], // Default to empty list
   });
 
   Map<String, dynamic> toJson() {
@@ -130,13 +147,12 @@ class OrderModel {
       'staffName': staffName,
       'items': items.map((item) => item.toJson()).toList(),
       'subtotal': subtotal,
-      'serviceCharge': serviceCharge,
-      'itemSpecificTaxes': itemSpecificTaxes,
       'grandTotal': grandTotal,
       'status': status.name,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'note': note,
+      'appliedCharges': appliedCharges.map((c) => c.toJson()).toList(),
     };
   }
 
@@ -155,8 +171,6 @@ class OrderModel {
           .map((item) => OrderItemModel.fromJson(item))
           .toList(),
       subtotal: (data['subtotal'] ?? 0.0).toDouble(),
-      serviceCharge: (data['serviceCharge'] ?? 0.0).toDouble(),
-      itemSpecificTaxes: (data['itemSpecificTaxes'] ?? 0.0).toDouble(),
       grandTotal: (data['grandTotal'] ?? 0.0).toDouble(),
       status: OrderStatus.values.firstWhere(
         (e) => e.name == data['status'],
@@ -165,6 +179,9 @@ class OrderModel {
       createdAt: data['createdAt'],
       updatedAt: data['updatedAt'],
       note: data['note'],
+      appliedCharges: (data['appliedCharges'] as List? ?? [])
+          .map((c) => AppliedCharge.fromJson(c))
+          .toList(),
     );
   }
 }
