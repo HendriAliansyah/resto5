@@ -7,6 +7,7 @@ import 'package:resto2/models/role_permission_model.dart';
 import 'package:resto2/models/staff_model.dart';
 import 'package:resto2/providers/staff_provider.dart';
 import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 
 class EditStaffPage extends HookConsumerWidget {
   final Staff staff;
@@ -19,7 +20,7 @@ class EditStaffPage extends HookConsumerWidget {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     return Scaffold(
-      appBar: AppBar(title: const Text(UIStrings.editStaff)),
+      appBar: const CustomAppBar(title: Text(UIStrings.editStaff)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

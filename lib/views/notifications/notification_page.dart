@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:resto2/models/notification_payload.dart';
 import 'package:resto2/utils/constants.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 import '../../providers/notification_provider.dart';
 import '../widgets/loading_indicator.dart';
 
@@ -52,7 +53,7 @@ class NotificationPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(UIStrings.notificationsTitle)),
+      appBar: const CustomAppBar(title: Text(UIStrings.notificationsTitle)),
       drawer: const AppDrawer(),
       body: SafeArea(
         child: notificationsAsync.when(

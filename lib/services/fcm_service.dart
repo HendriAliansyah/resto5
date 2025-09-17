@@ -20,7 +20,7 @@ class FcmService {
     // **THE FIX IS HERE:**
     // We now proactively get the token every time this service is initialized.
     // This ensures that on every app start, we save the latest valid token.
-    await _updateToken();
+    await updateToken();
 
     // Listen for any future token refreshes while the app is running
     _fcm.onTokenRefresh.listen(_saveTokenToFirestore);
@@ -38,7 +38,7 @@ class FcmService {
   }
 
   /// Gets the current FCM token and saves it to Firestore.
-  Future<void> _updateToken() async {
+  Future<void> updateToken() async {
     final token = await _fcm.getToken();
     debugPrint("FCM Token updated: $token");
     _saveTokenToFirestore(token);

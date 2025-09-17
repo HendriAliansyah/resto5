@@ -6,6 +6,7 @@ import 'package:resto2/providers/course_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/course/widgets/course_dialog.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/utils/constants.dart';
 
@@ -43,7 +44,7 @@ class CourseManagementPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(UIStrings.courseMaster)),
+      appBar: const CustomAppBar(title: Text(UIStrings.courseMaster)),
       drawer: const AppDrawer(),
       body: SafeArea(
         child: GestureDetector(

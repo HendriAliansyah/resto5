@@ -6,6 +6,7 @@ import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/views/order_type/widgets/order_type_dialog.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 
 class OrderTypeManagementPage extends ConsumerWidget {
   const OrderTypeManagementPage({super.key});
@@ -23,7 +24,7 @@ class OrderTypeManagementPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(UIStrings.orderTypeMaster)),
+      appBar: const CustomAppBar(title: Text(UIStrings.orderTypeMaster)),
       drawer: const AppDrawer(),
       body: SafeArea(
         child: orderTypesAsync.when(

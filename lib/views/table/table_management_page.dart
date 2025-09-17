@@ -12,6 +12,7 @@ import 'package:resto2/providers/table_type_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/table/widgets/table_dialog.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
 import 'package:resto2/utils/constants.dart';
@@ -51,7 +52,7 @@ class TableManagementPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(UIStrings.tableManagement)),
+      appBar: const CustomAppBar(title: Text(UIStrings.tableManagement)),
       drawer: const AppDrawer(),
       body: GestureDetector(
         onTap: () {

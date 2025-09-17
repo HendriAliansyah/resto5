@@ -48,6 +48,7 @@ class UIStrings {
 
   // Auth Screens
   static const String loginTitle = 'Login';
+  static const String logoutTitle = 'Logout';
   static const String registerTitle = 'Register';
   static const String forgotPasswordTitle = 'Forgot Password';
   static const String emailLabel = 'Email';

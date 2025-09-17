@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/role_permission_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
+import 'package:resto2/providers/restaurant_provider.dart';
 import 'package:resto2/utils/constants.dart';
 
 class AppDrawer extends ConsumerWidget {
@@ -13,6 +14,7 @@ class AppDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider).asData?.value;
     final authController = ref.read(authControllerProvider.notifier);
+    final restaurant = ref.watch(restaurantStreamProvider).asData?.value;
 
     if (currentUser == null) {
       return const Drawer(); // Return an empty drawer if user is not loaded
@@ -27,6 +29,13 @@ class AppDrawer extends ConsumerWidget {
           : false;
     }
 
+    ImageProvider? getBackgroundImage() {
+      if (restaurant?.logoUrl != null) {
+        return NetworkImage(restaurant!.logoUrl!);
+      }
+      return null;
+    }
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -39,10 +48,14 @@ class AppDrawer extends ConsumerWidget {
             accountEmail: Text(currentUser.email),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.surface,
-              child: Text(
-                currentUser.displayName?.substring(0, 1).toUpperCase() ?? 'U',
-                style: const TextStyle(fontSize: 40.0),
-              ),
+              backgroundImage: getBackgroundImage(),
+              child: getBackgroundImage() == null
+                  ? Text(
+                      currentUser.displayName?.substring(0, 1).toUpperCase() ??
+                          'U',
+                      style: const TextStyle(fontSize: 40.0),
+                    )
+                  : null,
             ),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
@@ -211,7 +224,7 @@ class AppDrawer extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.logout),
-            title: const Text(UIStrings.loginTitle),
+            title: const Text(UIStrings.logoutTitle),
             onTap: () {
               Navigator.pop(context);
               authController.signOut();

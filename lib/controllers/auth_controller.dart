@@ -75,8 +75,8 @@ class AuthController extends StateNotifier<bool> {
           uid: user.uid,
           token: sessionToken,
         );
-        // Initialize FCM service to get and save the token
-        _ref.read(fcmServiceProvider);
+        // THE FIX IS HERE: We now explicitly wait for the token to be initialized.
+        await _ref.read(fcmServiceProvider).updateToken();
       }
       state = false;
       return true;

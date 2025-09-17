@@ -6,6 +6,7 @@ import 'package:resto2/providers/table_type_provider.dart';
 import 'package:resto2/views/table_type/widgets/table_type_dialog.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 
 class TableTypeManagementPage extends ConsumerWidget {
   const TableTypeManagementPage({super.key});
@@ -23,7 +24,7 @@ class TableTypeManagementPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(UIStrings.tableTypeMaster)),
+      appBar: const CustomAppBar(title: Text(UIStrings.tableTypeMaster)),
       drawer: const AppDrawer(),
       body: SafeArea(
         child: tableTypesAsync.when(

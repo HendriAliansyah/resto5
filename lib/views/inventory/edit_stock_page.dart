@@ -9,6 +9,7 @@ import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/purchase/widgets/inventory_item_selector.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 
 class EditStockPage extends HookConsumerWidget {
   const EditStockPage({super.key});
@@ -57,7 +58,7 @@ class EditStockPage extends HookConsumerWidget {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: AppBar(title: const Text(UIStrings.manualStockAdjustment)),
+        appBar: const CustomAppBar(title: Text(UIStrings.manualStockAdjustment)),
         drawer: const AppDrawer(),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

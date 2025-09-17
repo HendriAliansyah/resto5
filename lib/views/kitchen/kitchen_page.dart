@@ -7,6 +7,7 @@ import 'package:resto2/models/order_model.dart';
 import 'package:resto2/providers/kitchen_provider.dart';
 import 'package:resto2/views/kitchen/widgets/order_ticket.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/utils/constants.dart';
 
@@ -23,7 +24,7 @@ class KitchenPage extends HookConsumerWidget {
     final currentView = useState(KitchenView.orders);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         title: const Text(UIStrings.kitchenDisplaySystem),
         actions: [
           // Toggle button to switch views

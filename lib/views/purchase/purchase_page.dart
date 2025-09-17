@@ -9,6 +9,7 @@ import 'package:resto2/providers/purchase_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/purchase/widgets/inventory_item_selector.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/utils/constants.dart';
 
@@ -59,7 +60,7 @@ class ReceivingInventoryPage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(UIStrings.receivingInventory)),
+      appBar: const CustomAppBar(title: Text(UIStrings.receivingInventory)),
       drawer: const AppDrawer(),
       body: inventoryAsync.when(
         data: (inventoryItems) {

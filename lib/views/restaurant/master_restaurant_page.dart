@@ -1,11 +1,14 @@
 // lib/views/restaurant/master_restaurant_page.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:resto2/models/role_permission_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 import '../../providers/restaurant_provider.dart';
 import '../../utils/snackbar.dart';
 import '../widgets/loading_indicator.dart';
@@ -27,6 +30,7 @@ class MasterRestaurantPage extends HookConsumerWidget {
     final isCreatingLoading = useState(false);
 
     final restaurantAsync = ref.watch(restaurantStreamProvider);
+    final currentUser = ref.watch(currentUserProvider).asData?.value;
     final isCreating = restaurantAsync.asData?.value == null;
     final imagePicker = useMemoized(() => ImagePicker());
 
@@ -121,7 +125,7 @@ class MasterRestaurantPage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         title: Text(
           isCreating
               ? UIStrings.createRestaurantTitle
@@ -139,6 +143,30 @@ class MasterRestaurantPage extends HookConsumerWidget {
             data: (restaurant) => ListView(
               padding: const EdgeInsets.all(24.0),
               children: [
+                if (currentUser?.role == UserRole.owner && restaurant != null)
+                  Card(
+                    elevation: 1,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: ListTile(
+                        title: const Text(
+                          UIStrings.restaurantId,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(restaurant.id),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.copy_all_outlined),
+                          onPressed: () {
+                            Clipboard.setData(
+                              ClipboardData(text: restaurant.id),
+                            );
+                            showSnackBar(context, 'Restaurant ID Copied!');
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
                 Center(
                   child: Stack(
                     alignment: Alignment.center,

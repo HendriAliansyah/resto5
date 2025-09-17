@@ -8,6 +8,7 @@ import 'package:resto2/providers/auth_providers.dart';
 import 'package:resto2/providers/restaurant_provider.dart';
 import 'package:resto2/utils/constants.dart';
 import 'package:resto2/utils/snackbar.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 import '../widgets/loading_indicator.dart';
 
 class OnboardingScreen extends HookConsumerWidget {
@@ -58,7 +59,7 @@ class OnboardingScreen extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         title: const Text(UIStrings.welcome),
         actions: [
           IconButton(

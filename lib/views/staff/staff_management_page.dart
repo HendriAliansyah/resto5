@@ -12,6 +12,7 @@ import 'package:resto2/providers/staff_provider.dart';
 import 'package:resto2/utils/constants.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
@@ -24,9 +25,9 @@ class StaffManagementPage extends HookConsumerWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text(UIStrings.staffManagement),
-          bottom: const TabBar(
+        appBar: const CustomAppBar(
+          title: Text(UIStrings.staffManagement),
+          bottom: TabBar(
             tabs: [
               Tab(
                 icon: Icon(Icons.people_outline),

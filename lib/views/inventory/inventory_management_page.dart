@@ -6,6 +6,7 @@ import 'package:resto2/providers/inventory_filter_provider.dart';
 import 'package:resto2/providers/inventory_provider.dart';
 import 'package:resto2/views/inventory/widgets/inventory_bottom_sheet.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
 import 'package:resto2/utils/constants.dart';
@@ -29,7 +30,7 @@ class InventoryManagementPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text(UIStrings.inventoryAndStock)),
+      appBar: const CustomAppBar(title: Text(UIStrings.inventoryAndStock)),
       drawer: const AppDrawer(),
       body: SafeArea(
         child: GestureDetector(

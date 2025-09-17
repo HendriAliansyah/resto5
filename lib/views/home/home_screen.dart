@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/views/widgets/custom_app_bar.dart'; // Import the new widget
 import 'package:resto2/views/widgets/loading_indicator.dart';
-import 'package:resto2/views/widgets/notification_bell.dart';
 import '../../providers/auth_providers.dart';
 import '../../utils/constants.dart';
 
@@ -15,11 +15,8 @@ class HomeScreen extends ConsumerWidget {
     final currentUser = ref.watch(currentUserProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(UIStrings.home),
-        actions: const [NotificationBell()],
-      ),
-      drawer: const AppDrawer(), // Add the drawer here
+      appBar: const CustomAppBar(title: Text(UIStrings.home)),
+      drawer: const AppDrawer(),
       body: SafeArea(
         child: currentUser.when(
           data: (appUser) {
