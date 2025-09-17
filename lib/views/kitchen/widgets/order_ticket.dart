@@ -9,6 +9,7 @@ import 'package:resto2/providers/kitchen_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/kitchen/widgets/item_countdown_timer.dart';
 import 'package:resto2/views/kitchen/widgets/reset_approval_dialog.dart';
+import 'package:resto2/utils/constants.dart';
 
 class OrderTicket extends HookConsumerWidget {
   final KitchenOrderModel order;
@@ -87,11 +88,11 @@ class OrderTicket extends HookConsumerWidget {
                     padding: const EdgeInsets.all(8),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.yellow.withOpacity(0.2),
+                      color: Colors.yellow.withAlpha(51),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      "Note: ${order.note}",
+                      "${UIStrings.orderNotePrefix}${order.note}",
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w500,
@@ -153,9 +154,9 @@ class OrderTicket extends HookConsumerWidget {
 
     return Material(
       color: itemStatus == OrderItemStatus.preparing
-          ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+          ? theme.colorScheme.primaryContainer.withAlpha(77)
           : (itemStatus == OrderItemStatus.ready
-                ? Colors.green.withOpacity(0.15)
+                ? Colors.green.withAlpha(38)
                 : Colors.transparent),
       child: InkWell(
         onTap: (isProcessing || nextStatus == null)
@@ -190,12 +191,11 @@ class OrderTicket extends HookConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Text(
-                          "↳ Note: ${item.note}",
-                          // THE FIX IS HERE: Changed the color for better contrast.
+                          "${UIStrings.itemNotePrefix}${item.note}",
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontStyle: FontStyle.italic,
                             fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface.withOpacity(0.8),
+                            color: theme.colorScheme.onSurface.withAlpha(204),
                           ),
                         ),
                       ),
@@ -230,7 +230,7 @@ class OrderTicket extends HookConsumerWidget {
                         if (itemStatus != OrderItemStatus.pending)
                           const PopupMenuItem<String>(
                             value: 'reset',
-                            child: Text('Reset Status'),
+                            child: Text(UIStrings.resetStatus),
                           ),
                       ],
                 ),

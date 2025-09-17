@@ -11,6 +11,7 @@ import 'package:resto2/views/menu/widgets/menu_bottom_sheet.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
+import 'package:resto2/utils/constants.dart';
 
 class MenuManagementPage extends ConsumerWidget {
   const MenuManagementPage({super.key});
@@ -27,13 +28,13 @@ class MenuManagementPage extends ConsumerWidget {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        useSafeArea: true, // This is the fix
+        useSafeArea: true,
         builder: (_) => MenuBottomSheet(menu: menu),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Menu Master')),
+      appBar: AppBar(title: const Text(UIStrings.menuMaster)),
       drawer: const AppDrawer(),
       body: SafeArea(
         child: GestureDetector(
@@ -48,7 +49,7 @@ class MenuManagementPage extends ConsumerWidget {
                   children: [
                     TextField(
                       decoration: const InputDecoration(
-                        labelText: 'Search by Name',
+                        labelText: UIStrings.searchByName,
                         prefixIcon: Icon(Icons.search),
                         border: OutlineInputBorder(),
                       ),
@@ -60,7 +61,7 @@ class MenuManagementPage extends ConsumerWidget {
                     DropdownButtonFormField2<String>(
                       value: filterState.courseId,
                       decoration: const InputDecoration(
-                        labelText: 'Filter by Course',
+                        labelText: UIStrings.filterByCourse,
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -71,7 +72,7 @@ class MenuManagementPage extends ConsumerWidget {
                       items: [
                         const DropdownMenuItem(
                           value: null,
-                          child: Text('All Courses'),
+                          child: Text(UIStrings.allCourses),
                         ),
                         ...courses.map(
                           (course) => DropdownMenuItem(
@@ -92,7 +93,7 @@ class MenuManagementPage extends ConsumerWidget {
                           child: DropdownButtonFormField2<MenuSortOption>(
                             value: filterState.sortOption,
                             decoration: const InputDecoration(
-                              labelText: 'Sort by',
+                              labelText: UIStrings.sortBy,
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.zero,
                             ),
@@ -103,11 +104,11 @@ class MenuManagementPage extends ConsumerWidget {
                             items: const [
                               DropdownMenuItem(
                                 value: MenuSortOption.byName,
-                                child: Text('Name'),
+                                child: Text(UIStrings.name),
                               ),
                               DropdownMenuItem(
                                 value: MenuSortOption.byPrice,
-                                child: Text('Price'),
+                                child: Text(UIStrings.price),
                               ),
                             ],
                             onChanged: (option) {
@@ -143,13 +144,11 @@ class MenuManagementPage extends ConsumerWidget {
                     final courseMap = {
                       for (var c in coursesAsync.asData!.value) c.id: c.name,
                     };
-                    final orderTypeMap = {
-                      for (var ot in orderTypesAsync.asData!.value)
-                        ot.id: ot.name,
-                    };
 
                     if (sortedMenus.isEmpty) {
-                      return const Center(child: Text('No menu items found.'));
+                      return const Center(
+                        child: Text(UIStrings.noMenuItemsFound),
+                      );
                     }
 
                     return ListView.builder(
@@ -157,7 +156,8 @@ class MenuManagementPage extends ConsumerWidget {
                       itemCount: sortedMenus.length,
                       itemBuilder: (_, index) {
                         final menu = sortedMenus[index];
-                        final courseName = courseMap[menu.courseId] ?? 'N/A';
+                        final courseName =
+                            courseMap[menu.courseId] ?? UIStrings.notAvailable;
                         return Card(
                           clipBehavior: Clip.antiAlias,
                           margin: const EdgeInsets.symmetric(
@@ -191,7 +191,7 @@ class MenuManagementPage extends ConsumerWidget {
                               ),
                             ),
                             subtitle: Text(
-                              '$courseName • ${menu.preparationTime} min',
+                              '$courseName • ${menu.preparationTime}${UIStrings.prepTimeSuffix}',
                               overflow: TextOverflow.ellipsis,
                             ),
                             trailing: Text(

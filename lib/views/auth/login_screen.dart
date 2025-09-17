@@ -31,11 +31,7 @@ class LoginScreen extends HookConsumerWidget {
               );
         } catch (e) {
           if (!context.mounted) return;
-          showSnackBar(
-            context,
-            'Failed to log in. Please check your credentials.',
-            isError: true,
-          );
+          showSnackBar(context, UIMessages.loginFailed, isError: true);
         }
       }
     }
@@ -58,13 +54,13 @@ class LoginScreen extends HookConsumerWidget {
                   Image.asset('assets/images/logo.png', height: 80),
                   const SizedBox(height: 16),
                   Text(
-                    'Welcome Back',
+                    UIStrings.welcomeBack,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in to your POS dashboard',
+                    UIStrings.signInToDashboard,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(
@@ -87,10 +83,10 @@ class LoginScreen extends HookConsumerWidget {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Please enter your email';
+                              return UIMessages.enterEmailPrompt;
                             }
                             if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                              return 'Please enter a valid email address';
+                              return UIMessages.enterValidEmail;
                             }
                             return null;
                           },
@@ -117,10 +113,10 @@ class LoginScreen extends HookConsumerWidget {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Please enter your password';
+                              return UIMessages.enterPassword;
                             }
                             if (value.length < 6) {
-                              return 'Password must be at least 6 characters long';
+                              return UIMessages.passwordTooShort;
                             }
                             return null;
                           },

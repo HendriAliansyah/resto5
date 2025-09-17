@@ -14,6 +14,7 @@ import 'package:resto2/providers/menu_provider.dart';
 import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/widgets/multi_select_form_field.dart';
+import 'package:resto2/utils/constants.dart';
 
 class MenuBottomSheet extends HookConsumerWidget {
   final MenuModel? menu;
@@ -51,12 +52,12 @@ class MenuBottomSheet extends HookConsumerWidget {
     ref.listen<MenuState>(menuControllerProvider, (prev, next) {
       if (next.status == MenuActionStatus.success) {
         if (context.mounted) Navigator.of(context).pop();
-        showSnackBar(context, 'Menu saved!');
+        showSnackBar(context, UIMessages.menuSaved);
       }
       if (next.status == MenuActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred.',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -79,7 +80,7 @@ class MenuBottomSheet extends HookConsumerWidget {
             selectedOrderTypeId.value == null) {
           showSnackBar(
             context,
-            'Please select a course and order type.',
+            UIMessages.selectCourseAndOrderType,
             isError: true,
           );
           return;
@@ -136,7 +137,7 @@ class MenuBottomSheet extends HookConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                isEditing ? 'Edit Menu' : 'Add New Menu',
+                isEditing ? UIStrings.editMenu : UIStrings.addMenu,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
@@ -187,7 +188,7 @@ class MenuBottomSheet extends HookConsumerWidget {
                                           size: 48,
                                         ),
                                         SizedBox(height: 8),
-                                        Text('Tap to add image'),
+                                        Text(UIStrings.tapToAddImage),
                                       ],
                                     ),
                                   )
@@ -198,23 +199,27 @@ class MenuBottomSheet extends HookConsumerWidget {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: nameController,
-                        decoration: const InputDecoration(labelText: 'Name'),
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                        decoration: const InputDecoration(
+                          labelText: UIStrings.name,
+                        ),
+                        validator: (v) =>
+                            v!.isEmpty ? UIStrings.requiredField : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: descController,
                         decoration: const InputDecoration(
-                          labelText: 'Description',
+                          labelText: UIStrings.description,
                         ),
                         maxLines: 3,
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? UIStrings.requiredField : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: priceController,
                         decoration: const InputDecoration(
-                          labelText: 'Price',
+                          labelText: UIStrings.price,
                           prefixText: '\$ ',
                         ),
                         keyboardType: const TextInputType.numberWithOptions(
@@ -225,24 +230,26 @@ class MenuBottomSheet extends HookConsumerWidget {
                             RegExp(r'^\d+\.?\d{0,2}'),
                           ),
                         ],
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? UIStrings.requiredField : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: preparationTimeController,
                         decoration: const InputDecoration(
-                          labelText: 'Preparation Time (minutes)',
+                          labelText: UIStrings.preparationTime,
                           prefixIcon: Icon(Icons.timer_outlined),
                         ),
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                         ],
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? UIStrings.requiredField : null,
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Item-Specific Tax',
+                        UIStrings.itemSpecificTax,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16),
@@ -250,8 +257,8 @@ class MenuBottomSheet extends HookConsumerWidget {
                         controller: itemTaxController,
                         decoration: InputDecoration(
                           labelText: isTaxFixed.value
-                              ? 'Tax Fixed Value (\$)'
-                              : 'Tax Percentage (%)',
+                              ? UIStrings.taxFixedValue
+                              : UIStrings.taxPercentage,
                           border: const OutlineInputBorder(),
                         ),
                         keyboardType: const TextInputType.numberWithOptions(
@@ -259,7 +266,7 @@ class MenuBottomSheet extends HookConsumerWidget {
                         ),
                       ),
                       SwitchListTile(
-                        title: const Text('Is Tax a Fixed Value?'),
+                        title: const Text(UIStrings.isTaxFixed),
                         value: isTaxFixed.value,
                         onChanged: (value) => isTaxFixed.value = value,
                         contentPadding: EdgeInsets.zero,
@@ -277,10 +284,11 @@ class MenuBottomSheet extends HookConsumerWidget {
                             .toList(),
                         onChanged: (v) => selectedCourseId.value = v,
                         decoration: const InputDecoration(
-                          labelText: 'Course',
+                          labelText: UIStrings.course,
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) => v == null ? 'Required' : null,
+                        validator: (v) =>
+                            v == null ? UIStrings.requiredField : null,
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField2<String>(
@@ -295,10 +303,11 @@ class MenuBottomSheet extends HookConsumerWidget {
                             .toList(),
                         onChanged: (v) => selectedOrderTypeId.value = v,
                         decoration: const InputDecoration(
-                          labelText: 'Order Type',
+                          labelText: UIStrings.orderType,
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) => v == null ? 'Required' : null,
+                        validator: (v) =>
+                            v == null ? UIStrings.requiredField : null,
                       ),
                       const SizedBox(height: 16),
                       MultiSelectBottomSheetField<InventoryItem>(
@@ -308,9 +317,9 @@ class MenuBottomSheet extends HookConsumerWidget {
                                   selectedInventoryItems.value.contains(i.id),
                             )
                             .toList(),
-                        items: inventories, // This line is the fix
-                        dialogTitle: 'Inventory Items',
-                        searchHint: 'Search for inventory items',
+                        items: inventories,
+                        dialogTitle: UIStrings.inventoryItems,
+                        searchHint: UIStrings.searchInventoryItems,
                         chipLabelBuilder: (inventory) => Text(inventory.name),
                         tileLabelBuilder: (inventory) => Text(inventory.name),
                         onSaved: (selected) {
@@ -340,7 +349,7 @@ class MenuBottomSheet extends HookConsumerWidget {
                           color: Colors.white,
                         ),
                       )
-                    : const Text('Save'),
+                    : const Text(UIStrings.save),
               ),
             ),
           ],

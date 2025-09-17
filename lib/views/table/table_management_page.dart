@@ -14,6 +14,7 @@ import 'package:resto2/views/table/widgets/table_dialog.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
+import 'package:resto2/utils/constants.dart';
 
 class TableManagementPage extends ConsumerWidget {
   const TableManagementPage({super.key});
@@ -31,12 +32,12 @@ class TableManagementPage extends ConsumerWidget {
         if (Navigator.of(context).canPop()) {
           Navigator.of(context).pop();
         }
-        showSnackBar(context, 'Table saved successfully!');
+        showSnackBar(context, UIMessages.tableSaved);
       }
       if (next.status == TableActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred.',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -50,11 +51,10 @@ class TableManagementPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Table Management')),
+      appBar: AppBar(title: const Text(UIStrings.tableManagement)),
       drawer: const AppDrawer(),
       body: GestureDetector(
         onTap: () {
-          // Dismiss the keyboard when the user taps on an empty space
           FocusScope.of(context).unfocus();
         },
         child: Column(
@@ -65,7 +65,7 @@ class TableManagementPage extends ConsumerWidget {
                   TextFormField(
                     initialValue: filter.searchQuery,
                     decoration: const InputDecoration(
-                      labelText: 'Search by Name',
+                      labelText: UIStrings.searchByName,
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.search),
                     ),
@@ -75,7 +75,7 @@ class TableManagementPage extends ConsumerWidget {
                   DropdownButtonFormField2<String?>(
                     value: filter.tableTypeId,
                     decoration: const InputDecoration(
-                      labelText: 'Filter by Type',
+                      labelText: UIStrings.filterByType,
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.zero,
                     ),
@@ -86,7 +86,7 @@ class TableManagementPage extends ConsumerWidget {
                     items: [
                       const DropdownMenuItem(
                         value: null,
-                        child: Text('All Types'),
+                        child: Text(UIStrings.allTypes),
                       ),
                       ...tableTypes.map(
                         (type) => DropdownMenuItem(
@@ -105,7 +105,7 @@ class TableManagementPage extends ConsumerWidget {
                         child: DropdownButtonFormField2<TableSortOption>(
                           value: filter.sortOption,
                           decoration: const InputDecoration(
-                            labelText: 'Sort by',
+                            labelText: UIStrings.sortBy,
                             border: OutlineInputBorder(),
                             contentPadding: EdgeInsets.zero,
                           ),
@@ -117,7 +117,9 @@ class TableManagementPage extends ConsumerWidget {
                               .map(
                                 (option) => DropdownMenuItem(
                                   value: option,
-                                  child: Text('By ${option.name.substring(2)}'),
+                                  child: Text(
+                                    '${UIStrings.by}${option.name.substring(2)}',
+                                  ),
                                 ),
                               )
                               .toList(),
@@ -148,20 +150,39 @@ class TableManagementPage extends ConsumerWidget {
                 itemCount: tables.length,
                 itemBuilder: (context, index) {
                   final table = tables[index];
-                  final tableType = tableTypesAsync.asData?.value.firstWhere(
-                    (element) => element.id == table.tableTypeId,
-                    orElse: () =>
-                        TableType(id: '', name: 'N/A', restaurantId: ''),
-                  );
-                  final orderType = orderTypesAsync.asData?.value.firstWhere(
-                    (element) => element.id == table.orderTypeId,
-                    orElse: () => OrderType(
-                      id: '',
-                      name: 'All',
-                      restaurantId: '',
-                      accessibility: OrderTypeAccessibility.all,
-                    ),
-                  );
+                  final tableTypesList = tableTypesAsync.asData?.value;
+                  final orderTypesList = orderTypesAsync.asData?.value;
+
+                  // **THE FIX IS HERE:** Safely get the names
+                  String tableTypeName = UIStrings.notAvailable;
+                  if (tableTypesList != null) {
+                    tableTypeName = tableTypesList
+                        .firstWhere(
+                          (element) => element.id == table.tableTypeId,
+                          orElse: () => TableType(
+                            id: '',
+                            name: UIStrings.notAvailable,
+                            restaurantId: '',
+                          ),
+                        )
+                        .name;
+                  }
+
+                  String orderTypeName = UIStrings.all;
+                  if (orderTypesList != null) {
+                    orderTypeName = orderTypesList
+                        .firstWhere(
+                          (element) => element.id == table.orderTypeId,
+                          orElse: () => OrderType(
+                            id: '',
+                            name: UIStrings.all,
+                            restaurantId: '',
+                            accessibility: OrderTypeAccessibility.all,
+                          ),
+                        )
+                        .name;
+                  }
+
                   return Card(
                     margin: const EdgeInsets.symmetric(
                       horizontal: 8.0,
@@ -173,7 +194,8 @@ class TableManagementPage extends ConsumerWidget {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(
-                        '${tableType?.name} • Capacity: ${table.capacity}\nOrder Type: ${orderType?.name}',
+                        '$tableTypeName${UIStrings.tableCapacity.replaceFirst('{value}', table.capacity.toString())}'
+                        '${UIStrings.tableOrderType.replaceFirst('{value}', orderTypeName)}',
                       ),
                       isThreeLine: true,
                       trailing: Row(
@@ -194,13 +216,19 @@ class TableManagementPage extends ConsumerWidget {
                                     .read(tableControllerProvider.notifier)
                                     .deleteTable(table.id);
                                 if (context.mounted) {
-                                  showSnackBar(context, 'Table deleted.');
+                                  showSnackBar(
+                                    context,
+                                    UIMessages.tableDeleted,
+                                  );
                                 }
                               } catch (e) {
                                 if (context.mounted) {
                                   showSnackBar(
                                     context,
-                                    'Failed to delete table: ${e.toString()}',
+                                    UIMessages.failedToDeleteTable.replaceFirst(
+                                      '{error}',
+                                      e.toString(),
+                                    ),
                                     isError: true,
                                   );
                                 }

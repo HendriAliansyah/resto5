@@ -6,6 +6,7 @@ import 'package:resto2/providers/charge_tax_rule_provider.dart';
 import 'package:resto2/views/restaurant/widgets/charge_tax_rule_dialog.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
+import 'package:resto2/utils/constants.dart';
 
 class ChargesAndTaxesPage extends ConsumerWidget {
   const ChargesAndTaxesPage({super.key});
@@ -22,7 +23,7 @@ class ChargesAndTaxesPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Charges & Taxes')),
+      appBar: AppBar(title: const Text(UIStrings.chargesAndTaxes)),
       drawer: const AppDrawer(),
       body: rulesAsync.when(
         data: (rules) {
@@ -35,14 +36,14 @@ class ChargesAndTaxesPage extends ConsumerWidget {
             padding: const EdgeInsets.all(16.0),
             children: [
               _RuleSection(
-                title: 'Service Charges',
+                title: UIStrings.serviceCharges,
                 rules: serviceCharges,
                 onAdd: () => showRuleDialog(rule: null),
                 onTap: (rule) => showRuleDialog(rule: rule),
               ),
               const Divider(height: 32),
               _RuleSection(
-                title: 'Taxes',
+                title: UIStrings.taxes,
                 rules: taxes,
                 onAdd: () => showRuleDialog(rule: null),
                 onTap: (rule) => showRuleDialog(rule: rule),
@@ -84,7 +85,7 @@ class _RuleSection extends StatelessWidget {
         if (rules.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16.0),
-            child: Center(child: Text('No rules defined.')),
+            child: Center(child: Text(UIStrings.noRulesDefined)),
           )
         else
           ListView.builder(
@@ -115,17 +116,27 @@ class _RuleSection extends StatelessWidget {
     String conditionString = '';
     switch (rule.conditionType) {
       case ConditionType.equalTo:
-        conditionString = ' if subtotal = \$${rule.conditionValue1}';
+        conditionString = UIStrings.subtotalConditionEqual.replaceFirst(
+          '{value}',
+          rule.conditionValue1.toString(),
+        );
         break;
       case ConditionType.between:
-        conditionString =
-            ' if subtotal is between \$${rule.conditionValue1} and \$${rule.conditionValue2}';
+        conditionString = UIStrings.subtotalConditionBetween
+            .replaceFirst('{from}', rule.conditionValue1.toString())
+            .replaceFirst('{to}', rule.conditionValue2.toString());
         break;
       case ConditionType.lessThan:
-        conditionString = ' if subtotal < \$${rule.conditionValue1}';
+        conditionString = UIStrings.subtotalConditionLessThan.replaceFirst(
+          '{value}',
+          rule.conditionValue1.toString(),
+        );
         break;
       case ConditionType.moreThan:
-        conditionString = ' if subtotal > \$${rule.conditionValue1}';
+        conditionString = UIStrings.subtotalConditionMoreThan.replaceFirst(
+          '{value}',
+          rule.conditionValue1.toString(),
+        );
         break;
       case ConditionType.none:
         break;

@@ -6,6 +6,7 @@ import 'package:resto2/providers/inventory_provider.dart';
 import 'package:resto2/providers/purchase_provider.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
+import 'package:resto2/utils/constants.dart';
 
 class PurchaseHistoryPage extends ConsumerWidget {
   const PurchaseHistoryPage({super.key});
@@ -16,12 +17,12 @@ class PurchaseHistoryPage extends ConsumerWidget {
     final inventoryAsync = ref.watch(inventoryStreamProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Purchase History')),
+      appBar: AppBar(title: const Text(UIStrings.purchaseHistory)),
       drawer: const AppDrawer(),
       body: purchasesAsync.when(
         data: (purchases) {
           if (purchases.isEmpty) {
-            return const Center(child: Text('No purchase records found.'));
+            return const Center(child: Text(UIStrings.noPurchaseRecords));
           }
           return inventoryAsync.when(
             data: (inventoryItems) {
@@ -47,11 +48,18 @@ class PurchaseHistoryPage extends ConsumerWidget {
                     ),
                     child: ListTile(
                       title: Text(
-                        item?.name ?? 'Unknown Item',
+                        item?.name ?? UIStrings.unknownItem,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(
-                        'Date: $formattedDate\nNotes: ${purchase.notes ?? 'N/A'}',
+                        UIStrings.dateLabel.replaceFirst(
+                              '{date}',
+                              formattedDate,
+                            ) +
+                            UIStrings.notesLabel.replaceFirst(
+                              '{notes}',
+                              purchase.notes ?? UIStrings.notAvailable,
+                            ),
                       ),
                       trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -64,7 +72,12 @@ class PurchaseHistoryPage extends ConsumerWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text('Qty: ${purchase.quantity.toStringAsFixed(2)}'),
+                          Text(
+                            UIStrings.quantityLabel.replaceFirst(
+                              '{value}',
+                              purchase.quantity.toStringAsFixed(2),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -73,15 +86,13 @@ class PurchaseHistoryPage extends ConsumerWidget {
               );
             },
             loading: () => const LoadingIndicator(),
-            error:
-                (err, stack) =>
-                    Center(child: Text('Error loading inventory: $err')),
+            error: (err, stack) =>
+                Center(child: Text('Error loading inventory: $err')),
           );
         },
         loading: () => const LoadingIndicator(),
-        error:
-            (err, stack) =>
-                Center(child: Text('Error loading purchases: $err')),
+        error: (err, stack) =>
+            Center(child: Text('Error loading purchases: $err')),
       ),
     );
   }

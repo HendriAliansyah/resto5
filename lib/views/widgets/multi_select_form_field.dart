@@ -1,5 +1,6 @@
 // lib/views/widgets/multi_select_form_field.dart
 import 'package:flutter/material.dart';
+import 'package:resto2/utils/constants.dart';
 
 class MultiSelectBottomSheetField<T> extends FormField<List<T>> {
   MultiSelectBottomSheetField({
@@ -65,7 +66,7 @@ class MultiSelectBottomSheetField<T> extends FormField<List<T>> {
                    Expanded(
                      child: selectedItems.isEmpty
                          ? Text(
-                             'Select items',
+                             UIStrings.selectAnItemPrompt,
                              style: Theme.of(state.context)
                                  .textTheme
                                  .titleMedium
@@ -75,7 +76,7 @@ class MultiSelectBottomSheetField<T> extends FormField<List<T>> {
                                  ),
                            )
                          : Text(
-                             '${selectedItems.length} items selected',
+                             '${selectedItems.length} ${UIStrings.itemsSelectedSuffix}',
                              style: Theme.of(
                                state.context,
                              ).textTheme.titleMedium,
@@ -172,7 +173,6 @@ class _MultiSelectBottomSheetState<T>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    // This is the fix
                     child: Text(
                       widget.dialogTitle,
                       style: theme.textTheme.headlineSmall,
@@ -196,11 +196,11 @@ class _MultiSelectBottomSheetState<T>
             decoration: InputDecoration(
               hintText: widget.searchHint,
               hintStyle: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                color: theme.colorScheme.onSurface.withAlpha(128),
               ),
               prefixIcon: Icon(
                 Icons.search,
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                color: theme.colorScheme.onSurface.withAlpha(128),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -243,7 +243,7 @@ class _MultiSelectBottomSheetState<T>
             color: theme.canvasColor,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withAlpha(26),
                 blurRadius: 8,
                 offset: const Offset(0, -4),
               ),
@@ -257,7 +257,7 @@ class _MultiSelectBottomSheetState<T>
               widget.onConfirm(_selectedValues);
               Navigator.pop(context);
             },
-            child: const Text('Confirm'),
+            child: const Text(UIStrings.confirm),
           ),
         ),
       ],

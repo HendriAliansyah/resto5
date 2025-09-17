@@ -34,7 +34,7 @@ class OnboardingScreen extends HookConsumerWidget {
               );
 
           if (context.mounted) {
-            showSnackBar(context, UIStrings.requestSentSuccessfully);
+            showSnackBar(context, UIMessages.requestSentSuccessfully);
             restaurantIdController.clear();
           }
         } catch (e) {
@@ -44,10 +44,10 @@ class OnboardingScreen extends HookConsumerWidget {
           // We now check the 'details' field of the exception. This is reliable.
           if (e is FirebaseFunctionsException &&
               e.details?['reason'] == 'RESTAURANT_NOT_FOUND') {
-            showSnackBar(context, UIStrings.restaurantNotFound, isError: true);
+            showSnackBar(context, UIMessages.restaurantNotFound, isError: true);
           } else {
             // Show a generic message for all other errors.
-            showSnackBar(context, UIStrings.unexpectedError, isError: true);
+            showSnackBar(context, UIMessages.unexpectedError, isError: true);
           }
         } finally {
           if (context.mounted) {
@@ -94,8 +94,8 @@ class OnboardingScreen extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 32),
                       ElevatedButton(
-                        onPressed:
-                            () => context.push(AppRoutes.manageRestaurant),
+                        onPressed: () =>
+                            context.push(AppRoutes.manageRestaurant),
                         child: const Text(UIStrings.createNewRestaurant),
                       ),
                       const SizedBox(height: 24),
@@ -128,7 +128,6 @@ class OnboardingScreen extends HookConsumerWidget {
                         const LoadingIndicator()
                       else
                         ElevatedButton(
-                          // THE FIX: The call now correctly matches the function signature.
                           onPressed: handleSendRequest,
                           child: const Text(UIStrings.sendJoinRequest),
                         ),
@@ -138,10 +137,9 @@ class OnboardingScreen extends HookConsumerWidget {
               );
             },
             loading: () => const LoadingIndicator(),
-            error:
-                (err, stack) => Center(
-                  child: Text('Error loading user profile: ${err.toString()}'),
-                ),
+            error: (err, stack) => Center(
+              child: Text('Error loading user profile: ${err.toString()}'),
+            ),
           ),
         ),
       ),

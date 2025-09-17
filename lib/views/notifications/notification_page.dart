@@ -99,26 +99,24 @@ class NotificationPage extends ConsumerWidget {
                     p.wasApproved
                         ? UIStrings.requestApproved
                         : UIStrings.requestRejected,
-                  StockEditPayload p => // Updated this line
-                  '${p.itemName}: ${p.quantityBefore.toStringAsFixed(2)} ➔ ${p.quantityAfter.toStringAsFixed(2)}',
+                  StockEditPayload p =>
+                    '${p.itemName}: ${p.quantityBefore.toStringAsFixed(2)} ➔ ${p.quantityAfter.toStringAsFixed(2)}',
                   _ => UIStrings.newNotification,
                 };
 
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor:
-                        notification.isRead
-                            ? Colors.grey
-                            : Theme.of(context).colorScheme.primary,
+                    backgroundColor: notification.isRead
+                        ? Colors.grey
+                        : Theme.of(context).colorScheme.primary,
                     child: const Icon(Icons.notifications, color: Colors.white),
                   ),
                   title: Text(
                     notification.title,
                     style: TextStyle(
-                      fontWeight:
-                          notification.isRead
-                              ? FontWeight.normal
-                              : FontWeight.bold,
+                      fontWeight: notification.isRead
+                          ? FontWeight.normal
+                          : FontWeight.bold,
                     ),
                   ),
                   subtitle: Column(
@@ -150,7 +148,7 @@ class NotificationPage extends ConsumerWidget {
                       case JoinRequestPayload():
                         context.push(AppRoutes.manageStaff);
                         break;
-                      case StockEditPayload p: // Updated this case
+                      case StockEditPayload p:
                         final change = p.quantityChanged;
                         final changeText =
                             '${change > 0 ? '+' : ''}${change.toStringAsFixed(2)}';
@@ -179,9 +177,8 @@ class NotificationPage extends ConsumerWidget {
             );
           },
           loading: () => const LoadingIndicator(),
-          error:
-              (err, stack) =>
-                  const Center(child: Text('Could not load notifications.')),
+          error: (err, stack) =>
+              const Center(child: Text(UIMessages.failedToLoadNotifications)),
         ),
       ),
     );

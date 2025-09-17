@@ -7,6 +7,7 @@ import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/course/widgets/course_dialog.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
+import 'package:resto2/utils/constants.dart';
 
 class CourseManagementPage extends ConsumerWidget {
   const CourseManagementPage({super.key});
@@ -22,13 +23,13 @@ class CourseManagementPage extends ConsumerWidget {
         if (Navigator.of(context).canPop()) {
           Navigator.of(context).pop();
         }
-        showSnackBar(context, 'Course saved successfully!');
+        showSnackBar(context, UIMessages.courseSaved);
       }
       // THE FIX: Extract the specific error message from the state
       if (next.status == CourseActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An unknown error occurred.',
+          next.errorMessage ?? UIMessages.unknownError,
           isError: true,
         );
       }
@@ -42,7 +43,7 @@ class CourseManagementPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Course Master')),
+      appBar: AppBar(title: const Text(UIStrings.courseMaster)),
       drawer: const AppDrawer(),
       body: SafeArea(
         child: GestureDetector(
@@ -53,9 +54,7 @@ class CourseManagementPage extends ConsumerWidget {
           child: coursesAsync.when(
             data: (courses) {
               if (courses.isEmpty) {
-                return const Center(
-                  child: Text('No courses found. Add one to get started!'),
-                );
+                return const Center(child: Text(UIStrings.noCoursesFound));
               }
               return ListView.builder(
                 itemCount: courses.length,
@@ -84,7 +83,7 @@ class CourseManagementPage extends ConsumerWidget {
                             onPressed: () async {
                               await courseController.deleteCourse(course.id);
                               if (!context.mounted) return;
-                              showSnackBar(context, 'Course deleted.');
+                              showSnackBar(context, UIMessages.courseDeleted);
                             },
                           ),
                         ],

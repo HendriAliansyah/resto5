@@ -7,6 +7,7 @@ import 'package:resto2/providers/auth_providers.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:resto2/utils/constants.dart';
 
 class ResetApprovalDialog extends HookConsumerWidget {
   final Function(bool wasWasted) onApproved;
@@ -41,7 +42,7 @@ class ResetApprovalDialog extends HookConsumerWidget {
           );
 
           if (credential.user == null) {
-            throw Exception('Authentication failed.');
+            throw Exception(UIMessages.authFailed);
           }
 
           final userDoc = await ref
@@ -51,7 +52,7 @@ class ResetApprovalDialog extends HookConsumerWidget {
               .get();
 
           if (!userDoc.exists) {
-            throw Exception('User data not found.');
+            throw Exception(UIMessages.userDataNotFound);
           }
 
           final userRole = UserRole.values.firstWhere(
@@ -65,9 +66,7 @@ class ResetApprovalDialog extends HookConsumerWidget {
               onApproved(wasWasted.value);
             }
           } else {
-            throw Exception(
-              'Insufficient permissions. Manager approval required.',
-            );
+            throw Exception(UIMessages.insufficientPermissions);
           }
         } catch (e) {
           if (context.mounted) {
@@ -87,7 +86,7 @@ class ResetApprovalDialog extends HookConsumerWidget {
     }
 
     return AlertDialog(
-      title: const Text('Manager Approval Required'),
+      title: const Text(UIStrings.managerApprovalRequired),
       content: Form(
         key: formKey,
         child: Column(
@@ -96,16 +95,16 @@ class ResetApprovalDialog extends HookConsumerWidget {
             TextFormField(
               controller: emailController,
               decoration: const InputDecoration(
-                labelText: 'Manager/Owner Email',
+                labelText: UIStrings.managerOwnerEmail,
               ),
-              validator: (v) => v!.isEmpty ? 'Email is required' : null,
+              validator: (v) => v!.isEmpty ? UIMessages.enterEmailPrompt : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: passwordController,
               obscureText: !isPasswordVisible.value,
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: UIStrings.passwordLabel,
                 suffixIcon: IconButton(
                   icon: Icon(
                     isPasswordVisible.value
@@ -116,11 +115,11 @@ class ResetApprovalDialog extends HookConsumerWidget {
                       isPasswordVisible.value = !isPasswordVisible.value,
                 ),
               ),
-              validator: (v) => v!.isEmpty ? 'Password is required' : null,
+              validator: (v) => v!.isEmpty ? UIMessages.enterPassword : null,
             ),
             const SizedBox(height: 16),
             CheckboxListTile(
-              title: const Text("Ingredients were wasted?"),
+              title: const Text(UIStrings.ingredientsWasted),
               value: wasWasted.value,
               onChanged: (newValue) {
                 if (newValue != null) {
@@ -136,7 +135,7 @@ class ResetApprovalDialog extends HookConsumerWidget {
       actions: [
         TextButton(
           onPressed: isLoading.value ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text(UIStrings.cancel),
         ),
         ElevatedButton(
           onPressed: isLoading.value ? null : handleApproval,
@@ -146,7 +145,7 @@ class ResetApprovalDialog extends HookConsumerWidget {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Approve'),
+              : const Text(UIStrings.approve),
         ),
       ],
     );

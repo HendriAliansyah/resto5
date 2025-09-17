@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/course_model.dart';
 import 'package:resto2/providers/course_provider.dart';
+import 'package:resto2/utils/constants.dart';
 
 class CourseDialog extends HookConsumerWidget {
   final Course? course;
@@ -55,7 +56,7 @@ class CourseDialog extends HookConsumerWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 12),
-            Text(isEditing ? 'Edit Course' : 'Add New Course'),
+            Text(isEditing ? UIStrings.editCourse : UIStrings.addCourse),
           ],
         ),
         content: Form(
@@ -66,26 +67,22 @@ class CourseDialog extends HookConsumerWidget {
               TextFormField(
                 controller: nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Course Name',
-                  hintText: 'e.g., Appetizers, Main Courses',
+                  labelText: UIStrings.courseName,
+                  hintText: UIStrings.courseNameHint,
                 ),
-                validator:
-                    (value) =>
-                        value!.trim().isEmpty ? 'Please enter a name' : null,
+                validator: (value) =>
+                    value!.trim().isEmpty ? UIMessages.enterCourseName : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: descriptionController,
                 decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'e.g., Delicious starters to begin your meal.',
+                  labelText: UIStrings.description,
+                  hintText: UIStrings.courseDescriptionHint,
                 ),
                 maxLines: 2,
-                validator:
-                    (value) =>
-                        value!.trim().isEmpty
-                            ? 'Please enter a description'
-                            : null,
+                validator: (value) =>
+                    value!.trim().isEmpty ? UIMessages.enterDescription : null,
               ),
             ],
           ),
@@ -93,18 +90,17 @@ class CourseDialog extends HookConsumerWidget {
         actions: [
           TextButton(
             onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text(UIStrings.cancel),
           ),
           ElevatedButton(
             onPressed: isLoading ? null : submit,
-            child:
-                isLoading
-                    ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2.0),
-                    )
-                    : const Text('Save'),
+            child: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2.0),
+                  )
+                : const Text(UIStrings.save),
           ),
         ],
       ),

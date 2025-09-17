@@ -18,11 +18,7 @@ class ForgotPasswordScreen extends HookConsumerWidget {
 
     void handleResetPassword() async {
       if (emailController.text.trim().isEmpty) {
-        showSnackBar(
-          context,
-          'Please enter your email address.',
-          isError: true,
-        );
+        showSnackBar(context, UIMessages.enterEmailError, isError: true);
         return;
       }
       try {
@@ -30,18 +26,11 @@ class ForgotPasswordScreen extends HookConsumerWidget {
             .read(authControllerProvider.notifier)
             .sendPasswordResetEmail(email: emailController.text.trim());
         if (!context.mounted) return;
-        showSnackBar(
-          context,
-          "A password reset link has been sent to your email. Please check your inbox.",
-        );
+        showSnackBar(context, UIMessages.passwordResetLinkSent);
         context.pop();
       } catch (e) {
         if (!context.mounted) return;
-        showSnackBar(
-          context,
-          "Failed to send reset link. Please try again.",
-          isError: true,
-        );
+        showSnackBar(context, UIMessages.failedToSendResetLink, isError: true);
       }
     }
 
@@ -65,13 +54,13 @@ class ForgotPasswordScreen extends HookConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Receive a reset link',
+                    UIStrings.receiveResetLink,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Enter your account email below to receive a password reset link.',
+                    UIStrings.receiveResetLinkMessage,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(

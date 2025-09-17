@@ -18,7 +18,9 @@ import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:uuid/uuid.dart';
+import 'package:resto2/utils/constants.dart';
 
+//... (OrderBottomSheet class remains the same)
 class OrderBottomSheet extends HookConsumerWidget {
   final TableModel table;
   final OrderType orderType;
@@ -39,7 +41,7 @@ class OrderBottomSheet extends HookConsumerWidget {
     ref.listen<OrderState>(orderControllerProvider, (prev, next) {
       if (next.status == OrderActionStatus.success) {
         Navigator.of(context).popUntil((route) => route.isFirst);
-        showSnackBar(context, 'Order placed successfully!');
+        showSnackBar(context, UIMessages.orderPlaced);
       }
       if (next.status == OrderActionStatus.error) {
         if (Navigator.of(context).canPop()) {
@@ -47,7 +49,7 @@ class OrderBottomSheet extends HookConsumerWidget {
         }
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred.',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -89,7 +91,9 @@ class OrderBottomSheet extends HookConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'New Order: ${table.name} (${orderType.name})',
+                UIStrings.newOrderTitle
+                    .replaceFirst('{tableName}', table.name)
+                    .replaceFirst('{orderType}', orderType.name),
                 style: Theme.of(context).textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
@@ -125,24 +129,26 @@ class _MenuList extends HookConsumerWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Note for ${item.menuName}'),
+          title: Text(
+            UIStrings.noteFor.replaceFirst('{itemName}', item.menuName),
+          ),
           content: TextField(
             controller: noteController,
             autofocus: true,
-            decoration: const InputDecoration(hintText: 'e.g., Extra spicy'),
+            decoration: const InputDecoration(hintText: UIStrings.noteHint),
             maxLines: 3,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text(UIStrings.cancel),
             ),
             ElevatedButton(
               onPressed: () {
                 onSave(noteController.text);
                 Navigator.pop(context);
               },
-              child: const Text('Save'),
+              child: const Text(UIStrings.save),
             ),
           ],
         );
@@ -201,7 +207,7 @@ class _MenuList extends HookConsumerWidget {
     return menusAsync.when(
       data: (menus) {
         if (menus.isEmpty) {
-          return const Center(child: Text('No menu items available.'));
+          return const Center(child: Text(UIStrings.noMenuItemsAvailable));
         }
 
         final courses = coursesAsync.asData?.value ?? [];
@@ -234,12 +240,12 @@ class _MenuList extends HookConsumerWidget {
         return Column(
           children: [
             FilterExpansionTile(
-              title: 'Filter & Sort Menu',
+              title: UIStrings.filterAndSortMenu,
               children: [
                 TextField(
                   onChanged: (value) => searchQuery.value = value,
                   decoration: InputDecoration(
-                    labelText: 'Search Menu',
+                    labelText: UIStrings.searchMenu,
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -251,7 +257,7 @@ class _MenuList extends HookConsumerWidget {
                   value: selectedCourseId.value,
                   onChanged: (value) => selectedCourseId.value = value,
                   decoration: const InputDecoration(
-                    labelText: 'Filter by Course',
+                    labelText: UIStrings.filterByCourse,
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -259,7 +265,7 @@ class _MenuList extends HookConsumerWidget {
                   items: [
                     const DropdownMenuItem(
                       value: null,
-                      child: Text('All Courses'),
+                      child: Text(UIStrings.allCourses),
                     ),
                     ...courses.map(
                       (course) => DropdownMenuItem(
@@ -279,7 +285,7 @@ class _MenuList extends HookConsumerWidget {
                           if (value != null) sortOption.value = value;
                         },
                         decoration: const InputDecoration(
-                          labelText: 'Sort by',
+                          labelText: UIStrings.sortBy,
                           border: OutlineInputBorder(),
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -287,11 +293,11 @@ class _MenuList extends HookConsumerWidget {
                         items: const [
                           DropdownMenuItem(
                             value: MenuSortOption.byName,
-                            child: Text('Name'),
+                            child: Text(UIStrings.name),
                           ),
                           DropdownMenuItem(
                             value: MenuSortOption.byPrice,
-                            child: Text('Price'),
+                            child: Text(UIStrings.price),
                           ),
                         ],
                       ),
@@ -395,24 +401,26 @@ class _OrderSummary extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add Note to Order'),
+          title: const Text(UIStrings.addNoteToOrder),
           content: TextField(
             controller: noteController,
             autofocus: true,
-            decoration: const InputDecoration(hintText: 'e.g., Allergy alert'),
+            decoration: const InputDecoration(
+              hintText: UIStrings.orderNoteHint,
+            ),
             maxLines: 3,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text(UIStrings.cancel),
             ),
             ElevatedButton(
               onPressed: () {
                 orderNote.value = noteController.text;
                 Navigator.pop(context);
               },
-              child: const Text('Save'),
+              child: const Text(UIStrings.save),
             ),
           ],
         );
@@ -433,7 +441,7 @@ class _OrderSummary extends StatelessWidget {
         color: Theme.of(context).canvasColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha(26),
             blurRadius: 8,
             offset: const Offset(0, -4),
           ),
@@ -445,7 +453,10 @@ class _OrderSummary extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total:', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                UIStrings.totalLabel,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               Text(
                 '\$${totalPrice.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -470,13 +481,13 @@ class _OrderSummary extends StatelessWidget {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Place Order'),
+                      : const Text(UIStrings.placeOrder),
                 ),
               ),
               const SizedBox(width: 16),
               IconButton.filled(
                 icon: const Icon(Icons.note_add),
-                tooltip: 'Add Order Note',
+                tooltip: UIStrings.addNoteToOrder,
                 onPressed: () => _showOrderNoteDialog(context),
                 style: IconButton.styleFrom(
                   backgroundColor:

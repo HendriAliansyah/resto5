@@ -11,7 +11,6 @@ import 'package:resto2/providers/notification_provider.dart';
 import 'package:resto2/providers/staff_filter_provider.dart';
 import 'package:resto2/providers/storage_provider.dart';
 import 'package:resto2/services/inventory_service.dart';
-import 'package:resto2/services/stock_movement_service.dart';
 
 // State Enum
 enum InventoryActionStatus { initial, loading, success, error }
@@ -31,8 +30,11 @@ final inventoryServiceProvider = Provider((ref) => InventoryService());
 
 final inventoryStreamProvider = StreamProvider<List<InventoryItem>>((ref) {
   // THIS NOW MATCHES YOUR EXISTING CODE'S PATTERN
-  final restaurantId =
-      ref.watch(currentUserProvider).asData?.value?.restaurantId;
+  final restaurantId = ref
+      .watch(currentUserProvider)
+      .asData
+      ?.value
+      ?.restaurantId;
   if (restaurantId == null) {
     return Stream.value([]);
   }
@@ -46,11 +48,10 @@ final sortedInventoryProvider = Provider.autoDispose<List<InventoryItem>>((
   final inventoryList = ref.watch(inventoryStreamProvider).asData?.value ?? [];
   final filter = ref.watch(inventoryFilterProvider);
 
-  final filteredList =
-      inventoryList.where((item) {
-        return filter.searchQuery.isEmpty ||
-            item.name.toLowerCase().contains(filter.searchQuery.toLowerCase());
-      }).toList();
+  final filteredList = inventoryList.where((item) {
+    return filter.searchQuery.isEmpty ||
+        item.name.toLowerCase().contains(filter.searchQuery.toLowerCase());
+  }).toList();
 
   filteredList.sort((a, b) {
     int comparison = a.name.compareTo(b.name);
@@ -97,8 +98,11 @@ class InventoryController extends StateNotifier<InventoryState> {
       );
       return;
     }
-    final restaurantId =
-        _ref.read(currentUserProvider).asData?.value?.restaurantId;
+    final restaurantId = _ref
+        .read(currentUserProvider)
+        .asData
+        ?.value
+        ?.restaurantId;
     if (restaurantId == null) {
       state = InventoryState(
         status: InventoryActionStatus.error,
@@ -245,8 +249,10 @@ class InventoryController extends StateNotifier<InventoryState> {
         final itemRef = _ref
             .read(inventoryServiceProvider)
             .getInventoryItemRef(item.id);
-        final movementRef =
-            _ref.read(firestoreProvider).collection('stockMovements').doc();
+        final movementRef = _ref
+            .read(firestoreProvider)
+            .collection('stockMovements')
+            .doc();
 
         transaction.update(itemRef, {'quantityInStock': newQuantity});
         transaction.set(movementRef, movement.toJson());

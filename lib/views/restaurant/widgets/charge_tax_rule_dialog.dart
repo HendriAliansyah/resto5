@@ -11,6 +11,7 @@ import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/views/widgets/multi_select_form_field.dart';
 import 'package:uuid/uuid.dart';
+import 'package:resto2/utils/constants.dart';
 
 class ChargeTaxRuleDialog extends HookConsumerWidget {
   final ChargeTaxRuleModel? rule;
@@ -49,12 +50,12 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
     ) {
       if (next.status == ChargeTaxRuleActionStatus.success) {
         if (context.mounted) Navigator.of(context).pop();
-        showSnackBar(context, 'Rule saved successfully!');
+        showSnackBar(context, UIMessages.ruleSaved);
       }
       if (next.status == ChargeTaxRuleActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -79,7 +80,7 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
     }
 
     return AlertDialog(
-      title: Text(isEditing ? 'Edit Rule' : 'Add New Rule'),
+      title: Text(isEditing ? UIStrings.editRule : UIStrings.addRule),
       content: SizedBox(
         width: double.maxFinite,
         child: Form(
@@ -92,17 +93,18 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
                 TextFormField(
                   controller: nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Rule Name',
+                    labelText: UIStrings.ruleName,
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) => v!.isEmpty ? 'Name is required' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? UIMessages.nameIsRequired : null,
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField2<RuleType>(
                   value: ruleType.value,
                   onChanged: (v) => ruleType.value = v!,
                   decoration: const InputDecoration(
-                    labelText: 'Rule Type',
+                    labelText: UIStrings.ruleType,
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -122,7 +124,7 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
                   value: valueType.value,
                   onChanged: (v) => valueType.value = v!,
                   decoration: const InputDecoration(
-                    labelText: 'Value Type',
+                    labelText: UIStrings.valueType,
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -141,13 +143,14 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
                 TextFormField(
                   controller: valueController,
                   decoration: const InputDecoration(
-                    labelText: 'Value',
+                    labelText: UIStrings.value,
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  validator: (v) => v!.isEmpty ? 'Value is required' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? UIMessages.valueIsRequired : null,
                 ),
                 const SizedBox(height: 16),
                 MultiSelectBottomSheetField<OrderType>(
@@ -155,8 +158,8 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
                   initialValue: allOrderTypes
                       .where((ot) => selectedOrderTypeIds.value.contains(ot.id))
                       .toList(),
-                  dialogTitle: 'Apply To Order Types (Optional)',
-                  searchHint: 'Search order types',
+                  dialogTitle: UIStrings.applyToOrderTypes,
+                  searchHint: UIStrings.searchOrderTypes,
                   chipLabelBuilder: (ot) => Text(ot.name),
                   tileLabelBuilder: (ot) => Text(ot.name),
                   onSaved: (selected) {
@@ -169,7 +172,7 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
                   value: conditionType.value,
                   onChanged: (v) => conditionType.value = v!,
                   decoration: const InputDecoration(
-                    labelText: 'Condition (based on subtotal)',
+                    labelText: UIStrings.conditionOnSubtotal,
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -190,15 +193,15 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
                     controller: conditionValue1Controller,
                     decoration: InputDecoration(
                       labelText: conditionType.value == ConditionType.between
-                          ? 'From (\$)'
-                          : 'Value (\$)',
+                          ? UIStrings.fromValue
+                          : UIStrings.valueAmount,
                       border: const OutlineInputBorder(),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                     validator: (v) =>
-                        v!.isEmpty ? 'Condition value is required' : null,
+                        v!.isEmpty ? UIMessages.conditionValueIsRequired : null,
                   ),
                 ],
                 if (conditionType.value == ConditionType.between) ...[
@@ -206,15 +209,14 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
                   TextFormField(
                     controller: conditionValue2Controller,
                     decoration: const InputDecoration(
-                      labelText: 'To (\$)',
+                      labelText: UIStrings.toValue,
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (v) => v!.isEmpty
-                        ? '"To" value is required for between'
-                        : null,
+                    validator: (v) =>
+                        v!.isEmpty ? UIMessages.toValueIsRequired : null,
                   ),
                 ],
               ],
@@ -225,11 +227,13 @@ class ChargeTaxRuleDialog extends HookConsumerWidget {
       actions: [
         TextButton(
           onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text(UIStrings.cancel),
         ),
         ElevatedButton(
           onPressed: isLoading ? null : handleSubmit,
-          child: isLoading ? const LoadingIndicator() : const Text('Save Rule'),
+          child: isLoading
+              ? const LoadingIndicator()
+              : const Text(UIStrings.saveRule),
         ),
       ],
     );

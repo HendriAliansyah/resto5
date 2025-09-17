@@ -1,10 +1,11 @@
 // lib/views/home/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:resto2/views/widgets/app_drawer.dart'; // Import the new drawer
+import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/views/widgets/notification_bell.dart';
 import '../../providers/auth_providers.dart';
+import '../../utils/constants.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -15,7 +16,7 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text(UIStrings.home),
         actions: const [NotificationBell()],
       ),
       drawer: const AppDrawer(), // Add the drawer here
@@ -26,18 +27,24 @@ class HomeScreen extends ConsumerWidget {
               return const LoadingIndicator();
             }
 
-            // You can customize the body of the home screen further here.
-            // For now, we'll keep the welcome message.
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Welcome, ${appUser.displayName ?? 'User'}! 👋',
+                    UIStrings.welcomeMessage.replaceFirst(
+                      '{name}',
+                      appUser.displayName ?? UIStrings.defaultUserName,
+                    ),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
-                  Text('Your role: ${appUser.role!.name}'),
+                  Text(
+                    UIStrings.yourRole.replaceFirst(
+                      '{role}',
+                      appUser.role!.name,
+                    ),
+                  ),
                 ],
               ),
             );

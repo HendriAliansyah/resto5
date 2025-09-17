@@ -34,10 +34,7 @@ class RegisterScreen extends HookConsumerWidget {
                 displayName: displayNameController.text.trim(),
               );
           if (context.mounted && success) {
-            showSnackBar(
-              context,
-              'Registration successful! Please wait for an admin to assign you a role.',
-            );
+            showSnackBar(context, UIMessages.registrationSuccessful);
           }
         } catch (e) {
           if (!context.mounted) return;
@@ -63,13 +60,13 @@ class RegisterScreen extends HookConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Create Account',
+                  UIStrings.createAccount,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Start your journey with us',
+                  UIStrings.startYourJourney,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(
@@ -92,7 +89,7 @@ class RegisterScreen extends HookConsumerWidget {
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your name';
+                            return UIMessages.enterNameError;
                           }
                           return null;
                         },
@@ -108,10 +105,10 @@ class RegisterScreen extends HookConsumerWidget {
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter an email';
+                            return UIMessages.enterEmailPrompt;
                           }
                           if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                            return 'Please enter a valid email address';
+                            return UIMessages.enterValidEmail;
                           }
                           return null;
                         },
@@ -129,19 +126,17 @@ class RegisterScreen extends HookConsumerWidget {
                                   ? Icons.visibility_off_outlined
                                   : Icons.visibility_outlined,
                             ),
-                            onPressed:
-                                () =>
-                                    isPasswordVisible.value =
-                                        !isPasswordVisible.value,
+                            onPressed: () => isPasswordVisible.value =
+                                !isPasswordVisible.value,
                           ),
                         ),
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter a password';
+                            return UIMessages.enterPassword;
                           }
                           if (value.length < 6) {
-                            return 'Password must be at least 6 characters long';
+                            return UIMessages.passwordTooShort;
                           }
                           return null;
                         },
@@ -159,19 +154,17 @@ class RegisterScreen extends HookConsumerWidget {
                                   ? Icons.visibility_off_outlined
                                   : Icons.visibility_outlined,
                             ),
-                            onPressed:
-                                () =>
-                                    isConfirmPasswordVisible.value =
-                                        !isConfirmPasswordVisible.value,
+                            onPressed: () => isConfirmPasswordVisible.value =
+                                !isConfirmPasswordVisible.value,
                           ),
                         ),
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
+                            return UIMessages.confirmPasswordError;
                           }
                           if (value != passwordController.text) {
-                            return 'Passwords do not match';
+                            return UIMessages.passwordMismatch;
                           }
                           return null;
                         },

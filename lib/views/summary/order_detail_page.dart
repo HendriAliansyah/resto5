@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:resto2/models/order_model.dart';
+import 'package:resto2/utils/constants.dart';
 
 class OrderDetailPage extends StatelessWidget {
   final OrderModel order;
@@ -13,7 +14,9 @@ class OrderDetailPage extends StatelessWidget {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order #${order.id.substring(0, 8)}'),
+        title: Text(
+          UIStrings.orderId.replaceFirst('{id}', order.id.substring(0, 8)),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -24,34 +27,39 @@ class OrderDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Order Details', style: theme.textTheme.headlineSmall),
+                Text(
+                  UIStrings.orderDetails,
+                  style: theme.textTheme.headlineSmall,
+                ),
                 const Divider(height: 24),
-                _buildDetailRow('Table:', order.tableName, theme),
+                _buildDetailRow(UIStrings.table, order.tableName, theme),
                 _buildDetailRow(
-                  'Date:',
+                  UIStrings.date,
                   DateFormat.yMd().add_jm().format(order.createdAt.toDate()),
                   theme,
                 ),
-                _buildDetailRow('Served By:', order.staffName, theme),
+                _buildDetailRow(UIStrings.servedBy, order.staffName, theme),
                 const Divider(height: 24),
-                Text('Items', style: theme.textTheme.titleLarge),
+                Text(UIStrings.items, style: theme.textTheme.titleLarge),
                 const SizedBox(height: 8),
                 ...order.items.map(
                   (item) => ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text('${item.quantity}x ${item.menuName}'),
-                    trailing:
-                        Text('\$${(item.price * item.quantity).toStringAsFixed(2)}'),
+                    trailing: Text(
+                      '\$${(item.price * item.quantity).toStringAsFixed(2)}',
+                    ),
                   ),
                 ),
                 const Divider(height: 24),
-                _buildChargeRow('Subtotal', order.subtotal, theme),
+                _buildChargeRow(UIStrings.subtotal, order.subtotal, theme),
                 ...order.appliedCharges.map(
-                  (charge) => _buildChargeRow(charge.name, charge.amount, theme),
+                  (charge) =>
+                      _buildChargeRow(charge.name, charge.amount, theme),
                 ),
                 const Divider(height: 16),
                 _buildChargeRow(
-                  'Grand Total',
+                  UIStrings.grandTotal,
                   order.grandTotal,
                   theme,
                   isTotal: true,
@@ -90,15 +98,20 @@ class OrderDetailPage extends StatelessWidget {
         children: [
           Text(
             label,
-            style: isTotal ? theme.textTheme.titleLarge : theme.textTheme.bodyLarge,
+            style: isTotal
+                ? theme.textTheme.titleLarge
+                : theme.textTheme.bodyLarge,
           ),
           Text(
             '\$${amount.toStringAsFixed(2)}',
-            style: (isTotal ? theme.textTheme.titleLarge : theme.textTheme.bodyLarge)
-                ?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: isTotal ? theme.colorScheme.primary : null,
-            ),
+            style:
+                (isTotal
+                        ? theme.textTheme.titleLarge
+                        : theme.textTheme.bodyLarge)
+                    ?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isTotal ? theme.colorScheme.primary : null,
+                    ),
           ),
         ],
       ),

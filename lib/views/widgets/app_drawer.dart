@@ -33,7 +33,7 @@ class AppDrawer extends ConsumerWidget {
         children: <Widget>[
           UserAccountsDrawerHeader(
             accountName: Text(
-              currentUser.displayName ?? 'No Name',
+              currentUser.displayName ?? UIStrings.defaultUserName,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             accountEmail: Text(currentUser.email),
@@ -50,7 +50,7 @@ class AppDrawer extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.home_outlined),
-            title: const Text('Home'),
+            title: const Text(UIStrings.home),
             onTap: () {
               Navigator.pop(context);
               context.go(AppRoutes.home);
@@ -59,7 +59,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessOrderPage))
             ListTile(
               leading: const Icon(Icons.point_of_sale_outlined),
-              title: const Text('POS / New Order'),
+              title: const Text(UIStrings.posNewOrder),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.order);
@@ -68,7 +68,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessKitchenPage))
             ListTile(
               leading: const Icon(Icons.kitchen_outlined),
-              title: const Text('Kitchen Display'),
+              title: const Text(UIStrings.kitchenDisplaySystem),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.kitchen);
@@ -77,7 +77,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessOrderSummary))
             ListTile(
               leading: const Icon(Icons.summarize_outlined),
-              title: const Text('Order Summary'),
+              title: const Text(UIStrings.orderSummary),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.orderSummary);
@@ -86,16 +86,16 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessMasterRestaurant))
             ListTile(
               leading: const Icon(Icons.storefront_outlined),
-              title: const Text('Manage Restaurant'),
+              title: const Text(UIStrings.manageRestaurantTitle),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.manageRestaurant);
               },
             ),
-          if (canAccess(PagePermission.accessChargesAndTaxes)) // Added
+          if (canAccess(PagePermission.accessChargesAndTaxes))
             ListTile(
               leading: const Icon(Icons.receipt_long_outlined),
-              title: const Text('Charges & Taxes'),
+              title: const Text(UIStrings.chargesAndTaxes),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.chargesAndTaxes);
@@ -104,7 +104,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessStaffManagement))
             ListTile(
               leading: const Icon(Icons.people_outline),
-              title: const Text('Manage Staff'),
+              title: const Text(UIStrings.staffManagement),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.manageStaff);
@@ -113,7 +113,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessCourseMaster))
             ListTile(
               leading: const Icon(Icons.book_outlined),
-              title: const Text('Course Master'),
+              title: const Text(UIStrings.courseMaster),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.manageCourses);
@@ -122,7 +122,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessTableTypeMaster))
             ListTile(
               leading: const Icon(Icons.category_outlined),
-              title: const Text('Table Type Master'),
+              title: const Text(UIStrings.tableTypeMaster),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.manageTableTypes);
@@ -131,7 +131,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessTableMaster))
             ListTile(
               leading: const Icon(Icons.table_restaurant_outlined),
-              title: const Text('Table Master'),
+              title: const Text(UIStrings.tableManagement),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.manageTables);
@@ -140,7 +140,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessOrderTypeMaster))
             ListTile(
               leading: const Icon(Icons.receipt_long_outlined),
-              title: const Text('Order Type Master'),
+              title: const Text(UIStrings.orderTypeMaster),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.manageOrderTypes);
@@ -149,7 +149,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessMenuMaster))
             ListTile(
               leading: const Icon(Icons.restaurant_menu_outlined),
-              title: const Text('Menu Master'),
+              title: const Text(UIStrings.menuMaster),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.manageMenu);
@@ -158,7 +158,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessInventoryMaster))
             ListTile(
               leading: const Icon(Icons.inventory_2_outlined),
-              title: const Text('Inventory & Stock'),
+              title: const Text(UIStrings.inventoryAndStock),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.manageInventory);
@@ -167,7 +167,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessPurchasePage))
             ListTile(
               leading: const Icon(Icons.inventory_outlined),
-              title: const Text('Receiving Inventory'),
+              title: const Text(UIStrings.receivingInventory),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.receivingInventory);
@@ -176,7 +176,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessPurchaseHistory))
             ListTile(
               leading: const Icon(Icons.history_outlined),
-              title: const Text('Purchase History'),
+              title: const Text(UIStrings.purchaseHistory),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.purchaseHistory);
@@ -185,7 +185,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessStockEdit))
             ListTile(
               leading: const Icon(Icons.edit_note),
-              title: const Text('Edit Stock'),
+              title: const Text(UIStrings.editStock),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.editStock);
@@ -194,7 +194,7 @@ class AppDrawer extends ConsumerWidget {
           if (canAccess(PagePermission.accessStockMovementHistory))
             ListTile(
               leading: const Icon(Icons.sync_alt),
-              title: const Text('Stock Movement History'),
+              title: const Text(UIStrings.stockMovementHistory),
               onTap: () {
                 Navigator.pop(context);
                 context.push(AppRoutes.stockMovementHistory);
@@ -203,7 +203,7 @@ class AppDrawer extends ConsumerWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings_outlined),
-            title: const Text('Settings'),
+            title: const Text(UIStrings.settings),
             onTap: () {
               Navigator.pop(context);
               context.push(AppRoutes.settings);
@@ -211,7 +211,7 @@ class AppDrawer extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.logout),
-            title: const Text('Log Out'),
+            title: const Text(UIStrings.loginTitle),
             onTap: () {
               Navigator.pop(context);
               authController.signOut();

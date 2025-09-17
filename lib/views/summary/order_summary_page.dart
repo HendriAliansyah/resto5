@@ -7,7 +7,6 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/providers/order_provider.dart';
 import 'package:resto2/providers/order_summary_filter_provider.dart';
-import 'package:resto2/providers/staff_filter_provider.dart';
 import 'package:resto2/utils/constants.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
@@ -42,7 +41,7 @@ class OrderSummaryPage extends ConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Order & Payment Summary')),
+      appBar: AppBar(title: const Text(UIStrings.orderAndPaymentSummary)),
       drawer: const AppDrawer(),
       body: Column(
         children: [
@@ -51,7 +50,7 @@ class OrderSummaryPage extends ConsumerWidget {
               DropdownButtonFormField2<OrderStatus?>(
                 value: filterState.status,
                 decoration: const InputDecoration(
-                  labelText: 'Filter by Status',
+                  labelText: UIStrings.filterByStatus,
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -62,7 +61,7 @@ class OrderSummaryPage extends ConsumerWidget {
                 items: [
                   const DropdownMenuItem(
                     value: null,
-                    child: Text('All Statuses'),
+                    child: Text(UIStrings.allStatuses),
                   ),
                   ...OrderStatus.values.map(
                     (status) => DropdownMenuItem(
@@ -80,7 +79,7 @@ class OrderSummaryPage extends ConsumerWidget {
                     child: DropdownButtonFormField2<OrderSortOption>(
                       value: filterState.sortOption,
                       decoration: const InputDecoration(
-                        labelText: 'Sort by',
+                        labelText: UIStrings.sortBy,
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -91,11 +90,11 @@ class OrderSummaryPage extends ConsumerWidget {
                       items: const [
                         DropdownMenuItem(
                           value: OrderSortOption.byDate,
-                          child: Text('Date'),
+                          child: Text(UIStrings.date),
                         ),
                         DropdownMenuItem(
                           value: OrderSortOption.byTotal,
-                          child: Text('Total'),
+                          child: Text(UIStrings.totalFilter),
                         ),
                       ],
                       onChanged: (option) {
@@ -118,7 +117,7 @@ class OrderSummaryPage extends ConsumerWidget {
                 onTap: () => selectDateRange(context),
                 child: InputDecorator(
                   decoration: const InputDecoration(
-                    labelText: 'Date Range',
+                    labelText: UIStrings.dateRange,
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
                   ),
@@ -127,7 +126,7 @@ class OrderSummaryPage extends ConsumerWidget {
                     children: [
                       Text(
                         filterState.dateRange == null
-                            ? 'All Time'
+                            ? UIStrings.allTime
                             : '${DateFormat.yMd().format(filterState.dateRange!.start)} - ${DateFormat.yMd().format(filterState.dateRange!.end)}',
                       ),
                       if (filterState.dateRange != null)
@@ -148,7 +147,7 @@ class OrderSummaryPage extends ConsumerWidget {
               data: (orders) {
                 if (filteredOrders.isEmpty) {
                   return const Center(
-                    child: Text('No orders found for the selected criteria.'),
+                    child: Text(UIStrings.noOrdersForCriteria),
                   );
                 }
                 return ListView.builder(
@@ -165,11 +164,23 @@ class OrderSummaryPage extends ConsumerWidget {
                         onTap: () =>
                             context.push(AppRoutes.orderDetail, extra: order),
                         title: Text(
-                          'Order #${order.id.substring(0, 8)}',
+                          UIStrings.orderId.replaceFirst(
+                            '{id}',
+                            order.id.substring(0, 8),
+                          ),
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(
-                          'Table: ${order.tableName}\nTime: ${DateFormat.yMd().add_jm().format(order.createdAt.toDate())}',
+                          UIStrings.tableLabel.replaceFirst(
+                                '{name}',
+                                order.tableName,
+                              ) +
+                              UIStrings.timeLabel.replaceFirst(
+                                '{time}',
+                                DateFormat.yMd().add_jm().format(
+                                  order.createdAt.toDate(),
+                                ),
+                              ),
                         ),
                         trailing: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -204,7 +215,7 @@ class OrderSummaryPage extends ConsumerWidget {
               color: Theme.of(context).cardColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withAlpha(26),
                   blurRadius: 8,
                   offset: const Offset(0, -4),
                 ),
@@ -214,7 +225,7 @@ class OrderSummaryPage extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Total Sales:',
+                  UIStrings.totalSales,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Text(

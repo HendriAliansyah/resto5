@@ -22,8 +22,6 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // THE FIX IS HERE: Initialize Local Notification Service before the app runs.
-  // This creates a ProviderContainer to access the provider outside of the widget tree.
   final container = ProviderContainer();
   await container.read(localNotificationServiceProvider).init();
 
@@ -36,7 +34,6 @@ void main() async {
     persistenceEnabled: true,
   );
 
-  // We pass the container to the app so providers initialized here are available.
   runApp(UncontrolledProviderScope(container: container, child: const MyApp()));
 }
 
@@ -56,7 +53,6 @@ class MyApp extends ConsumerWidget {
     ) async {
       final user = next.asData?.value;
       if (user != null) {
-        // Initialize FCM service when the user is available
         ref.read(fcmServiceProvider);
 
         final localToken = ref.read(localSessionTokenProvider);

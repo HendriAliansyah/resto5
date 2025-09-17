@@ -5,6 +5,7 @@ import 'package:resto2/models/table_type_model.dart';
 import 'package:resto2/providers/table_type_provider.dart';
 import 'package:resto2/views/table_type/widgets/table_type_dialog.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
+import 'package:resto2/utils/constants.dart';
 
 class TableTypeManagementPage extends ConsumerWidget {
   const TableTypeManagementPage({super.key});
@@ -22,15 +23,13 @@ class TableTypeManagementPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Table Type Master')),
+      appBar: AppBar(title: const Text(UIStrings.tableTypeMaster)),
       drawer: const AppDrawer(),
       body: SafeArea(
         child: tableTypesAsync.when(
           data: (types) {
             if (types.isEmpty) {
-              return const Center(
-                child: Text('No table types found. Add one to get started!'),
-              );
+              return const Center(child: Text(UIStrings.noTableTypesFound));
             }
             return ListView.builder(
               padding: const EdgeInsets.all(8.0),

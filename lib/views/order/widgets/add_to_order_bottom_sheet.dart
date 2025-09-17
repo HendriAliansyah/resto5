@@ -9,6 +9,7 @@ import 'package:resto2/providers/order_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:uuid/uuid.dart';
+import 'package:resto2/utils/constants.dart';
 
 class AddToOrderBottomSheet extends HookConsumerWidget {
   final OrderModel order;
@@ -24,12 +25,12 @@ class AddToOrderBottomSheet extends HookConsumerWidget {
     ref.listen<OrderState>(orderControllerProvider, (prev, next) {
       if (next.status == OrderActionStatus.success) {
         Navigator.of(context).pop(); // Close this bottom sheet
-        showSnackBar(context, 'Items added to order successfully!');
+        showSnackBar(context, UIMessages.itemsAddedToOrder);
       }
       if (next.status == OrderActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -37,7 +38,7 @@ class AddToOrderBottomSheet extends HookConsumerWidget {
 
     void handleAddItems() {
       if (newItems.value.isEmpty) {
-        showSnackBar(context, 'Please select items to add.', isError: true);
+        showSnackBar(context, UIMessages.pleaseSelectItemsToAdd, isError: true);
         return;
       }
       ref
@@ -52,25 +53,24 @@ class AddToOrderBottomSheet extends HookConsumerWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Add to Order: ${order.tableName}',
+              UIStrings.addToOrderTitle.replaceFirst(
+                '{tableName}',
+                order.tableName,
+              ),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
           const Divider(height: 1),
-          Expanded(
-            child: _MenuList(
-              orderedItems: newItems,
-            ),
-          ),
+          Expanded(child: _MenuList(orderedItems: newItems)),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: isLoading ? null : handleAddItems,
               child: isLoading
                   ? const LoadingIndicator()
-                  : const Text('Confirm & Add Items'),
+                  : const Text(UIStrings.confirmAndAddItems),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -121,13 +121,16 @@ class _MenuList extends HookConsumerWidget {
         itemBuilder: (context, index) {
           final menu = menus[index];
           final currentQuantity = orderedItems.value
-              .firstWhere((item) => item.menuId == menu.id,
-                  orElse: () => OrderItemModel(
-                      id: '',
-                      menuId: '',
-                      menuName: '',
-                      quantity: 0,
-                      price: 0))
+              .firstWhere(
+                (item) => item.menuId == menu.id,
+                orElse: () => OrderItemModel(
+                  id: '',
+                  menuId: '',
+                  menuName: '',
+                  quantity: 0,
+                  price: 0,
+                ),
+              )
               .quantity;
 
           return ListTile(

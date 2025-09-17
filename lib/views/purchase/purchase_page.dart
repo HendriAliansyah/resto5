@@ -10,6 +10,7 @@ import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/purchase/widgets/inventory_item_selector.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
+import 'package:resto2/utils/constants.dart';
 
 class ReceivingInventoryPage extends HookConsumerWidget {
   const ReceivingInventoryPage({super.key});
@@ -29,12 +30,12 @@ class ReceivingInventoryPage extends HookConsumerWidget {
     ref.listen<PurchaseState>(purchaseControllerProvider, (prev, next) {
       if (next.status == PurchaseActionStatus.success) {
         if (context.mounted) Navigator.of(context).pop();
-        showSnackBar(context, 'Stock successfully updated!');
+        showSnackBar(context, UIMessages.stockUpdated);
       }
       if (next.status == PurchaseActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred.',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -58,7 +59,7 @@ class ReceivingInventoryPage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Receiving Inventory')),
+      appBar: AppBar(title: const Text(UIStrings.receivingInventory)),
       drawer: const AppDrawer(),
       body: inventoryAsync.when(
         data: (inventoryItems) {
@@ -67,7 +68,7 @@ class ReceivingInventoryPage extends HookConsumerWidget {
               child: Padding(
                 padding: EdgeInsets.all(24.0),
                 child: Text(
-                  'There are no inventory items to receive. Please add an item in the "Inventory & Stock" page first.',
+                  UIStrings.noInventoryToReceive,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -83,14 +84,14 @@ class ReceivingInventoryPage extends HookConsumerWidget {
                   InventoryItemSelector(
                     initialValue: selectedInventoryItem.value,
                     validator: (item) =>
-                        item == null ? 'Please select an item.' : null,
+                        item == null ? UIMessages.selectItemError : null,
                     onSaved: (item) => selectedInventoryItem.value = item,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: quantityController,
                     decoration: const InputDecoration(
-                      labelText: 'Quantity Received',
+                      labelText: UIStrings.quantityReceived,
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
@@ -100,13 +101,14 @@ class ReceivingInventoryPage extends HookConsumerWidget {
                         RegExp(r'^\d+\.?\d{0,2}'),
                       ),
                     ],
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) =>
+                        v!.isEmpty ? UIStrings.requiredField : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: priceController,
                     decoration: const InputDecoration(
-                      labelText: 'Total Cost',
+                      labelText: UIStrings.totalCost,
                       prefixText: '\$ ',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
@@ -117,13 +119,14 @@ class ReceivingInventoryPage extends HookConsumerWidget {
                         RegExp(r'^\d+\.?\d{0,2}'),
                       ),
                     ],
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) =>
+                        v!.isEmpty ? UIStrings.requiredField : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: notesController,
                     decoration: const InputDecoration(
-                      labelText: 'Notes (e.g., Invoice #)',
+                      labelText: UIStrings.notesHint,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -136,7 +139,7 @@ class ReceivingInventoryPage extends HookConsumerWidget {
                         ? const CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation(Colors.white),
                           )
-                        : const Text('Record Stock Entry'),
+                        : const Text(UIStrings.recordStockEntry),
                   ),
                 ],
               ),

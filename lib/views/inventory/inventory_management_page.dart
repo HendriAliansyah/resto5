@@ -8,6 +8,7 @@ import 'package:resto2/views/inventory/widgets/inventory_bottom_sheet.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
+import 'package:resto2/utils/constants.dart';
 
 class InventoryManagementPage extends ConsumerWidget {
   const InventoryManagementPage({super.key});
@@ -28,7 +29,7 @@ class InventoryManagementPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inventory & Stock')),
+      appBar: AppBar(title: const Text(UIStrings.inventoryAndStock)),
       drawer: const AppDrawer(),
       body: SafeArea(
         child: GestureDetector(
@@ -41,27 +42,25 @@ class InventoryManagementPage extends ConsumerWidget {
                 children: [
                   TextField(
                     decoration: const InputDecoration(
-                      labelText: 'Search by Name',
+                      labelText: UIStrings.searchByName,
                       prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(),
                     ),
-                    onChanged:
-                        (value) => ref
-                            .read(inventoryFilterProvider.notifier)
-                            .setSearchQuery(value),
+                    onChanged: (value) => ref
+                        .read(inventoryFilterProvider.notifier)
+                        .setSearchQuery(value),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      const Text('Sort by Name:'),
+                      const Text(UIStrings.sortByName),
                       const SizedBox(width: 8),
                       SortOrderToggle(
                         currentOrder: filterState.sortOrder,
-                        onOrderChanged:
-                            (order) => ref
-                                .read(inventoryFilterProvider.notifier)
-                                .setSortOrder(order),
+                        onOrderChanged: (order) => ref
+                            .read(inventoryFilterProvider.notifier)
+                            .setSortOrder(order),
                       ),
                     ],
                   ),
@@ -72,7 +71,7 @@ class InventoryManagementPage extends ConsumerWidget {
                   data: (_) {
                     if (sortedInventory.isEmpty) {
                       return const Center(
-                        child: Text('No inventory items found.'),
+                        child: Text(UIStrings.noInventoryItems),
                       );
                     }
                     return ListView.builder(
@@ -92,18 +91,17 @@ class InventoryManagementPage extends ConsumerWidget {
                               height: 56,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child:
-                                    item.imageUrl != null
-                                        ? Image.network(
-                                          item.imageUrl!,
-                                          fit: BoxFit.cover,
-                                        )
-                                        : Container(
-                                          color: Colors.grey.shade300,
-                                          child: const Icon(
-                                            Icons.inventory_2_outlined,
-                                          ),
+                                child: item.imageUrl != null
+                                    ? Image.network(
+                                        item.imageUrl!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        color: Colors.grey.shade300,
+                                        child: const Icon(
+                                          Icons.inventory_2_outlined,
                                         ),
+                                      ),
                               ),
                             ),
                             title: Text(
@@ -113,10 +111,16 @@ class InventoryManagementPage extends ConsumerWidget {
                               ),
                             ),
                             subtitle: Text(
-                              'Stock: ${item.quantityInStock.toStringAsFixed(2)}',
+                              UIStrings.stockLabel.replaceFirst(
+                                '{value}',
+                                item.quantityInStock.toStringAsFixed(2),
+                              ),
                             ),
                             trailing: Text(
-                              'Avg Cost: \$${item.averageCost.toStringAsFixed(2)}',
+                              UIStrings.avgCostLabel.replaceFirst(
+                                '{value}',
+                                item.averageCost.toStringAsFixed(2),
+                              ),
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -127,8 +131,8 @@ class InventoryManagementPage extends ConsumerWidget {
                       },
                     );
                   },
-                  loading:
-                      () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Center(child: Text(e.toString())),
                 ),
               ),

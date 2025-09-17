@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/models/payment_model.dart';
 import 'package:resto2/providers/payment_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
+import 'package:resto2/utils/constants.dart';
 
 class PaymentPage extends HookConsumerWidget {
   final OrderModel order;
@@ -40,13 +40,13 @@ class PaymentPage extends HookConsumerWidget {
 
     ref.listen<PaymentState>(paymentControllerProvider, (prev, next) {
       if (next.status == PaymentStatus.success) {
-        showSnackBar(context, 'Payment successful!');
+        showSnackBar(context, UIMessages.paymentSuccessful);
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
       if (next.status == PaymentStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -57,11 +57,7 @@ class PaymentPage extends HookConsumerWidget {
 
       if (selectedPaymentMethod.value == PaymentMethod.cash &&
           amountTendered.value < finalTotal) {
-        showSnackBar(
-          context,
-          'Cash tendered is less than the total amount due.',
-          isError: true,
-        );
+        showSnackBar(context, UIMessages.cashTenderedIsLess, isError: true);
         return;
       }
 
@@ -78,7 +74,11 @@ class PaymentPage extends HookConsumerWidget {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: AppBar(title: Text('Payment for ${order.tableName}')),
+        appBar: AppBar(
+          title: Text(
+            UIStrings.paymentFor.replaceFirst('{tableName}', order.tableName),
+          ),
+        ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -93,7 +93,7 @@ class PaymentPage extends HookConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Order Summary',
+                        UIStrings.orderSummary,
                         style: theme.textTheme.headlineSmall,
                       ),
                       const Divider(height: 24),
@@ -107,7 +107,11 @@ class PaymentPage extends HookConsumerWidget {
                         ),
                       ),
                       const Divider(height: 24),
-                      _buildChargeRow('Subtotal', order.subtotal, theme),
+                      _buildChargeRow(
+                        UIStrings.subtotal,
+                        order.subtotal,
+                        theme,
+                      ),
                       // Display the detailed charge breakdown
                       ...order.appliedCharges.map(
                         (charge) =>
@@ -115,7 +119,7 @@ class PaymentPage extends HookConsumerWidget {
                       ),
                       const Divider(height: 16),
                       _buildChargeRow(
-                        'Grand Total',
+                        UIStrings.grandTotal,
                         order.grandTotal,
                         theme,
                         isTotal: true,
@@ -127,23 +131,23 @@ class PaymentPage extends HookConsumerWidget {
               const SizedBox(height: 24),
 
               // Payment Method
-              Text('Payment Method', style: theme.textTheme.titleLarge),
+              Text(UIStrings.paymentMethod, style: theme.textTheme.titleLarge),
               const SizedBox(height: 16),
               SegmentedButton<PaymentMethod>(
                 segments: const [
                   ButtonSegment(
                     value: PaymentMethod.cash,
-                    label: Text('Cash'),
+                    label: Text(UIStrings.cash),
                     icon: Icon(Icons.money_outlined),
                   ),
                   ButtonSegment(
                     value: PaymentMethod.card,
-                    label: Text('Card'),
+                    label: Text(UIStrings.card),
                     icon: Icon(Icons.credit_card_outlined),
                   ),
                   ButtonSegment(
                     value: PaymentMethod.other,
-                    label: Text('Other'),
+                    label: Text(UIStrings.other),
                     icon: Icon(Icons.wallet_outlined),
                   ),
                 ],
@@ -158,7 +162,7 @@ class PaymentPage extends HookConsumerWidget {
               TextFormField(
                 controller: tipController,
                 decoration: const InputDecoration(
-                  labelText: 'Add Tip (Optional)',
+                  labelText: UIStrings.addTip,
                   prefixText: '\$',
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
@@ -173,14 +177,19 @@ class PaymentPage extends HookConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              _buildChargeRow('Final Total', finalTotal, theme, isTotal: true),
+              _buildChargeRow(
+                UIStrings.finalTotal,
+                finalTotal,
+                theme,
+                isTotal: true,
+              ),
               const Divider(height: 24),
 
               if (selectedPaymentMethod.value == PaymentMethod.cash) ...[
                 TextFormField(
                   controller: amountTenderedController,
                   decoration: const InputDecoration(
-                    labelText: 'Amount Tendered',
+                    labelText: UIStrings.amountTendered,
                     prefixText: '\$',
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
@@ -197,7 +206,7 @@ class PaymentPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 _buildChargeRow(
-                  'Change Due',
+                  UIStrings.changeDue,
                   changeDue < 0 ? 0.0 : changeDue,
                   theme,
                   isChange: true,
@@ -212,7 +221,7 @@ class PaymentPage extends HookConsumerWidget {
             onPressed: isLoading ? null : finalize,
             child: isLoading
                 ? const LoadingIndicator()
-                : const Text('Finalize Payment'),
+                : const Text(UIStrings.finalizePayment),
           ),
         ),
       ),

@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/inventory_item_model.dart';
 import 'package:resto2/providers/inventory_provider.dart';
+import 'package:resto2/utils/constants.dart';
 
 class InventoryItemSelector extends FormField<InventoryItem> {
   InventoryItemSelector({
@@ -11,7 +12,7 @@ class InventoryItemSelector extends FormField<InventoryItem> {
     required FormFieldSetter<InventoryItem> super.onSaved,
     required FormFieldValidator<InventoryItem> super.validator,
     super.initialValue,
-    ValueChanged<InventoryItem?>? onChanged, // Added this line
+    ValueChanged<InventoryItem?>? onChanged,
   }) : super(
          builder: (FormFieldState<InventoryItem> state) {
            final context = state.context;
@@ -21,24 +22,23 @@ class InventoryItemSelector extends FormField<InventoryItem> {
                context: context,
                isScrollControlled: true,
                useSafeArea: true,
-               builder:
-                   (_) => DraggableScrollableSheet(
-                     expand: false,
-                     initialChildSize: 0.9,
-                     maxChildSize: 1.0,
-                     builder: (context, scrollController) {
-                       return _InventoryItemSelectionSheet(
-                         scrollController: scrollController,
-                         onItemSelected: (item) {
-                           state.didChange(item);
-                           if (onChanged != null) {
-                             onChanged(item); // Added this line
-                           }
-                           Navigator.pop(context);
-                         },
-                       );
+               builder: (_) => DraggableScrollableSheet(
+                 expand: false,
+                 initialChildSize: 0.9,
+                 maxChildSize: 1.0,
+                 builder: (context, scrollController) {
+                   return _InventoryItemSelectionSheet(
+                     scrollController: scrollController,
+                     onItemSelected: (item) {
+                       state.didChange(item);
+                       if (onChanged != null) {
+                         onChanged(item);
+                       }
+                       Navigator.pop(context);
                      },
-                   ),
+                   );
+                 },
+               ),
              );
            }
 
@@ -46,19 +46,18 @@ class InventoryItemSelector extends FormField<InventoryItem> {
              onTap: showItemSelectionSheet,
              child: InputDecorator(
                decoration: InputDecoration(
-                 labelText: 'Inventory Item',
+                 labelText: UIStrings.inventoryItem,
                  border: const OutlineInputBorder(),
                  errorText: state.errorText,
                  suffixIcon: const Icon(Icons.arrow_drop_down),
                ),
                child: Text(
-                 state.value?.name ?? 'Select an item',
-                 style:
-                     state.value == null
-                         ? Theme.of(context).textTheme.bodyLarge?.copyWith(
-                           color: Theme.of(context).hintColor,
-                         )
-                         : Theme.of(context).textTheme.bodyLarge,
+                 state.value?.name ?? UIStrings.selectAnItemPrompt,
+                 style: state.value == null
+                     ? Theme.of(context).textTheme.bodyLarge?.copyWith(
+                         color: Theme.of(context).hintColor,
+                       )
+                     : Theme.of(context).textTheme.bodyLarge,
                ),
              ),
            );
@@ -79,14 +78,12 @@ class _InventoryItemSelectionSheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = useState('');
     final allItems = ref.watch(inventoryStreamProvider).asData?.value ?? [];
-    final filteredItems =
-        allItems
-            .where(
-              (item) => item.name.toLowerCase().contains(
-                searchQuery.value.toLowerCase(),
-              ),
-            )
-            .toList();
+    final filteredItems = allItems
+        .where(
+          (item) =>
+              item.name.toLowerCase().contains(searchQuery.value.toLowerCase()),
+        )
+        .toList();
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -102,13 +99,13 @@ class _InventoryItemSelectionSheet extends HookConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Select Inventory Item',
+            UIStrings.selectInventoryItem,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
           TextField(
             decoration: const InputDecoration(
-              labelText: 'Search',
+              labelText: UIStrings.search,
               prefixIcon: Icon(Icons.search),
               border: OutlineInputBorder(),
             ),
@@ -123,7 +120,12 @@ class _InventoryItemSelectionSheet extends HookConsumerWidget {
                 final item = filteredItems[index];
                 return ListTile(
                   title: Text(item.name),
-                  subtitle: Text('Current Stock: ${item.quantityInStock}'),
+                  subtitle: Text(
+                    UIStrings.currentStock.replaceFirst(
+                      '{value}',
+                      item.quantityInStock.toString(),
+                    ),
+                  ),
                   onTap: () => onItemSelected(item),
                 );
               },

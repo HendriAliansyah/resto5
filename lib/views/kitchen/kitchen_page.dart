@@ -2,13 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:resto2/models/aggregated_kitchen_item_model.dart';
 import 'package:resto2/models/kitchen_order_model.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/providers/kitchen_provider.dart';
 import 'package:resto2/views/kitchen/widgets/order_ticket.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
+import 'package:resto2/utils/constants.dart';
 
 // Enum to manage the view state
 enum KitchenView { orders, summary }
@@ -24,7 +24,7 @@ class KitchenPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kitchen Display System'),
+        title: const Text(UIStrings.kitchenDisplaySystem),
         actions: [
           // Toggle button to switch views
           Padding(
@@ -33,12 +33,12 @@ class KitchenPage extends HookConsumerWidget {
               segments: const [
                 ButtonSegment(
                   value: KitchenView.orders,
-                  label: Text('Orders'),
+                  label: Text(UIStrings.orders),
                   icon: Icon(Icons.receipt_long_outlined),
                 ),
                 ButtonSegment(
                   value: KitchenView.summary,
-                  label: Text('Summary'),
+                  label: Text(UIStrings.summary),
                   icon: Icon(Icons.view_list_outlined),
                 ),
               ],
@@ -100,21 +100,21 @@ class KitchenPage extends HookConsumerWidget {
                   children: [
                     Expanded(
                       child: _OrderColumn(
-                        title: 'New',
+                        title: UIStrings.newOrders,
                         orders: newOrders,
                         showTitle: true,
                       ),
                     ),
                     Expanded(
                       child: _OrderColumn(
-                        title: 'Preparing',
+                        title: UIStrings.preparing,
                         orders: preparingOrders,
                         showTitle: true,
                       ),
                     ),
                     Expanded(
                       child: _OrderColumn(
-                        title: 'Ready',
+                        title: UIStrings.ready,
                         orders: readyOrders,
                         showTitle: true,
                       ),
@@ -128,20 +128,34 @@ class KitchenPage extends HookConsumerWidget {
                     children: [
                       TabBar(
                         tabs: [
-                          Tab(text: 'New (${newOrders.length})'),
-                          Tab(text: 'Preparing (${preparingOrders.length})'),
-                          Tab(text: 'Ready (${readyOrders.length})'),
+                          Tab(
+                            text:
+                                '${UIStrings.newOrders} (${newOrders.length})',
+                          ),
+                          Tab(
+                            text:
+                                '${UIStrings.preparing} (${preparingOrders.length})',
+                          ),
+                          Tab(
+                            text: '${UIStrings.ready} (${readyOrders.length})',
+                          ),
                         ],
                       ),
                       Expanded(
                         child: TabBarView(
                           children: [
-                            _OrderColumn(title: 'New', orders: newOrders),
                             _OrderColumn(
-                              title: 'Preparing',
+                              title: UIStrings.newOrders,
+                              orders: newOrders,
+                            ),
+                            _OrderColumn(
+                              title: UIStrings.preparing,
                               orders: preparingOrders,
                             ),
-                            _OrderColumn(title: 'Ready', orders: readyOrders),
+                            _OrderColumn(
+                              title: UIStrings.ready,
+                              orders: readyOrders,
+                            ),
                           ],
                         ),
                       ),
@@ -176,11 +190,8 @@ class _AggregatedView extends ConsumerWidget {
           children: [
             Icon(Icons.check_circle_outline, color: Colors.grey, size: 60),
             SizedBox(height: 16),
-            Text('All Caught Up!', style: TextStyle(fontSize: 20)),
-            Text(
-              'No new items to prepare.',
-              style: TextStyle(color: Colors.grey),
-            ),
+            Text(UIStrings.allCaughtUp, style: TextStyle(fontSize: 20)),
+            Text(UIStrings.noNewItems, style: TextStyle(color: Colors.grey)),
           ],
         ),
       );
@@ -222,7 +233,7 @@ class _AggregatedView extends ConsumerWidget {
                   ),
                   onPressed: () =>
                       controller.startPreparingAggregatedItems(item),
-                  child: const Text('Start Preparing'),
+                  child: const Text(UIStrings.startPreparing),
                 ),
               ],
             ),
@@ -249,7 +260,7 @@ class _OrderColumn extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+        color: Theme.of(context).colorScheme.surface.withAlpha(128),
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Column(
@@ -265,7 +276,7 @@ class _OrderColumn extends StatelessWidget {
           if (showTitle) const Divider(height: 1),
           Expanded(
             child: orders.isEmpty
-                ? const Center(child: Text('No orders in this stage.'))
+                ? const Center(child: Text(UIStrings.noOrdersInStage))
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 4.0,

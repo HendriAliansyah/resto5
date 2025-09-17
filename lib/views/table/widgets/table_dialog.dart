@@ -8,6 +8,7 @@ import 'package:resto2/models/table_model.dart';
 import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/providers/table_provider.dart';
 import 'package:resto2/providers/table_type_provider.dart';
+import 'package:resto2/utils/constants.dart';
 
 class TableDialog extends HookConsumerWidget {
   final TableModel? table;
@@ -60,7 +61,7 @@ class TableDialog extends HookConsumerWidget {
         FocusScope.of(context).unfocus();
       },
       child: AlertDialog(
-        title: Text(isEditing ? 'Edit Table' : 'Add Table'),
+        title: Text(isEditing ? UIStrings.editTable : UIStrings.addTable),
         content: Form(
           key: formKey,
           child: Column(
@@ -68,18 +69,22 @@ class TableDialog extends HookConsumerWidget {
             children: [
               TextFormField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'Table Name'),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                decoration: const InputDecoration(
+                  labelText: UIStrings.tableName,
+                ),
+                validator: (v) => v!.isEmpty ? UIStrings.requiredField : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: capacityController,
-                decoration: const InputDecoration(labelText: 'Capacity'),
+                decoration: const InputDecoration(
+                  labelText: UIStrings.capacityLabel,
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (v) {
-                  if (v!.isEmpty) return 'Required';
-                  if (int.tryParse(v) == null) return 'Invalid number';
+                  if (v!.isEmpty) return UIStrings.requiredField;
+                  if (int.tryParse(v) == null) return UIMessages.invalidNumber;
                   return null;
                 },
               ),
@@ -94,7 +99,7 @@ class TableDialog extends HookConsumerWidget {
                     .toList(),
                 onChanged: (v) => selectedTableTypeId.value = v,
                 decoration: const InputDecoration(
-                  labelText: 'Table Type',
+                  labelText: UIStrings.tableType,
                   contentPadding: EdgeInsets.zero,
                   border: OutlineInputBorder(),
                 ),
@@ -102,7 +107,7 @@ class TableDialog extends HookConsumerWidget {
                   height: 50,
                   padding: EdgeInsets.only(right: 10),
                 ),
-                validator: (v) => v == null ? 'Required' : null,
+                validator: (v) => v == null ? UIStrings.requiredField : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField2<String?>(
@@ -110,7 +115,7 @@ class TableDialog extends HookConsumerWidget {
                 items: [
                   const DropdownMenuItem(
                     value: null,
-                    child: Text('All Order Types'),
+                    child: Text(UIStrings.allOrderTypes),
                   ),
                   ...orderTypes.map(
                     (ot) =>
@@ -119,7 +124,7 @@ class TableDialog extends HookConsumerWidget {
                 ],
                 onChanged: (v) => selectedOrderTypeId.value = v,
                 decoration: const InputDecoration(
-                  labelText: 'Order Type',
+                  labelText: UIStrings.orderType,
                   contentPadding: EdgeInsets.zero,
                   border: OutlineInputBorder(),
                 ),
@@ -134,9 +139,9 @@ class TableDialog extends HookConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text(UIStrings.cancel),
           ),
-          ElevatedButton(onPressed: submit, child: const Text('Save')),
+          ElevatedButton(onPressed: submit, child: const Text(UIStrings.save)),
         ],
       ),
     );

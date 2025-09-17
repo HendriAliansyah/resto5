@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/order_type_model.dart';
 import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
+import 'package:resto2/utils/constants.dart';
 
 class OrderTypeDialog extends HookConsumerWidget {
   final OrderType? orderType;
@@ -25,12 +26,12 @@ class OrderTypeDialog extends HookConsumerWidget {
     ref.listen<OrderTypeState>(orderTypeControllerProvider, (prev, next) {
       if (next.status == OrderTypeActionStatus.success) {
         if (context.mounted) Navigator.of(context).pop();
-        showSnackBar(context, 'Order Type saved successfully!');
+        showSnackBar(context, UIMessages.orderTypeSaved);
       }
       if (next.status == OrderTypeActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -60,11 +61,11 @@ class OrderTypeDialog extends HookConsumerWidget {
         FocusScope.of(context).unfocus();
       },
       child: AlertDialog(
-        title: Text(isEditing ? 'Edit Order Type' : 'Add Order Type'),
-        // THE FIX IS HERE: Constrain the width of the dialog's content.
+        title: Text(
+          isEditing ? UIStrings.editOrderType : UIStrings.addOrderType,
+        ),
         content: SizedBox(
-          width:
-              MediaQuery.of(context).size.width * 0.8, // Set a consistent width
+          width: MediaQuery.of(context).size.width * 0.8,
           child: Form(
             key: formKey,
             child: Column(
@@ -74,15 +75,15 @@ class OrderTypeDialog extends HookConsumerWidget {
                 TextFormField(
                   controller: nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Order Type Name',
-                    hintText: 'e.g., Dine-In, Takeaway',
+                    labelText: UIStrings.orderTypeName,
+                    hintText: UIStrings.orderTypeNameHint,
                   ),
-                  validator:
-                      (v) => v!.trim().isEmpty ? 'Please enter a name' : null,
+                  validator: (v) =>
+                      v!.trim().isEmpty ? UIMessages.enterNameError : null,
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Accessibility',
+                  UIStrings.accessibility,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 8),
@@ -90,11 +91,11 @@ class OrderTypeDialog extends HookConsumerWidget {
                   segments: const [
                     ButtonSegment(
                       value: OrderTypeAccessibility.all,
-                      label: Text('All Users'),
+                      label: Text(UIStrings.allUsers),
                     ),
                     ButtonSegment(
                       value: OrderTypeAccessibility.staff,
-                      label: Text('Staff Only'),
+                      label: Text(UIStrings.staffOnly),
                     ),
                   ],
                   selected: {accessibility.value},
@@ -109,18 +110,17 @@ class OrderTypeDialog extends HookConsumerWidget {
         actions: [
           TextButton(
             onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text(UIStrings.cancel),
           ),
           ElevatedButton(
             onPressed: isLoading ? null : submit,
-            child:
-                isLoading
-                    ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : const Text('Save'),
+            child: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text(UIStrings.save),
           ),
         ],
       ),

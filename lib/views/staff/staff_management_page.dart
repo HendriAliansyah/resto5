@@ -67,7 +67,7 @@ class CurrentStaffView extends HookConsumerWidget {
                 TextFormField(
                   focusNode: searchFocusNode,
                   decoration: const InputDecoration(
-                    labelText: 'Search by Name or Email',
+                    labelText: UIStrings.searchByNameOrEmail,
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(),
                   ),
@@ -81,7 +81,7 @@ class CurrentStaffView extends HookConsumerWidget {
                 DropdownButtonFormField2<UserRole?>(
                   value: filterState.role,
                   decoration: const InputDecoration(
-                    labelText: 'Filter by Role',
+                    labelText: UIStrings.filterByRole,
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -97,7 +97,7 @@ class CurrentStaffView extends HookConsumerWidget {
                   items: [
                     const DropdownMenuItem(
                       value: null,
-                      child: Text('All Roles'),
+                      child: Text(UIStrings.allRoles),
                     ),
                     ...UserRole.values.map(
                       (role) =>
@@ -116,7 +116,7 @@ class CurrentStaffView extends HookConsumerWidget {
                       child: DropdownButtonFormField2<StaffSortOption>(
                         value: filterState.sortOption,
                         decoration: const InputDecoration(
-                          labelText: 'Sort by',
+                          labelText: UIStrings.sortBy,
                           border: OutlineInputBorder(),
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -132,11 +132,11 @@ class CurrentStaffView extends HookConsumerWidget {
                         items: const [
                           DropdownMenuItem(
                             value: StaffSortOption.byRole,
-                            child: Text('Role'),
+                            child: Text(UIStrings.role),
                           ),
                           DropdownMenuItem(
                             value: StaffSortOption.byName,
-                            child: Text('Name'),
+                            child: Text(UIStrings.name),
                           ),
                         ],
                         onChanged: (value) {
@@ -162,37 +162,35 @@ class CurrentStaffView extends HookConsumerWidget {
               ],
             ),
             Expanded(
-              child:
-                  sortedStaffList.isEmpty
-                      ? const Center(child: Text('No staff members found.'))
-                      : ListView.builder(
-                        itemCount: sortedStaffList.length,
-                        itemBuilder: (context, index) {
-                          final staff = sortedStaffList[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4,
+              child: sortedStaffList.isEmpty
+                  ? const Center(child: Text(UIStrings.noStaffMembersFound))
+                  : ListView.builder(
+                      itemCount: sortedStaffList.length,
+                      itemBuilder: (context, index) {
+                        final staff = sortedStaffList[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
+                          ),
+                          child: ListTile(
+                            title: Text(staff.displayName),
+                            subtitle: Text(
+                              '${staff.role.name} - ${staff.email}',
                             ),
-                            child: ListTile(
-                              title: Text(staff.displayName),
-                              subtitle: Text(
-                                '${staff.role.name} - ${staff.email}',
-                              ),
-                              trailing: Icon(
-                                staff.isDisabled
-                                    ? Icons.lock_person_outlined
-                                    : Icons.chevron_right,
-                                color:
-                                    staff.isDisabled ? Colors.redAccent : null,
-                              ),
-                              onTap: () {
-                                context.push(AppRoutes.editStaff, extra: staff);
-                              },
+                            trailing: Icon(
+                              staff.isDisabled
+                                  ? Icons.lock_person_outlined
+                                  : Icons.chevron_right,
+                              color: staff.isDisabled ? Colors.redAccent : null,
                             ),
-                          );
-                        },
-                      ),
+                            onTap: () {
+                              context.push(AppRoutes.editStaff, extra: staff);
+                            },
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         );
@@ -210,8 +208,11 @@ class JoinRequestsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final joinRequestsAsync = ref.watch(joinRequestsStreamProvider);
     final staffController = ref.read(staffControllerProvider);
-    final restaurantId =
-        ref.watch(currentUserProvider).asData?.value?.restaurantId;
+    final restaurantId = ref
+        .watch(currentUserProvider)
+        .asData
+        ?.value
+        ?.restaurantId;
 
     void onAccept(JoinRequestModel request) async {
       if (restaurantId == null) return;
@@ -223,13 +224,10 @@ class JoinRequestsView extends ConsumerWidget {
             title: const Text(UIStrings.assignRole),
             content: DropdownButtonFormField<UserRole>(
               initialValue: role,
-              items:
-                  UserRole.values
-                      .where((r) => r != UserRole.owner) // Cannot assign owner
-                      .map(
-                        (r) => DropdownMenuItem(value: r, child: Text(r.name)),
-                      )
-                      .toList(),
+              items: UserRole.values
+                  .where((r) => r != UserRole.owner)
+                  .map((r) => DropdownMenuItem(value: r, child: Text(r.name)))
+                  .toList(),
               onChanged: (value) {
                 if (value != null) role = value;
               },
@@ -258,7 +256,10 @@ class JoinRequestsView extends ConsumerWidget {
           if (context.mounted) {
             showSnackBar(
               context,
-              '${request.userDisplayName} has been added to your staff.',
+              UIMessages.staffMemberAdded.replaceFirst(
+                '{name}',
+                request.userDisplayName,
+              ),
             );
           }
         } catch (e) {
@@ -279,7 +280,10 @@ class JoinRequestsView extends ConsumerWidget {
         if (context.mounted) {
           showSnackBar(
             context,
-            'Request from ${request.userDisplayName} has been rejected.',
+            UIMessages.requestRejected.replaceFirst(
+              '{name}',
+              request.userDisplayName,
+            ),
           );
         }
       } catch (e) {
@@ -346,9 +350,8 @@ class JoinRequestsView extends ConsumerWidget {
         );
       },
       loading: () => const LoadingIndicator(),
-      error:
-          (e, st) =>
-              Center(child: Text('Error loading requests: ${e.toString()}')),
+      error: (e, st) =>
+          Center(child: Text('Error loading requests: ${e.toString()}')),
     );
   }
 }

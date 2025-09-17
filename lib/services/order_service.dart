@@ -31,7 +31,6 @@ class OrderService {
     required String userDisplayName,
   }) async {
     final batch = _db.batch();
-    final List<StockMovementModel> movementsToLog = [];
 
     // Group sources by orderId to read each order only once
     final Map<String, List<String>> orderIdToItemIds = {};

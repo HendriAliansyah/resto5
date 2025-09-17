@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:resto2/models/inventory_item_model.dart';
 import 'package:resto2/providers/inventory_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
+import 'package:resto2/utils/constants.dart';
 
 class InventoryBottomSheet extends HookConsumerWidget {
   final InventoryItem? item;
@@ -29,12 +30,12 @@ class InventoryBottomSheet extends HookConsumerWidget {
     ref.listen<InventoryState>(inventoryControllerProvider, (prev, next) {
       if (next.status == InventoryActionStatus.success) {
         if (context.mounted) Navigator.of(context).pop();
-        showSnackBar(context, 'Inventory item saved!');
+        showSnackBar(context, UIMessages.inventoryItemSaved);
       }
       if (next.status == InventoryActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -86,7 +87,7 @@ class InventoryBottomSheet extends HookConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                isEditing ? 'Edit Item' : 'Add New Item',
+                isEditing ? UIStrings.editItem : UIStrings.addItem,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
@@ -110,31 +111,30 @@ class InventoryBottomSheet extends HookConsumerWidget {
                               border: Border.all(
                                 color: Theme.of(context).dividerColor,
                               ),
-                              image:
-                                  localImageFile.value != null
-                                      ? DecorationImage(
-                                        image: FileImage(localImageFile.value!),
-                                        fit: BoxFit.fill,
-                                      )
-                                      : (item?.imageUrl != null
-                                          ? DecorationImage(
+                              image: localImageFile.value != null
+                                  ? DecorationImage(
+                                      image: FileImage(localImageFile.value!),
+                                      fit: BoxFit.fill,
+                                    )
+                                  : (item?.imageUrl != null
+                                        ? DecorationImage(
                                             image: NetworkImage(
                                               item!.imageUrl!,
                                             ),
                                             fit: BoxFit.fill,
                                           )
-                                          : null),
+                                        : null),
                             ),
                             child:
                                 localImageFile.value == null &&
-                                        item?.imageUrl == null
-                                    ? const Center(
-                                      child: Icon(
-                                        Icons.add_a_photo_outlined,
-                                        size: 48,
-                                      ),
-                                    )
-                                    : null,
+                                    item?.imageUrl == null
+                                ? const Center(
+                                    child: Icon(
+                                      Icons.add_a_photo_outlined,
+                                      size: 48,
+                                    ),
+                                  )
+                                : null,
                           ),
                         ),
                       ),
@@ -142,18 +142,21 @@ class InventoryBottomSheet extends HookConsumerWidget {
                       TextFormField(
                         controller: nameController,
                         decoration: const InputDecoration(
-                          labelText: 'Item Name',
+                          labelText: UIStrings.itemName,
                         ),
-                        validator: (v) => v!.trim().isEmpty ? 'Required' : null,
+                        validator: (v) =>
+                            v!.trim().isEmpty ? UIMessages.enterItemName : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: descriptionController,
                         decoration: const InputDecoration(
-                          labelText: 'Description (e.g., from Supplier X)',
+                          labelText: UIStrings.itemDescriptionHint,
                         ),
                         maxLines: 2,
-                        validator: (v) => v!.trim().isEmpty ? 'Required' : null,
+                        validator: (v) => v!.trim().isEmpty
+                            ? UIMessages.enterDescription
+                            : null,
                       ),
                     ],
                   ),
@@ -168,10 +171,9 @@ class InventoryBottomSheet extends HookConsumerWidget {
                   minimumSize: const Size(double.infinity, 48),
                 ),
                 onPressed: isLoading ? null : submit,
-                child:
-                    isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('Save'),
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text(UIStrings.save),
               ),
             ),
           ],

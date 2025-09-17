@@ -5,6 +5,7 @@ import 'package:resto2/models/charge_tax_rule_model.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/models/order_type_model.dart';
 import 'package:resto2/providers/charge_tax_rule_provider.dart';
+import 'package:resto2/utils/constants.dart';
 
 class OrderConfirmationDialog extends ConsumerWidget {
   final List<OrderItemModel> items;
@@ -45,7 +46,12 @@ class OrderConfirmationDialog extends ConsumerWidget {
       if (_isRuleApplicable(rule, subtotal, orderType.id)) {
         final amount = _calculateRuleAmount(rule, subtotal);
         totalServiceCharge += amount;
-        chargeWidgets.add(_buildChargeRow('Service: ${rule.name}', amount));
+        chargeWidgets.add(
+          _buildChargeRow(
+            '${UIStrings.serviceChargePrefix}${rule.name}',
+            amount,
+          ),
+        );
       }
     }
 
@@ -53,17 +59,18 @@ class OrderConfirmationDialog extends ConsumerWidget {
     final taxRules = rules.where((r) => r.ruleType == RuleType.tax).toList();
     for (var rule in taxRules) {
       if (_isRuleApplicable(rule, subtotal, orderType.id)) {
-        // THE FIX IS HERE: The base amount for tax is now correctly the subtotal.
         final baseAmountForTax = subtotal;
         final amount = _calculateRuleAmount(rule, baseAmountForTax);
         totalGeneralTax += amount;
-        chargeWidgets.add(_buildChargeRow('Tax: ${rule.name}', amount));
+        chargeWidgets.add(
+          _buildChargeRow('${UIStrings.taxPrefix}${rule.name}', amount),
+        );
       }
     }
 
     if (itemSpecificTaxes > 0) {
       chargeWidgets.add(
-        _buildChargeRow('Item-Specific Taxes', itemSpecificTaxes),
+        _buildChargeRow(UIStrings.itemSpecificTaxes, itemSpecificTaxes),
       );
     }
 
@@ -75,7 +82,7 @@ class OrderConfirmationDialog extends ConsumerWidget {
         children: [
           Icon(Icons.receipt_long_outlined, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
-          const Text('Confirm Order'),
+          const Text(UIStrings.confirmOrder),
         ],
       ),
       content: SizedBox(
@@ -86,7 +93,7 @@ class OrderConfirmationDialog extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (orderNote != null && orderNote!.isNotEmpty) ...[
-                Text('Order Note:', style: theme.textTheme.titleSmall),
+                Text(UIStrings.orderNote, style: theme.textTheme.titleSmall),
                 Text(orderNote!),
                 const Divider(height: 24),
               ],
@@ -112,7 +119,7 @@ class OrderConfirmationDialog extends ConsumerWidget {
                               Padding(
                                 padding: const EdgeInsets.only(top: 4.0),
                                 child: Text(
-                                  'Note: ${item.note}',
+                                  '${UIStrings.orderNotePrefix}${item.note}',
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     fontStyle: FontStyle.italic,
                                   ),
@@ -133,11 +140,11 @@ class OrderConfirmationDialog extends ConsumerWidget {
                 );
               }),
               const Divider(height: 24),
-              _buildChargeRow('Subtotal', subtotal),
+              _buildChargeRow(UIStrings.subtotal, subtotal),
               ...chargeWidgets,
               const Divider(height: 16),
               _buildChargeRow(
-                'Grand Total',
+                UIStrings.grandTotal,
                 grandTotal,
                 isBold: true,
                 isTotal: true,
@@ -162,12 +169,12 @@ class OrderConfirmationDialog extends ConsumerWidget {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Submit'),
+                  : const Text(UIStrings.submit),
             ),
             const SizedBox(height: 12),
             TextButton(
               onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: const Text(UIStrings.cancel),
             ),
           ],
         ),

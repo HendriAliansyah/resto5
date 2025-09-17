@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/table_type_model.dart';
 import 'package:resto2/providers/table_type_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
+import 'package:resto2/utils/constants.dart';
 
 class TableTypeDialog extends HookConsumerWidget {
   final TableType? tableType;
@@ -22,12 +23,12 @@ class TableTypeDialog extends HookConsumerWidget {
     ref.listen<TableTypeState>(tableTypeControllerProvider, (prev, next) {
       if (next.status == TableTypeActionStatus.success) {
         Navigator.of(context).pop(); // Pop the dialog itself
-        showSnackBar(context, 'Table Type saved successfully!');
+        showSnackBar(context, UIMessages.tableTypeSaved);
       }
       if (next.status == TableTypeActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -53,30 +54,32 @@ class TableTypeDialog extends HookConsumerWidget {
         FocusScope.of(context).unfocus();
       },
       child: AlertDialog(
-        title: Text(isEditing ? 'Edit Table Type' : 'Add Table Type'),
+        title: Text(
+          isEditing ? UIStrings.editTableType : UIStrings.addTableType,
+        ),
         content: Form(
           key: formKey,
           child: TextFormField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: 'Type Name'),
-            validator: (v) => v!.trim().isEmpty ? 'Please enter a name' : null,
+            decoration: const InputDecoration(labelText: UIStrings.typeName),
+            validator: (v) =>
+                v!.trim().isEmpty ? UIMessages.enterTableName : null,
           ),
         ),
         actions: [
           TextButton(
             onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: const Text(UIStrings.cancel),
           ),
           ElevatedButton(
             onPressed: isLoading ? null : submit,
-            child:
-                isLoading
-                    ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : const Text('Save'),
+            child: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text(UIStrings.save),
           ),
         ],
       ),

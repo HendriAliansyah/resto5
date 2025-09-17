@@ -3,7 +3,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/charge_tax_rule_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
 import 'package:resto2/providers/restaurant_provider.dart';
-import 'package:resto2/services/restaurant_service.dart';
 
 enum ChargeTaxRuleActionStatus { initial, loading, success, error }
 

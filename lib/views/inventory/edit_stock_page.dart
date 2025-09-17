@@ -8,7 +8,7 @@ import 'package:resto2/providers/inventory_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/purchase/widgets/inventory_item_selector.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
-import 'package:resto2/views/widgets/loading_indicator.dart';
+import 'package:resto2/utils/constants.dart';
 
 class EditStockPage extends HookConsumerWidget {
   const EditStockPage({super.key});
@@ -24,7 +24,7 @@ class EditStockPage extends HookConsumerWidget {
 
     ref.listen<InventoryState>(inventoryControllerProvider, (prev, next) {
       if (next.status == InventoryActionStatus.success) {
-        showSnackBar(context, 'Stock updated successfully!');
+        showSnackBar(context, UIMessages.stockUpdateSuccessful);
         selectedItem.value = null;
         newQuantityController.clear();
         reasonController.clear();
@@ -33,7 +33,7 @@ class EditStockPage extends HookConsumerWidget {
       if (next.status == InventoryActionStatus.error) {
         showSnackBar(
           context,
-          next.errorMessage ?? 'An error occurred',
+          next.errorMessage ?? UIMessages.errorOccurred,
           isError: true,
         );
       }
@@ -57,7 +57,7 @@ class EditStockPage extends HookConsumerWidget {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Manual Stock Adjustment')),
+        appBar: AppBar(title: const Text(UIStrings.manualStockAdjustment)),
         drawer: const AppDrawer(),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -77,7 +77,7 @@ class EditStockPage extends HookConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Adjust Item Stock',
+                          UIStrings.adjustItemStock,
                           style: Theme.of(context).textTheme.headlineSmall,
                           textAlign: TextAlign.center,
                         ),
@@ -87,9 +87,8 @@ class EditStockPage extends HookConsumerWidget {
                             selectedItem.value = item;
                             newQuantityController.clear();
                           },
-                          validator:
-                              (item) =>
-                                  item == null ? 'Please select an item' : null,
+                          validator: (item) =>
+                              item == null ? UIMessages.selectItemError : null,
                           onSaved: (item) => selectedItem.value = item,
                         ),
                         const SizedBox(height: 16),
@@ -99,7 +98,7 @@ class EditStockPage extends HookConsumerWidget {
                               Icons.inventory_2_outlined,
                               color: Theme.of(context).colorScheme.primary,
                             ),
-                            title: const Text('Current Quantity'),
+                            title: const Text(UIStrings.currentQuantity),
                             trailing: Text(
                               selectedItem.value!.quantityInStock
                                   .toStringAsFixed(2),
@@ -111,7 +110,7 @@ class EditStockPage extends HookConsumerWidget {
                         TextFormField(
                           controller: newQuantityController,
                           decoration: const InputDecoration(
-                            labelText: 'New Quantity',
+                            labelText: UIStrings.newQuantity,
                             prefixIcon: Icon(Icons.edit_note),
                           ),
                           keyboardType: const TextInputType.numberWithOptions(
@@ -124,10 +123,10 @@ class EditStockPage extends HookConsumerWidget {
                           ],
                           validator: (v) {
                             if (v == null || v.isEmpty) {
-                              return 'A new quantity is required';
+                              return UIMessages.newQuantityRequired;
                             }
                             if (double.tryParse(v) == null) {
-                              return 'Please enter a valid number';
+                              return UIMessages.invalidNumber;
                             }
                             return null;
                           },
@@ -136,32 +135,28 @@ class EditStockPage extends HookConsumerWidget {
                         TextFormField(
                           controller: reasonController,
                           decoration: const InputDecoration(
-                            labelText: 'Reason for Change',
-                            hintText:
-                                'e.g., Stock count correction, damaged goods',
+                            labelText: UIStrings.reasonForChange,
+                            hintText: UIStrings.reasonHint,
                             prefixIcon: Icon(Icons.comment_outlined),
                           ),
                           maxLines: 3,
-                          validator:
-                              (v) =>
-                                  v!.trim().isEmpty
-                                      ? 'A reason is required'
-                                      : null,
+                          validator: (v) => v!.trim().isEmpty
+                              ? UIMessages.reasonRequired
+                              : null,
                         ),
                         const SizedBox(height: 32),
                         ElevatedButton(
                           onPressed: isLoading ? null : submit,
-                          child:
-                              isLoading
-                                  ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 3,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                  : const Text('Confirm Adjustment'),
+                          child: isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(UIStrings.confirmAdjustment),
                         ),
                       ],
                     ),

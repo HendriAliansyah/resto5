@@ -4,8 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/models/payment_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
-import 'package:resto2/providers/order_provider.dart';
-import 'package:resto2/providers/table_provider.dart';
 import 'package:resto2/services/payment_service.dart';
 import 'package:uuid/uuid.dart';
 

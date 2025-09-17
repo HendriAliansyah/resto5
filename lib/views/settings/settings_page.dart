@@ -27,15 +27,12 @@ class SettingsPage extends HookConsumerWidget {
         previewNotifier.state = savedThemeMode;
       });
 
-      // THE DEFINITIVE FIX:
-      // When the widget is disposed, schedule the state reset for the next microtask.
-      // This ensures the widget tree is no longer building/disposing when the state is modified.
       return () {
         Future.microtask(() {
           previewNotifier.state = null;
         });
       };
-    }, []); // Empty array ensures this runs only on mount and dispose.
+    }, []);
 
     void handleSaveChanges() async {
       if (previewThemeMode == null) return;
@@ -47,7 +44,7 @@ class SettingsPage extends HookConsumerWidget {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               const SnackBar(
-                content: Text('Theme preference saved!'),
+                content: Text(UIMessages.themePreferenceSaved),
                 behavior: SnackBarBehavior.floating,
                 duration: Duration(seconds: 2),
               ),
@@ -61,15 +58,18 @@ class SettingsPage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: const Text(UIStrings.settings)),
       drawer: const AppDrawer(),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          Text('Appearance', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            UIStrings.appearance,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           Text(
-            'Choose how the app looks.',
+            UIStrings.chooseAppearance,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
@@ -77,17 +77,17 @@ class SettingsPage extends HookConsumerWidget {
             segments: const [
               ButtonSegment<ThemeMode>(
                 value: ThemeMode.system,
-                label: Text('System'),
+                label: Text(UIStrings.system),
                 icon: Icon(Icons.brightness_auto_outlined),
               ),
               ButtonSegment<ThemeMode>(
                 value: ThemeMode.light,
-                label: Text('Light'),
+                label: Text(UIStrings.light),
                 icon: Icon(Icons.light_mode_outlined),
               ),
               ButtonSegment<ThemeMode>(
                 value: ThemeMode.dark,
-                label: Text('Dark'),
+                label: Text(UIStrings.dark),
                 icon: Icon(Icons.dark_mode_outlined),
               ),
             ],
@@ -102,8 +102,9 @@ class SettingsPage extends HookConsumerWidget {
             const Center(child: LoadingIndicator())
           else
             ElevatedButton(
-              onPressed:
-                  previewThemeMode == savedThemeMode ? null : handleSaveChanges,
+              onPressed: previewThemeMode == savedThemeMode
+                  ? null
+                  : handleSaveChanges,
               child: const Text(UIStrings.saveChanges),
             ),
         ],

@@ -6,6 +6,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:resto2/models/role_permission_model.dart';
 import 'package:resto2/models/staff_model.dart';
 import 'package:resto2/providers/staff_provider.dart';
+import 'package:resto2/utils/constants.dart';
 
 class EditStaffPage extends HookConsumerWidget {
   final Staff staff;
@@ -18,7 +19,7 @@ class EditStaffPage extends HookConsumerWidget {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Staff')),
+      appBar: AppBar(title: const Text(UIStrings.editStaff)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -27,33 +28,30 @@ class EditStaffPage extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Email: ${staff.email}',
+                UIStrings.staffEmail.replaceFirst('{email}', staff.email),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                'Name: ${staff.displayName}',
+                UIStrings.staffName.replaceFirst('{name}', staff.displayName),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField2<UserRole>(
                 value: role.value,
-                items:
-                    UserRole.values
-                        .map(
-                          (role) => DropdownMenuItem(
-                            value: role,
-                            child: Text(role.name),
-                          ),
-                        )
-                        .toList(),
+                items: UserRole.values
+                    .map(
+                      (role) =>
+                          DropdownMenuItem(value: role, child: Text(role.name)),
+                    )
+                    .toList(),
                 onChanged: (value) {
                   if (value != null) {
                     role.value = value;
                   }
                 },
                 decoration: const InputDecoration(
-                  labelText: 'Role',
+                  labelText: UIStrings.role,
                   contentPadding: EdgeInsets.zero,
                   border: OutlineInputBorder(),
                 ),
@@ -70,7 +68,7 @@ class EditStaffPage extends HookConsumerWidget {
                       .updateStaffRole(userId: staff.uid, newRole: role.value);
                   Navigator.of(context).pop();
                 },
-                child: const Text('Save'),
+                child: const Text(UIStrings.save),
               ),
             ],
           ),

@@ -23,7 +23,14 @@ class OccupiedTableDialog extends ConsumerWidget {
         children: [
           Icon(Icons.receipt_long_outlined, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
-          Expanded(child: Text('Order Details: ${order.tableName}')),
+          Expanded(
+            child: Text(
+              UIStrings.orderDetailsTitle.replaceFirst(
+                '{tableName}',
+                order.tableName,
+              ),
+            ),
+          ),
         ],
       ),
       content: SizedBox(
@@ -33,8 +40,8 @@ class OccupiedTableDialog extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Placed by: ${order.staffName}'),
-              Text('Time: $formattedDate'),
+              Text(UIStrings.placedBy.replaceFirst('{name}', order.staffName)),
+              Text(UIStrings.time.replaceFirst('{time}', formattedDate)),
               const Divider(height: 24),
               ListView.builder(
                 shrinkWrap: true,
@@ -75,14 +82,14 @@ class OccupiedTableDialog extends ConsumerWidget {
                 },
               ),
               const Divider(height: 24),
-              _buildChargeRow('Subtotal', order.subtotal, theme: theme),
+              _buildChargeRow(UIStrings.subtotal, order.subtotal, theme: theme),
               ...order.appliedCharges.map(
                 (charge) =>
                     _buildChargeRow(charge.name, charge.amount, theme: theme),
               ),
               const Divider(height: 16),
               _buildChargeRow(
-                'Grand Total',
+                UIStrings.grandTotal,
                 order.grandTotal,
                 theme: theme,
                 isTotal: true,
@@ -102,7 +109,7 @@ class OccupiedTableDialog extends ConsumerWidget {
                 context.push(AppRoutes.payment, extra: order);
               },
               icon: const Icon(Icons.payment_outlined),
-              label: const Text('Go to Payment'),
+              label: const Text(UIStrings.goToPayment),
             ),
             const SizedBox(height: 8),
             ElevatedButton.icon(
@@ -116,7 +123,7 @@ class OccupiedTableDialog extends ConsumerWidget {
                 );
               },
               icon: const Icon(Icons.add_shopping_cart),
-              label: const Text('Add to Order'),
+              label: const Text(UIStrings.addToOrder),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.secondaryContainer,
                 foregroundColor: theme.colorScheme.onSecondaryContainer,
@@ -125,7 +132,7 @@ class OccupiedTableDialog extends ConsumerWidget {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+              child: const Text(UIStrings.close),
             ),
           ],
         ),

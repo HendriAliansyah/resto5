@@ -4,13 +4,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/order_type_model.dart';
 import 'package:resto2/models/table_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
-import 'package:resto2/providers/order_provider.dart'; // THE FIX IS HERE: Add this import
+import 'package:resto2/providers/order_provider.dart';
 import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/providers/table_provider.dart';
 import 'package:resto2/views/order/widgets/occupied_table_dialog.dart';
 import 'package:resto2/views/order/widgets/order_bottom_sheet.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
+import 'package:resto2/utils/constants.dart';
 
 class OrderPage extends ConsumerWidget {
   const OrderPage({super.key});
@@ -23,13 +24,9 @@ class OrderPage extends ConsumerWidget {
       data: (orderTypes) {
         if (orderTypes.isEmpty) {
           return Scaffold(
-            appBar: AppBar(title: const Text('POS / New Order')),
+            appBar: AppBar(title: const Text(UIStrings.posNewOrder)),
             drawer: const AppDrawer(),
-            body: const Center(
-              child: Text(
-                'Please create at least one Order Type in the Master settings.',
-              ),
-            ),
+            body: const Center(child: Text(UIStrings.createOrderTypeMessage)),
           );
         }
 
@@ -37,7 +34,7 @@ class OrderPage extends ConsumerWidget {
           length: orderTypes.length,
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('POS / New Order'),
+              title: const Text(UIStrings.posNewOrder),
               bottom: TabBar(
                 isScrollable: true,
                 tabs: orderTypes.map((ot) => Tab(text: ot.name)).toList(),
@@ -53,11 +50,11 @@ class OrderPage extends ConsumerWidget {
         );
       },
       loading: () => Scaffold(
-        appBar: AppBar(title: const Text('POS / New Order')),
+        appBar: AppBar(title: const Text(UIStrings.posNewOrder)),
         body: const LoadingIndicator(),
       ),
       error: (e, st) => Scaffold(
-        appBar: AppBar(title: const Text('POS / New Order')),
+        appBar: AppBar(title: const Text(UIStrings.posNewOrder)),
         body: Center(child: Text('Error: ${e.toString()}')),
       ),
     );
@@ -96,30 +93,36 @@ class _TableSelectionView extends ConsumerWidget {
           );
           final order = await ref.read(activeOrderProvider(args).future);
 
-          if (context.mounted)
+          // **THE FIX IS HERE:** Guard all uses of BuildContext with a mounted check.
+          if (context.mounted) {
             Navigator.of(context).pop(); // Dismiss loading indicator
 
-          if (order != null) {
-            showDialog(
-              context: context,
-              builder: (_) => OccupiedTableDialog(order: order),
-            );
-          } else {
-            if (context.mounted) {
+            if (order != null) {
+              showDialog(
+                context: context,
+                builder: (_) => OccupiedTableDialog(order: order),
+              );
+            } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text(
-                    'Could not find an active order for this table.',
-                  ),
+                  content: Text(UIMessages.couldNotFindActiveOrder),
                 ),
               );
             }
           }
         } catch (e) {
+          // **THE FIX IS HERE:** Guard all uses of BuildContext with a mounted check.
           if (context.mounted) {
             Navigator.of(context).pop(); // Dismiss loading indicator
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error loading order: ${e.toString()}')),
+              SnackBar(
+                content: Text(
+                  UIMessages.errorLoadingOrder.replaceFirst(
+                    '{error}',
+                    e.toString(),
+                  ),
+                ),
+              ),
             );
           }
         }
@@ -140,9 +143,7 @@ class _TableSelectionView extends ConsumerWidget {
         }).toList();
 
         if (filteredTables.isEmpty) {
-          return const Center(
-            child: Text('No tables available for this order type.'),
-          );
+          return const Center(child: Text(UIStrings.noTablesForOrderType));
         }
 
         return GridView.builder(
@@ -190,7 +191,10 @@ class _TableSelectionView extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Capacity: ${table.capacity}',
+                      UIStrings.capacity.replaceFirst(
+                        '{value}',
+                        table.capacity.toString(),
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: textColor,
                       ),
