@@ -10,7 +10,6 @@ class MenuModel {
   final String restaurantId;
   final String courseId;
   final String orderTypeId;
-  final List<String> menuItems;
   final List<String> inventoryItems;
   final int preparationTime;
   final double itemTaxPercentage;
@@ -25,7 +24,6 @@ class MenuModel {
     required this.restaurantId,
     required this.courseId,
     required this.orderTypeId,
-    this.menuItems = const [],
     this.inventoryItems = const [],
     this.preparationTime = 0,
     this.itemTaxPercentage = 0.0,
@@ -43,7 +41,6 @@ class MenuModel {
       restaurantId: data['restaurantId'] ?? '',
       courseId: data['courseId'] ?? '',
       orderTypeId: data['orderTypeId'] ?? '',
-      menuItems: List<String>.from(data['menuItems'] ?? []),
       inventoryItems: List<String>.from(data['inventoryItems'] ?? []),
       preparationTime: data['preparationTime'] ?? 0,
       itemTaxPercentage: (data['itemTaxPercentage'] ?? 0.0).toDouble(),
@@ -60,7 +57,6 @@ class MenuModel {
       'restaurantId': restaurantId,
       'courseId': courseId,
       'orderTypeId': orderTypeId,
-      'menuItems': menuItems,
       'inventoryItems': inventoryItems,
       'preparationTime': preparationTime,
       'itemTaxPercentage': itemTaxPercentage,

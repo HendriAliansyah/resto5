@@ -36,7 +36,6 @@ class MenuBottomSheet extends HookConsumerWidget {
     final isTaxFixed = useState(menu?.isTaxFixed ?? false);
     final selectedCourseId = useState<String?>(menu?.courseId);
     final selectedOrderTypeId = useState<String?>(menu?.orderTypeId);
-    final selectedMenuItems = useState<List<String>>(menu?.menuItems ?? []);
     final selectedInventoryItems = useState<List<String>>(
       menu?.inventoryItems ?? [],
     );
@@ -45,7 +44,6 @@ class MenuBottomSheet extends HookConsumerWidget {
 
     final courses = ref.watch(coursesStreamProvider).asData?.value ?? [];
     final orderTypes = ref.watch(orderTypesStreamProvider).asData?.value ?? [];
-    final menus = ref.watch(menusStreamProvider).asData?.value ?? [];
     final inventories = ref.watch(inventoryStreamProvider).asData?.value ?? [];
     final menuState = ref.watch(menuControllerProvider);
     final isLoading = menuState.status == MenuActionStatus.loading;
@@ -100,7 +98,6 @@ class MenuBottomSheet extends HookConsumerWidget {
             price: price,
             courseId: selectedCourseId.value!,
             orderTypeId: selectedOrderTypeId.value!,
-            menuItems: selectedMenuItems.value,
             inventoryItems: selectedInventoryItems.value,
             imageFile: localImageFile.value,
             existingImageUrl: menu?.imageUrl,
@@ -115,7 +112,6 @@ class MenuBottomSheet extends HookConsumerWidget {
             price: price,
             courseId: selectedCourseId.value!,
             orderTypeId: selectedOrderTypeId.value!,
-            menuItems: selectedMenuItems.value,
             inventoryItems: selectedInventoryItems.value,
             imageFile: localImageFile.value,
             preparationTime: preparationTime,
@@ -303,23 +299,6 @@ class MenuBottomSheet extends HookConsumerWidget {
                           border: OutlineInputBorder(),
                         ),
                         validator: (v) => v == null ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      MultiSelectBottomSheetField<MenuModel>(
-                        initialValue: menus
-                            .where(
-                              (m) => selectedMenuItems.value.contains(m.id),
-                            )
-                            .toList(),
-                        items: menus, // This line is the fix
-                        dialogTitle: 'Menu Items',
-                        searchHint: 'Search for menu items',
-                        chipLabelBuilder: (menu) => Text(menu.name),
-                        tileLabelBuilder: (menu) => Text(menu.name),
-                        onSaved: (selected) {
-                          selectedMenuItems.value =
-                              selected?.map((m) => m.id).toList() ?? [];
-                        },
                       ),
                       const SizedBox(height: 16),
                       MultiSelectBottomSheetField<InventoryItem>(
