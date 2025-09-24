@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:resto2/views/widgets/shared/app_text_form_field.dart';
 import '../../providers/auth_providers.dart';
 import '../../utils/snackbar.dart';
 import '../../utils/constants.dart';
@@ -40,7 +41,6 @@ class LoginScreen extends HookConsumerWidget {
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
-            // Dismiss the keyboard when the user taps on an empty space
             FocusScope.of(context).unfocus();
           },
           child: Center(
@@ -50,7 +50,7 @@ class LoginScreen extends HookConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 40), // Top padding
+                  const SizedBox(height: 40),
                   Image.asset('assets/images/logo.png', height: 80),
                   const SizedBox(height: 16),
                   Text(
@@ -73,14 +73,11 @@ class LoginScreen extends HookConsumerWidget {
                     key: formKey,
                     child: Column(
                       children: [
-                        TextFormField(
+                        AppTextFormField(
                           controller: emailController,
-                          decoration: const InputDecoration(
-                            labelText: UIStrings.emailLabel,
-                            prefixIcon: Icon(Icons.email_outlined),
-                          ),
+                          labelText: UIStrings.emailLabel,
+                          prefixIcon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return UIMessages.enterEmailPrompt;
@@ -141,7 +138,7 @@ class LoginScreen extends HookConsumerWidget {
                     onPressed: () => context.push(AppRoutes.forgotPassword),
                     child: const Text(UIStrings.forgotPasswordPrompt),
                   ),
-                  const SizedBox(height: 40), // Bottom padding
+                  const SizedBox(height: 40),
                 ],
               ),
             ),

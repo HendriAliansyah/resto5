@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/course_model.dart';
 import 'package:resto2/providers/course_provider.dart';
 import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/widgets/shared/app_text_form_field.dart';
+import 'package:resto2/views/widgets/shared/entity_dialog.dart';
 
 class CourseDialog extends HookConsumerWidget {
   final Course? course;
@@ -19,8 +21,6 @@ class CourseDialog extends HookConsumerWidget {
     );
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
-    // THE FIX IS HERE:
-    // We access the .status property of the CourseState object.
     final isLoading =
         ref.watch(courseControllerProvider).status ==
         CourseActionStatus.loading;
@@ -43,66 +43,33 @@ class CourseDialog extends HookConsumerWidget {
       }
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Dismiss the keyboard when the user taps on an empty space
-        FocusScope.of(context).unfocus();
-      },
-      child: AlertDialog(
-        title: Row(
+    return EntityDialog(
+      title: isEditing ? UIStrings.editCourse : UIStrings.addCourse,
+      isLoading: isLoading,
+      onSave: submit,
+      content: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isEditing ? Icons.edit_note : Icons.add_box_outlined,
-              color: Theme.of(context).colorScheme.primary,
+            AppTextFormField(
+              controller: nameController,
+              labelText: UIStrings.courseName,
+              hintText: UIStrings.courseNameHint,
+              validator: (value) =>
+                  value!.trim().isEmpty ? UIMessages.enterCourseName : null,
             ),
-            const SizedBox(width: 12),
-            Text(isEditing ? UIStrings.editCourse : UIStrings.addCourse),
+            const SizedBox(height: 16),
+            AppTextFormField(
+              controller: descriptionController,
+              labelText: UIStrings.description,
+              hintText: UIStrings.courseDescriptionHint,
+              maxLines: 2,
+              validator: (value) =>
+                  value!.trim().isEmpty ? UIMessages.enterDescription : null,
+            ),
           ],
         ),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: UIStrings.courseName,
-                  hintText: UIStrings.courseNameHint,
-                ),
-                validator: (value) =>
-                    value!.trim().isEmpty ? UIMessages.enterCourseName : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: UIStrings.description,
-                  hintText: UIStrings.courseDescriptionHint,
-                ),
-                maxLines: 2,
-                validator: (value) =>
-                    value!.trim().isEmpty ? UIMessages.enterDescription : null,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-            child: const Text(UIStrings.cancel),
-          ),
-          ElevatedButton(
-            onPressed: isLoading ? null : submit,
-            child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2.0),
-                  )
-                : const Text(UIStrings.save),
-          ),
-        ],
       ),
     );
   }

@@ -8,6 +8,8 @@ import 'package:resto2/models/inventory_item_model.dart';
 import 'package:resto2/providers/inventory_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/widgets/shared/app_bottom_sheet.dart';
+import 'package:resto2/views/widgets/shared/app_text_form_field.dart';
 
 class InventoryBottomSheet extends HookConsumerWidget {
   final InventoryItem? item;
@@ -72,109 +74,58 @@ class InventoryBottomSheet extends HookConsumerWidget {
       }
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Dismiss the keyboard when the user taps on an empty space
-        FocusScope.of(context).unfocus();
-      },
-      child: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
+    return AppBottomSheet(
+      title: isEditing ? UIStrings.editItem : UIStrings.addItem,
+      isLoading: isLoading,
+      onSave: submit,
+      content: Form(
+        key: formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                isEditing ? UIStrings.editItem : UIStrings.addItem,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
-            const Divider(height: 1),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      InkWell(
-                        onTap: pickImage,
-                        child: AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: Theme.of(context).dividerColor,
-                              ),
-                              image: localImageFile.value != null
-                                  ? DecorationImage(
-                                      image: FileImage(localImageFile.value!),
-                                      fit: BoxFit.fill,
-                                    )
-                                  : (item?.imageUrl != null
-                                        ? DecorationImage(
-                                            image: NetworkImage(
-                                              item!.imageUrl!,
-                                            ),
-                                            fit: BoxFit.fill,
-                                          )
-                                        : null),
-                            ),
-                            child:
-                                localImageFile.value == null &&
-                                    item?.imageUrl == null
-                                ? const Center(
-                                    child: Icon(
-                                      Icons.add_a_photo_outlined,
-                                      size: 48,
-                                    ),
-                                  )
-                                : null,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: nameController,
-                        decoration: const InputDecoration(
-                          labelText: UIStrings.itemName,
-                        ),
-                        validator: (v) =>
-                            v!.trim().isEmpty ? UIMessages.enterItemName : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: descriptionController,
-                        decoration: const InputDecoration(
-                          labelText: UIStrings.itemDescriptionHint,
-                        ),
-                        maxLines: 2,
-                        validator: (v) => v!.trim().isEmpty
-                            ? UIMessages.enterDescription
-                            : null,
-                      ),
-                    ],
+            InkWell(
+              onTap: pickImage,
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                    image: localImageFile.value != null
+                        ? DecorationImage(
+                            image: FileImage(localImageFile.value!),
+                            fit: BoxFit.fill,
+                          )
+                        : (item?.imageUrl != null
+                              ? DecorationImage(
+                                  image: NetworkImage(item!.imageUrl!),
+                                  fit: BoxFit.fill,
+                                )
+                              : null),
                   ),
+                  child: localImageFile.value == null && item?.imageUrl == null
+                      ? const Center(
+                          child: Icon(Icons.add_a_photo_outlined, size: 48),
+                        )
+                      : null,
                 ),
               ),
             ),
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                ),
-                onPressed: isLoading ? null : submit,
-                child: isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text(UIStrings.save),
-              ),
+            const SizedBox(height: 16),
+            AppTextFormField(
+              controller: nameController,
+              labelText: UIStrings.itemName,
+              validator: (v) =>
+                  v!.trim().isEmpty ? UIMessages.enterItemName : null,
+            ),
+            const SizedBox(height: 16),
+            AppTextFormField(
+              controller: descriptionController,
+              labelText: UIStrings.itemDescriptionHint,
+              maxLines: 2,
+              validator: (v) =>
+                  v!.trim().isEmpty ? UIMessages.enterDescription : null,
             ),
           ],
         ),

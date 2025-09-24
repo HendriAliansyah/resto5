@@ -6,6 +6,8 @@ import 'package:resto2/models/table_type_model.dart';
 import 'package:resto2/providers/table_type_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/widgets/shared/app_text_form_field.dart';
+import 'package:resto2/views/widgets/shared/entity_dialog.dart';
 
 class TableTypeDialog extends HookConsumerWidget {
   final TableType? tableType;
@@ -22,8 +24,12 @@ class TableTypeDialog extends HookConsumerWidget {
 
     ref.listen<TableTypeState>(tableTypeControllerProvider, (prev, next) {
       if (next.status == TableTypeActionStatus.success) {
-        Navigator.of(context).pop(); // Pop the dialog itself
         showSnackBar(context, UIMessages.tableTypeSaved);
+        if (isEditing) {
+          Navigator.of(context).pop();
+        } else {
+          nameController.clear();
+        }
       }
       if (next.status == TableTypeActionStatus.error) {
         showSnackBar(
@@ -48,40 +54,18 @@ class TableTypeDialog extends HookConsumerWidget {
       }
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Dismiss the keyboard when the user taps on an empty space
-        FocusScope.of(context).unfocus();
-      },
-      child: AlertDialog(
-        title: Text(
-          isEditing ? UIStrings.editTableType : UIStrings.addTableType,
+    return EntityDialog(
+      title: isEditing ? UIStrings.editTableType : UIStrings.addTableType,
+      isLoading: isLoading,
+      onSave: submit,
+      content: Form(
+        key: formKey,
+        child: AppTextFormField(
+          controller: nameController,
+          labelText: UIStrings.typeName,
+          validator: (v) =>
+              v!.trim().isEmpty ? UIMessages.enterTableName : null,
         ),
-        content: Form(
-          key: formKey,
-          child: TextFormField(
-            controller: nameController,
-            decoration: const InputDecoration(labelText: UIStrings.typeName),
-            validator: (v) =>
-                v!.trim().isEmpty ? UIMessages.enterTableName : null,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-            child: const Text(UIStrings.cancel),
-          ),
-          ElevatedButton(
-            onPressed: isLoading ? null : submit,
-            child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text(UIStrings.save),
-          ),
-        ],
       ),
     );
   }

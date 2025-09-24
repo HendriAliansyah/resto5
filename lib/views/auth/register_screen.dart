@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:resto2/views/widgets/shared/app_text_form_field.dart';
 import '../../providers/auth_providers.dart';
 import '../../utils/snackbar.dart';
 import '../../utils/constants.dart';
@@ -48,7 +49,6 @@ class RegisterScreen extends HookConsumerWidget {
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
-            // Dismiss the keyboard when the user taps on an empty space
             FocusScope.of(context).unfocus();
           },
           child: SingleChildScrollView(
@@ -79,14 +79,11 @@ class RegisterScreen extends HookConsumerWidget {
                   key: formKey,
                   child: Column(
                     children: [
-                      TextFormField(
+                      AppTextFormField(
                         controller: displayNameController,
-                        decoration: const InputDecoration(
-                          labelText: UIStrings.displayNameLabel,
-                          prefixIcon: Icon(Icons.person_outline),
-                        ),
+                        labelText: UIStrings.displayNameLabel,
+                        prefixIcon: Icons.person_outline,
                         keyboardType: TextInputType.name,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return UIMessages.enterNameError;
@@ -95,14 +92,11 @@ class RegisterScreen extends HookConsumerWidget {
                         },
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
+                      AppTextFormField(
                         controller: emailController,
-                        decoration: const InputDecoration(
-                          labelText: UIStrings.emailLabel,
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
+                        labelText: UIStrings.emailLabel,
+                        prefixIcon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return UIMessages.enterEmailPrompt;

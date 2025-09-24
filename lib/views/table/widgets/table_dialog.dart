@@ -9,6 +9,8 @@ import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/providers/table_provider.dart';
 import 'package:resto2/providers/table_type_provider.dart';
 import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/widgets/shared/app_text_form_field.dart';
+import 'package:resto2/views/widgets/shared/entity_dialog.dart';
 
 class TableDialog extends HookConsumerWidget {
   final TableModel? table;
@@ -55,94 +57,77 @@ class TableDialog extends HookConsumerWidget {
       }
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Dismiss the keyboard when the user taps on an empty space
-        FocusScope.of(context).unfocus();
-      },
-      child: AlertDialog(
-        title: Text(isEditing ? UIStrings.editTable : UIStrings.addTable),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: UIStrings.tableName,
-                ),
-                validator: (v) => v!.isEmpty ? UIStrings.requiredField : null,
+    return EntityDialog(
+      title: isEditing ? UIStrings.editTable : UIStrings.addTable,
+      onSave: submit,
+      content: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppTextFormField(
+              controller: nameController,
+              labelText: UIStrings.tableName,
+              validator: (v) => v!.isEmpty ? UIStrings.requiredField : null,
+            ),
+            const SizedBox(height: 16),
+            AppTextFormField(
+              controller: capacityController,
+              labelText: UIStrings.capacityLabel,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (v) {
+                if (v!.isEmpty) return UIStrings.requiredField;
+                if (int.tryParse(v) == null) return UIMessages.invalidNumber;
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField2<String>(
+              value: selectedTableTypeId.value,
+              items: tableTypes
+                  .map(
+                    (tt) =>
+                        DropdownMenuItem(value: tt.id, child: Text(tt.name)),
+                  )
+                  .toList(),
+              onChanged: (v) => selectedTableTypeId.value = v,
+              decoration: const InputDecoration(
+                labelText: UIStrings.tableType,
+                contentPadding: EdgeInsets.zero,
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: capacityController,
-                decoration: const InputDecoration(
-                  labelText: UIStrings.capacityLabel,
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) {
-                  if (v!.isEmpty) return UIStrings.requiredField;
-                  if (int.tryParse(v) == null) return UIMessages.invalidNumber;
-                  return null;
-                },
+              buttonStyleData: const ButtonStyleData(
+                height: 50,
+                padding: EdgeInsets.only(right: 10),
               ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField2<String>(
-                value: selectedTableTypeId.value,
-                items: tableTypes
-                    .map(
-                      (tt) =>
-                          DropdownMenuItem(value: tt.id, child: Text(tt.name)),
-                    )
-                    .toList(),
-                onChanged: (v) => selectedTableTypeId.value = v,
-                decoration: const InputDecoration(
-                  labelText: UIStrings.tableType,
-                  contentPadding: EdgeInsets.zero,
-                  border: OutlineInputBorder(),
+              validator: (v) => v == null ? UIStrings.requiredField : null,
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField2<String?>(
+              value: selectedOrderTypeId.value,
+              items: [
+                const DropdownMenuItem(
+                  value: null,
+                  child: Text(UIStrings.allOrderTypes),
                 ),
-                buttonStyleData: const ButtonStyleData(
-                  height: 50,
-                  padding: EdgeInsets.only(right: 10),
+                ...orderTypes.map(
+                  (ot) => DropdownMenuItem(value: ot.id, child: Text(ot.name)),
                 ),
-                validator: (v) => v == null ? UIStrings.requiredField : null,
+              ],
+              onChanged: (v) => selectedOrderTypeId.value = v,
+              decoration: const InputDecoration(
+                labelText: UIStrings.orderType,
+                contentPadding: EdgeInsets.zero,
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField2<String?>(
-                value: selectedOrderTypeId.value,
-                items: [
-                  const DropdownMenuItem(
-                    value: null,
-                    child: Text(UIStrings.allOrderTypes),
-                  ),
-                  ...orderTypes.map(
-                    (ot) =>
-                        DropdownMenuItem(value: ot.id, child: Text(ot.name)),
-                  ),
-                ],
-                onChanged: (v) => selectedOrderTypeId.value = v,
-                decoration: const InputDecoration(
-                  labelText: UIStrings.orderType,
-                  contentPadding: EdgeInsets.zero,
-                  border: OutlineInputBorder(),
-                ),
-                buttonStyleData: const ButtonStyleData(
-                  height: 50,
-                  padding: EdgeInsets.only(right: 10),
-                ),
+              buttonStyleData: const ButtonStyleData(
+                height: 50,
+                padding: EdgeInsets.only(right: 10),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(UIStrings.cancel),
-          ),
-          ElevatedButton(onPressed: submit, child: const Text(UIStrings.save)),
-        ],
       ),
     );
   }

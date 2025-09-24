@@ -4,9 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/table_type_model.dart';
 import 'package:resto2/providers/table_type_provider.dart';
 import 'package:resto2/views/table_type/widgets/table_type_dialog.dart';
-import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/utils/constants.dart';
-import 'package:resto2/views/widgets/custom_app_bar.dart';
+import 'package:resto2/views/widgets/shared/entity_management_page.dart';
 
 class TableTypeManagementPage extends ConsumerWidget {
   const TableTypeManagementPage({super.key});
@@ -23,59 +22,39 @@ class TableTypeManagementPage extends ConsumerWidget {
       );
     }
 
-    return Scaffold(
-      appBar: const CustomAppBar(title: Text(UIStrings.tableTypeMaster)),
-      drawer: const AppDrawer(),
-      body: SafeArea(
-        child: tableTypesAsync.when(
-          data: (types) {
-            if (types.isEmpty) {
-              return const Center(child: Text(UIStrings.noTableTypesFound));
-            }
-            return ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              itemCount: types.length,
-              itemBuilder: (_, index) {
-                final type = types[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 4.0,
+    return EntityManagementPage<TableType>(
+      title: UIStrings.tableTypeMaster,
+      noItemsFoundText: UIStrings.noTableTypesFound,
+      items: tableTypesAsync.asData?.value ?? [],
+      onAdd: () => showTableTypeDialog(),
+      filterTile: const SizedBox.shrink(), // No filter for this page
+      itemBuilder: (context, type) {
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          child: ListTile(
+            title: Text(
+              type.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () => showTableTypeDialog(tableType: type),
+                  icon: const Icon(Icons.edit_outlined),
+                ),
+                IconButton(
+                  onPressed: () => controller.deleteTableType(type.id),
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: Theme.of(context).colorScheme.error,
                   ),
-                  child: ListTile(
-                    title: Text(
-                      type.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          onPressed: () => showTableTypeDialog(tableType: type),
-                          icon: const Icon(Icons.edit_outlined),
-                        ),
-                        IconButton(
-                          onPressed: () => controller.deleteTableType(type.id),
-                          icon: Icon(
-                            Icons.delete_outline,
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => Center(child: Text(e.toString())),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => showTableTypeDialog(),
-        child: const Icon(Icons.add),
-      ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

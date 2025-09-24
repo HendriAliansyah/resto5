@@ -36,201 +36,244 @@ class AppDrawer extends ConsumerWidget {
       return null;
     }
 
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          UserAccountsDrawerHeader(
-            accountName: Text(
-              currentUser.displayName ?? UIStrings.defaultUserName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            accountEmail: Text(currentUser.email),
-            currentAccountPicture: CircleAvatar(
+    // Helper to create a navigation list tile
+    Widget buildTile(
+      BuildContext context,
+      String title,
+      IconData icon,
+      String route,
+    ) {
+      return ListTile(
+        leading: Icon(icon),
+        title: Text(title),
+        onTap: () {
+          Navigator.pop(context);
+          context.go(route);
+        },
+      );
+    }
+
+    // Custom header widget that replaces UserAccountsDrawerHeader
+    Widget buildDrawerHeader() {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 16.0),
+        decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 32,
               backgroundColor: Theme.of(context).colorScheme.surface,
               backgroundImage: getBackgroundImage(),
               child: getBackgroundImage() == null
                   ? Text(
                       currentUser.displayName?.substring(0, 1).toUpperCase() ??
                           'U',
-                      style: const TextStyle(fontSize: 40.0),
+                      style: const TextStyle(fontSize: 32.0),
                     )
                   : null,
             ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+            const SizedBox(height: 12),
+            Text(
+              currentUser.displayName ?? UIStrings.defaultUserName,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home_outlined),
-            title: const Text(UIStrings.home),
-            onTap: () {
-              Navigator.pop(context);
-              context.go(AppRoutes.home);
-            },
-          ),
-          if (canAccess(PagePermission.accessOrderPage))
-            ListTile(
-              leading: const Icon(Icons.point_of_sale_outlined),
-              title: const Text(UIStrings.posNewOrder),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.order);
-              },
+            const SizedBox(height: 4),
+            Text(
+              currentUser.email,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
-          if (canAccess(PagePermission.accessKitchenPage))
-            ListTile(
-              leading: const Icon(Icons.kitchen_outlined),
-              title: const Text(UIStrings.kitchenDisplaySystem),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.kitchen);
-              },
+          ],
+        ),
+      );
+    }
+
+    return SafeArea(
+      child: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            buildDrawerHeader(), // Using the new custom header
+            buildTile(
+              context,
+              UIStrings.home,
+              Icons.home_outlined,
+              AppRoutes.home,
             ),
-          if (canAccess(PagePermission.accessOrderSummary))
-            ListTile(
-              leading: const Icon(Icons.summarize_outlined),
-              title: const Text(UIStrings.orderSummary),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.orderSummary);
-              },
+            // --- Operations Group ---
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text(
+                "Operations",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
-          if (canAccess(PagePermission.accessMasterRestaurant))
-            ListTile(
-              leading: const Icon(Icons.storefront_outlined),
-              title: const Text(UIStrings.manageRestaurantTitle),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.manageRestaurant);
-              },
+            if (canAccess(PagePermission.accessOrderPage))
+              buildTile(
+                context,
+                UIStrings.posNewOrder,
+                Icons.point_of_sale_outlined,
+                AppRoutes.order,
+              ),
+            if (canAccess(PagePermission.accessKitchenPage))
+              buildTile(
+                context,
+                UIStrings.kitchenDisplaySystem,
+                Icons.kitchen_outlined,
+                AppRoutes.kitchen,
+              ),
+            if (canAccess(PagePermission.accessOrderSummary))
+              buildTile(
+                context,
+                UIStrings.orderSummary,
+                Icons.summarize_outlined,
+                AppRoutes.orderSummary,
+              ),
+
+            // --- Management Group (Collapsible) ---
+            const Divider(),
+            ExpansionTile(
+              shape: const Border(),
+              collapsedShape: const Border(),
+              title: const Text(
+                "Management",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              leading: const Icon(Icons.settings_applications_outlined),
+              children: [
+                if (canAccess(PagePermission.accessMasterRestaurant))
+                  buildTile(
+                    context,
+                    UIStrings.manageRestaurantTitle,
+                    Icons.storefront_outlined,
+                    AppRoutes.manageRestaurant,
+                  ),
+                if (canAccess(PagePermission.accessChargesAndTaxes))
+                  buildTile(
+                    context,
+                    UIStrings.chargesAndTaxes,
+                    Icons.receipt_long_outlined,
+                    AppRoutes.chargesAndTaxes,
+                  ),
+                if (canAccess(PagePermission.accessStaffManagement))
+                  buildTile(
+                    context,
+                    UIStrings.staffManagement,
+                    Icons.people_outline,
+                    AppRoutes.manageStaff,
+                  ),
+                if (canAccess(PagePermission.accessMenuMaster))
+                  buildTile(
+                    context,
+                    UIStrings.menuMaster,
+                    Icons.restaurant_menu_outlined,
+                    AppRoutes.manageMenu,
+                  ),
+                if (canAccess(PagePermission.accessCourseMaster))
+                  buildTile(
+                    context,
+                    UIStrings.courseMaster,
+                    Icons.book_outlined,
+                    AppRoutes.manageCourses,
+                  ),
+                if (canAccess(PagePermission.accessTableMaster))
+                  buildTile(
+                    context,
+                    UIStrings.tableManagement,
+                    Icons.table_restaurant_outlined,
+                    AppRoutes.manageTables,
+                  ),
+                if (canAccess(PagePermission.accessTableTypeMaster))
+                  buildTile(
+                    context,
+                    UIStrings.tableTypeMaster,
+                    Icons.category_outlined,
+                    AppRoutes.manageTableTypes,
+                  ),
+                if (canAccess(PagePermission.accessOrderTypeMaster))
+                  buildTile(
+                    context,
+                    UIStrings.orderTypeMaster,
+                    Icons.receipt_long_outlined,
+                    AppRoutes.manageOrderTypes,
+                  ),
+              ],
             ),
-          if (canAccess(PagePermission.accessChargesAndTaxes))
-            ListTile(
-              leading: const Icon(Icons.receipt_long_outlined),
-              title: const Text(UIStrings.chargesAndTaxes),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.chargesAndTaxes);
-              },
-            ),
-          if (canAccess(PagePermission.accessStaffManagement))
-            ListTile(
-              leading: const Icon(Icons.people_outline),
-              title: const Text(UIStrings.staffManagement),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.manageStaff);
-              },
-            ),
-          if (canAccess(PagePermission.accessCourseMaster))
-            ListTile(
-              leading: const Icon(Icons.book_outlined),
-              title: const Text(UIStrings.courseMaster),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.manageCourses);
-              },
-            ),
-          if (canAccess(PagePermission.accessTableTypeMaster))
-            ListTile(
-              leading: const Icon(Icons.category_outlined),
-              title: const Text(UIStrings.tableTypeMaster),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.manageTableTypes);
-              },
-            ),
-          if (canAccess(PagePermission.accessTableMaster))
-            ListTile(
-              leading: const Icon(Icons.table_restaurant_outlined),
-              title: const Text(UIStrings.tableManagement),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.manageTables);
-              },
-            ),
-          if (canAccess(PagePermission.accessOrderTypeMaster))
-            ListTile(
-              leading: const Icon(Icons.receipt_long_outlined),
-              title: const Text(UIStrings.orderTypeMaster),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.manageOrderTypes);
-              },
-            ),
-          if (canAccess(PagePermission.accessMenuMaster))
-            ListTile(
-              leading: const Icon(Icons.restaurant_menu_outlined),
-              title: const Text(UIStrings.menuMaster),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.manageMenu);
-              },
-            ),
-          if (canAccess(PagePermission.accessInventoryMaster))
-            ListTile(
+
+            // --- Inventory Group (Collapsible) ---
+            const Divider(),
+            ExpansionTile(
+              shape: const Border(),
+              collapsedShape: const Border(),
+              title: const Text(
+                "Inventory",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               leading: const Icon(Icons.inventory_2_outlined),
-              title: const Text(UIStrings.inventoryAndStock),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.manageInventory);
-              },
+              children: [
+                if (canAccess(PagePermission.accessInventoryMaster))
+                  buildTile(
+                    context,
+                    UIStrings.inventoryAndStock,
+                    Icons.inventory_2_outlined,
+                    AppRoutes.manageInventory,
+                  ),
+                if (canAccess(PagePermission.accessPurchasePage))
+                  buildTile(
+                    context,
+                    UIStrings.receivingInventory,
+                    Icons.inventory_outlined,
+                    AppRoutes.receivingInventory,
+                  ),
+                if (canAccess(PagePermission.accessPurchaseHistory))
+                  buildTile(
+                    context,
+                    UIStrings.purchaseHistory,
+                    Icons.history_outlined,
+                    AppRoutes.purchaseHistory,
+                  ),
+                if (canAccess(PagePermission.accessStockEdit))
+                  buildTile(
+                    context,
+                    UIStrings.editStock,
+                    Icons.edit_note,
+                    AppRoutes.editStock,
+                  ),
+                if (canAccess(PagePermission.accessStockMovementHistory))
+                  buildTile(
+                    context,
+                    UIStrings.stockMovementHistory,
+                    Icons.sync_alt,
+                    AppRoutes.stockMovementHistory,
+                  ),
+              ],
             ),
-          if (canAccess(PagePermission.accessPurchasePage))
+
+            // --- App Settings & Logout ---
+            const Divider(),
+            buildTile(
+              context,
+              UIStrings.settings,
+              Icons.settings_outlined,
+              AppRoutes.settings,
+            ),
             ListTile(
-              leading: const Icon(Icons.inventory_outlined),
-              title: const Text(UIStrings.receivingInventory),
+              leading: const Icon(Icons.logout),
+              title: const Text(UIStrings.logoutTitle),
               onTap: () {
                 Navigator.pop(context);
-                context.push(AppRoutes.receivingInventory);
+                authController.signOut();
               },
             ),
-          if (canAccess(PagePermission.accessPurchaseHistory))
-            ListTile(
-              leading: const Icon(Icons.history_outlined),
-              title: const Text(UIStrings.purchaseHistory),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.purchaseHistory);
-              },
-            ),
-          if (canAccess(PagePermission.accessStockEdit))
-            ListTile(
-              leading: const Icon(Icons.edit_note),
-              title: const Text(UIStrings.editStock),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.editStock);
-              },
-            ),
-          if (canAccess(PagePermission.accessStockMovementHistory))
-            ListTile(
-              leading: const Icon(Icons.sync_alt),
-              title: const Text(UIStrings.stockMovementHistory),
-              onTap: () {
-                Navigator.pop(context);
-                context.push(AppRoutes.stockMovementHistory);
-              },
-            ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings_outlined),
-            title: const Text(UIStrings.settings),
-            onTap: () {
-              Navigator.pop(context);
-              context.push(AppRoutes.settings);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text(UIStrings.logoutTitle),
-            onTap: () {
-              Navigator.pop(context);
-              authController.signOut();
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

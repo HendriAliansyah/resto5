@@ -6,6 +6,8 @@ import 'package:resto2/models/order_type_model.dart';
 import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/utils/constants.dart';
+import 'package:resto2/views/widgets/shared/app_text_form_field.dart';
+import 'package:resto2/views/widgets/shared/entity_dialog.dart';
 
 class OrderTypeDialog extends HookConsumerWidget {
   final OrderType? orderType;
@@ -25,8 +27,13 @@ class OrderTypeDialog extends HookConsumerWidget {
 
     ref.listen<OrderTypeState>(orderTypeControllerProvider, (prev, next) {
       if (next.status == OrderTypeActionStatus.success) {
-        if (context.mounted) Navigator.of(context).pop();
         showSnackBar(context, UIMessages.orderTypeSaved);
+        if (isEditing) {
+          if (context.mounted) Navigator.of(context).pop();
+        } else {
+          nameController.clear();
+          accessibility.value = OrderTypeAccessibility.all;
+        }
       }
       if (next.status == OrderTypeActionStatus.error) {
         showSnackBar(
@@ -55,74 +62,50 @@ class OrderTypeDialog extends HookConsumerWidget {
       }
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Dismiss the keyboard when the user taps on an empty space
-        FocusScope.of(context).unfocus();
-      },
-      child: AlertDialog(
-        title: Text(
-          isEditing ? UIStrings.editOrderType : UIStrings.addOrderType,
-        ),
-        content: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: UIStrings.orderTypeName,
-                    hintText: UIStrings.orderTypeNameHint,
+    return EntityDialog(
+      title: isEditing ? UIStrings.editOrderType : UIStrings.addOrderType,
+      isLoading: isLoading,
+      onSave: submit,
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppTextFormField(
+                controller: nameController,
+                labelText: UIStrings.orderTypeName,
+                hintText: UIStrings.orderTypeNameHint,
+                validator: (v) =>
+                    v!.trim().isEmpty ? UIMessages.enterNameError : null,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                UIStrings.accessibility,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 8),
+              SegmentedButton<OrderTypeAccessibility>(
+                segments: const [
+                  ButtonSegment(
+                    value: OrderTypeAccessibility.all,
+                    label: Text(UIStrings.allUsers),
                   ),
-                  validator: (v) =>
-                      v!.trim().isEmpty ? UIMessages.enterNameError : null,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  UIStrings.accessibility,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 8),
-                SegmentedButton<OrderTypeAccessibility>(
-                  segments: const [
-                    ButtonSegment(
-                      value: OrderTypeAccessibility.all,
-                      label: Text(UIStrings.allUsers),
-                    ),
-                    ButtonSegment(
-                      value: OrderTypeAccessibility.staff,
-                      label: Text(UIStrings.staffOnly),
-                    ),
-                  ],
-                  selected: {accessibility.value},
-                  onSelectionChanged: (newSelection) {
-                    accessibility.value = newSelection.first;
-                  },
-                ),
-              ],
-            ),
+                  ButtonSegment(
+                    value: OrderTypeAccessibility.staff,
+                    label: Text(UIStrings.staffOnly),
+                  ),
+                ],
+                selected: {accessibility.value},
+                onSelectionChanged: (newSelection) {
+                  accessibility.value = newSelection.first;
+                },
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-            child: const Text(UIStrings.cancel),
-          ),
-          ElevatedButton(
-            onPressed: isLoading ? null : submit,
-            child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text(UIStrings.save),
-          ),
-        ],
       ),
     );
   }

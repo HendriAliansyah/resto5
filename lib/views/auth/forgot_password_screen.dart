@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:resto2/views/widgets/shared/app_text_form_field.dart';
 import '../../providers/auth_providers.dart';
 import '../../utils/snackbar.dart';
 import '../../utils/constants.dart';
@@ -43,7 +44,6 @@ class ForgotPasswordScreen extends HookConsumerWidget {
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
-            // Dismiss the keyboard when the user taps on an empty space
             FocusScope.of(context).unfocus();
           },
           child: Center(
@@ -69,12 +69,10 @@ class ForgotPasswordScreen extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  TextFormField(
+                  AppTextFormField(
                     controller: emailController,
-                    decoration: const InputDecoration(
-                      labelText: UIStrings.emailLabel,
-                      prefixIcon: Icon(Icons.email_outlined),
-                    ),
+                    labelText: UIStrings.emailLabel,
+                    prefixIcon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 24),
