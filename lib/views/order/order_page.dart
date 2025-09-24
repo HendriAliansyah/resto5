@@ -10,7 +10,6 @@ import 'package:resto2/providers/table_provider.dart';
 import 'package:resto2/views/order/widgets/occupied_table_dialog.dart';
 import 'package:resto2/views/order/widgets/order_bottom_sheet.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
-import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/utils/constants.dart';
 
@@ -25,7 +24,7 @@ class OrderPage extends ConsumerWidget {
       data: (orderTypes) {
         if (orderTypes.isEmpty) {
           return Scaffold(
-            appBar: const CustomAppBar(title: Text(UIStrings.posNewOrder)),
+            appBar: AppBar(title: const Text(UIStrings.posNewOrder)),
             drawer: const AppDrawer(),
             body: const Center(child: Text(UIStrings.createOrderTypeMessage)),
           );
@@ -34,7 +33,7 @@ class OrderPage extends ConsumerWidget {
         return DefaultTabController(
           length: orderTypes.length,
           child: Scaffold(
-            appBar: CustomAppBar(
+            appBar: AppBar(
               title: const Text(UIStrings.posNewOrder),
               bottom: TabBar(
                 isScrollable: true,
@@ -51,11 +50,11 @@ class OrderPage extends ConsumerWidget {
         );
       },
       loading: () => Scaffold(
-        appBar: const CustomAppBar(title: Text(UIStrings.posNewOrder)),
+        appBar: AppBar(title: const Text(UIStrings.posNewOrder)),
         body: const LoadingIndicator(),
       ),
       error: (e, st) => Scaffold(
-        appBar: const CustomAppBar(title: Text(UIStrings.posNewOrder)),
+        appBar: AppBar(title: const Text(UIStrings.posNewOrder)),
         body: Center(child: Text('Error: ${e.toString()}')),
       ),
     );

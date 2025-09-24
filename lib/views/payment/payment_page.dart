@@ -7,7 +7,6 @@ import 'package:resto2/models/order_model.dart';
 import 'package:resto2/models/payment_model.dart';
 import 'package:resto2/providers/payment_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
-import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/utils/constants.dart';
 
@@ -75,7 +74,7 @@ class PaymentPage extends HookConsumerWidget {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: CustomAppBar(
+        appBar: AppBar(
           title: Text(
             UIStrings.paymentFor.replaceFirst('{tableName}', order.tableName),
           ),

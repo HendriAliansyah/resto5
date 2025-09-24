@@ -5,7 +5,6 @@ import 'package:resto2/models/order_type_model.dart';
 import 'package:resto2/providers/order_type_provider.dart';
 import 'package:resto2/views/order_type/widgets/order_type_dialog.dart';
 import 'package:resto2/utils/constants.dart';
-import 'package:resto2/views/widgets/shared/entity_management_page.dart';
 
 class OrderTypeManagementPage extends ConsumerWidget {
   const OrderTypeManagementPage({super.key});
@@ -22,42 +21,44 @@ class OrderTypeManagementPage extends ConsumerWidget {
       );
     }
 
-    return EntityManagementPage<OrderType>(
-      title: UIStrings.orderTypeMaster,
-      noItemsFoundText: "No order types found.",
-      items: orderTypesAsync.asData?.value ?? [],
-      onAdd: () => showOrderTypeDialog(),
-      filterTile: const SizedBox.shrink(),
-      itemBuilder: (context, type) {
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          child: ListTile(
-            title: Text(type.name),
-            subtitle: Text(
-              UIStrings.accessibleBy.replaceFirst(
-                '{value}',
-                type.accessibility.name.replaceFirst(
-                  type.accessibility.name[0],
-                  type.accessibility.name[0].toUpperCase(),
-                ),
-              ),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () => showOrderTypeDialog(orderType: type),
-                  icon: const Icon(Icons.edit_outlined),
-                ),
-                IconButton(
-                  onPressed: () => controller.deleteOrderType(type.id),
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: Colors.redAccent,
+    return Scaffold(
+      appBar: AppBar(title: const Text(UIStrings.orderTypeMaster)),
+      drawer: const AppDrawer(),
+      body: SafeArea(
+        child: orderTypesAsync.when(
+          data: (types) => ListView.builder(
+            itemCount: types.length,
+            itemBuilder: (_, index) {
+              final type = types[index];
+              return ListTile(
+                title: Text(type.name),
+                subtitle: Text(
+                  UIStrings.accessibleBy.replaceFirst(
+                    '{value}',
+                    type.accessibility.name.replaceFirst(
+                      type.accessibility.name[0],
+                      type.accessibility.name[0].toUpperCase(),
+                    ),
                   ),
                 ),
-              ],
-            ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () => showOrderTypeDialog(orderType: type),
+                      icon: const Icon(Icons.edit_outlined),
+                    ),
+                    IconButton(
+                      onPressed: () => controller.deleteOrderType(type.id),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         );
       },
