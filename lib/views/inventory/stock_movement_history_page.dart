@@ -7,7 +7,6 @@ import 'package:resto2/models/inventory_item_model.dart';
 import 'package:resto2/providers/stock_movement_provider.dart';
 import 'package:resto2/views/purchase/widgets/inventory_item_selector.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
-import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/utils/constants.dart';
 
@@ -22,7 +21,7 @@ class StockMovementHistoryPage extends HookConsumerWidget {
         : null;
 
     return Scaffold(
-      appBar: const CustomAppBar(title: Text(UIStrings.stockMovementHistory)),
+      appBar: AppBar(title: const Text(UIStrings.stockMovementHistory)),
       drawer: const AppDrawer(),
       body: Column(
         children: [

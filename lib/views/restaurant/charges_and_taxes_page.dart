@@ -5,7 +5,6 @@ import 'package:resto2/models/charge_tax_rule_model.dart';
 import 'package:resto2/providers/charge_tax_rule_provider.dart';
 import 'package:resto2/views/restaurant/widgets/charge_tax_rule_dialog.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
-import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/utils/constants.dart';
 
@@ -24,7 +23,7 @@ class ChargesAndTaxesPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: const CustomAppBar(title: Text(UIStrings.chargesAndTaxes)),
+      appBar: AppBar(title: const Text(UIStrings.chargesAndTaxes)),
       drawer: const AppDrawer(),
       body: rulesAsync.when(
         data: (rules) {

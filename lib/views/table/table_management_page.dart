@@ -11,6 +11,7 @@ import 'package:resto2/providers/table_provider.dart';
 import 'package:resto2/providers/table_type_provider.dart';
 import 'package:resto2/utils/snackbar.dart';
 import 'package:resto2/views/table/widgets/table_dialog.dart';
+import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/shared/entity_management_page.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
@@ -50,95 +51,108 @@ class TableManagementPage extends ConsumerWidget {
       );
     }
 
-    return EntityManagementPage<TableModel>(
-      title: UIStrings.tableManagement,
-      noItemsFoundText: "No tables found.",
-      items: tables,
-      onAdd: () => showTableDialog(),
-      filterTile: FilterExpansionTile(
-        children: [
-          TextFormField(
-            initialValue: filter.searchQuery,
-            decoration: const InputDecoration(
-              labelText: UIStrings.searchByName,
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.search),
-            ),
-            onChanged: (value) => filterNotifier.setSearchQuery(value),
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField2<String?>(
-            value: filter.tableTypeId,
-            decoration: const InputDecoration(
-              labelText: UIStrings.filterByType,
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.zero,
-            ),
-            buttonStyleData: const ButtonStyleData(
-              height: 50,
-              padding: EdgeInsets.only(right: 10),
-            ),
-            items: [
-              const DropdownMenuItem(
-                value: null,
-                child: Text(UIStrings.allTypes),
-              ),
-              ...tableTypesAsync.asData?.value.map(
-                    (type) => DropdownMenuItem(
-                      value: type.id,
-                      child: Text(type.name),
+    return Scaffold(
+      appBar: AppBar(title: const Text(UIStrings.tableManagement)),
+      drawer: const AppDrawer(),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Column(
+          children: [
+            tableTypesAsync.when(
+              data: (tableTypes) => FilterExpansionTile(
+                children: [
+                  TextFormField(
+                    initialValue: filter.searchQuery,
+                    decoration: const InputDecoration(
+                      labelText: UIStrings.searchByName,
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.search),
                     ),
-                  ) ??
-                  [],
-            ],
-            onChanged: (value) => filterNotifier.setTableTypeFilter(value),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField2<TableSortOption>(
-                  value: filter.sortOption,
-                  decoration: const InputDecoration(
-                    labelText: UIStrings.sortBy,
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.zero,
+                    onChanged: (value) => filterNotifier.setSearchQuery(value),
                   ),
-                  buttonStyleData: const ButtonStyleData(
-                    height: 50,
-                    padding: EdgeInsets.only(right: 10),
-                  ),
-                  items: TableSortOption.values
-                      .map(
-                        (option) => DropdownMenuItem(
-                          value: option,
-                          child: Text(
-                            '${UIStrings.by}${option.name.substring(2)}',
-                          ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField2<String?>(
+                    value: filter.tableTypeId,
+                    decoration: const InputDecoration(
+                      labelText: UIStrings.filterByType,
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    buttonStyleData: const ButtonStyleData(
+                      height: 50,
+                      padding: EdgeInsets.only(right: 10),
+                    ),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text(UIStrings.allTypes),
+                      ),
+                      ...tableTypes.map(
+                        (type) => DropdownMenuItem(
+                          value: type.id,
+                          child: Text(type.name),
                         ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      filterNotifier.setSortOption(value);
-                    }
-                  },
-                ),
+                      ),
+                    ],
+                    onChanged: (value) =>
+                        filterNotifier.setTableTypeFilter(value),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField2<TableSortOption>(
+                          value: filter.sortOption,
+                          decoration: const InputDecoration(
+                            labelText: UIStrings.sortBy,
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          buttonStyleData: const ButtonStyleData(
+                            height: 50,
+                            padding: EdgeInsets.only(right: 10),
+                          ),
+                          items: TableSortOption.values
+                              .map(
+                                (option) => DropdownMenuItem(
+                                  value: option,
+                                  child: Text(
+                                    '${UIStrings.by}${option.name.substring(2)}',
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              filterNotifier.setSortOption(value);
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      SortOrderToggle(
+                        currentOrder: filter.sortOrder,
+                        onOrderChanged: (order) {
+                          filterNotifier.setSortOrder(order);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(width: 16),
-              SortOrderToggle(
-                currentOrder: filter.sortOrder,
-                onOrderChanged: (order) {
-                  filterNotifier.setSortOrder(order);
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-      itemBuilder: (context, table) {
-        final tableTypesList = tableTypesAsync.asData?.value;
-        final orderTypesList = orderTypesAsync.asData?.value;
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8.0),
+                itemCount: tables.length,
+                itemBuilder: (context, index) {
+                  final table = tables[index];
+                  final tableTypesList = tableTypesAsync.asData?.value;
+                  final orderTypesList = orderTypesAsync.asData?.value;
 
         String tableTypeName = UIStrings.notAvailable;
         if (tableTypesList != null) {

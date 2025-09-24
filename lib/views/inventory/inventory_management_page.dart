@@ -5,6 +5,7 @@ import 'package:resto2/models/inventory_item_model.dart';
 import 'package:resto2/providers/inventory_filter_provider.dart';
 import 'package:resto2/providers/inventory_provider.dart';
 import 'package:resto2/views/inventory/widgets/inventory_bottom_sheet.dart';
+import 'package:resto2/views/widgets/app_drawer.dart';
 import 'package:resto2/views/widgets/filter_expansion_tile.dart';
 import 'package:resto2/views/widgets/shared/entity_management_page.dart';
 import 'package:resto2/views/widgets/sort_order_toggle.dart';
@@ -27,80 +28,122 @@ class InventoryManagementPage extends ConsumerWidget {
       );
     }
 
-    return EntityManagementPage<InventoryItem>(
-      title: UIStrings.inventoryAndStock,
-      noItemsFoundText: UIStrings.noInventoryItems,
-      items: sortedInventory,
-      onAdd: () => showItemSheet(),
-      filterTile: FilterExpansionTile(
-        children: [
-          TextField(
-            decoration: const InputDecoration(
-              labelText: UIStrings.searchByName,
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
-            ),
-            onChanged: (value) => ref
-                .read(inventoryFilterProvider.notifier)
-                .setSearchQuery(value),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+    return Scaffold(
+      appBar: AppBar(title: const Text(UIStrings.inventoryAndStock)),
+      drawer: const AppDrawer(),
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: Column(
             children: [
-              const Text(UIStrings.sortByName),
-              const SizedBox(width: 8),
-              SortOrderToggle(
-                currentOrder: filterState.sortOrder,
-                onOrderChanged: (order) => ref
-                    .read(inventoryFilterProvider.notifier)
-                    .setSortOrder(order),
+              FilterExpansionTile(
+                children: [
+                  TextField(
+                    decoration: const InputDecoration(
+                      labelText: UIStrings.searchByName,
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) => ref
+                        .read(inventoryFilterProvider.notifier)
+                        .setSearchQuery(value),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const Text(UIStrings.sortByName),
+                      const SizedBox(width: 8),
+                      SortOrderToggle(
+                        currentOrder: filterState.sortOrder,
+                        onOrderChanged: (order) => ref
+                            .read(inventoryFilterProvider.notifier)
+                            .setSortOrder(order),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Expanded(
+                child: inventoryAsync.when(
+                  data: (_) {
+                    if (sortedInventory.isEmpty) {
+                      return const Center(
+                        child: Text(UIStrings.noInventoryItems),
+                      );
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(8.0),
+                      itemCount: sortedInventory.length,
+                      itemBuilder: (_, index) {
+                        final item = sortedInventory[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 6,
+                            horizontal: 8,
+                          ),
+                          child: ListTile(
+                            onTap: () => showItemSheet(item: item),
+                            leading: SizedBox(
+                              width: 56,
+                              height: 56,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: item.imageUrl != null
+                                    ? Image.network(
+                                        item.imageUrl!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        color: Colors.grey.shade300,
+                                        child: const Icon(
+                                          Icons.inventory_2_outlined,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            title: Text(
+                              item.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              UIStrings.stockLabel.replaceFirst(
+                                '{value}',
+                                item.quantityInStock.toStringAsFixed(2),
+                              ),
+                            ),
+                            trailing: Text(
+                              UIStrings.avgCostLabel.replaceFirst(
+                                '{value}',
+                                item.averageCost.toStringAsFixed(2),
+                              ),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, st) => Center(child: Text(e.toString())),
+                ),
               ),
             ],
           ),
-        ],
+        ),
       ),
-      itemBuilder: (context, item) {
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-          child: ListTile(
-            onTap: () => showItemSheet(item: item),
-            leading: SizedBox(
-              width: 56,
-              height: 56,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: item.imageUrl != null
-                    ? Image.network(item.imageUrl!, fit: BoxFit.cover)
-                    : Container(
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.inventory_2_outlined),
-                      ),
-              ),
-            ),
-            title: Text(
-              item.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-              UIStrings.stockLabel.replaceFirst(
-                '{value}',
-                item.quantityInStock.toStringAsFixed(2),
-              ),
-            ),
-            trailing: Text(
-              UIStrings.avgCostLabel.replaceFirst(
-                '{value}',
-                item.averageCost.toStringAsFixed(2),
-              ),
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        );
-      },
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showItemSheet(),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

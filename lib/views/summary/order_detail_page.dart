@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:resto2/models/order_model.dart';
 import 'package:resto2/utils/constants.dart';
-import 'package:resto2/views/widgets/custom_app_bar.dart';
 
 class OrderDetailPage extends StatelessWidget {
   final OrderModel order;
@@ -14,7 +13,7 @@ class OrderDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: AppBar(
         title: Text(
           UIStrings.orderId.replaceFirst('{id}', order.id.substring(0, 8)),
         ),

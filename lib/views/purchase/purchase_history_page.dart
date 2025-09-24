@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:resto2/providers/inventory_provider.dart';
 import 'package:resto2/providers/purchase_provider.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
-import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 import 'package:resto2/utils/constants.dart';
 
@@ -18,7 +17,7 @@ class PurchaseHistoryPage extends ConsumerWidget {
     final inventoryAsync = ref.watch(inventoryStreamProvider);
 
     return Scaffold(
-      appBar: const CustomAppBar(title: Text(UIStrings.purchaseHistory)),
+      appBar: AppBar(title: const Text(UIStrings.purchaseHistory)),
       drawer: const AppDrawer(),
       body: purchasesAsync.when(
         data: (purchases) {

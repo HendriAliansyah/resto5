@@ -5,7 +5,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/providers/theme_provider.dart';
 import 'package:resto2/utils/constants.dart';
 import 'package:resto2/views/widgets/app_drawer.dart';
-import 'package:resto2/views/widgets/custom_app_bar.dart';
 import 'package:resto2/views/widgets/loading_indicator.dart';
 
 class SettingsPage extends HookConsumerWidget {
@@ -59,7 +58,7 @@ class SettingsPage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: const CustomAppBar(title: Text(UIStrings.settings)),
+      appBar: AppBar(title: const Text(UIStrings.settings)),
       drawer: const AppDrawer(),
       body: ListView(
         padding: const EdgeInsets.all(16.0),

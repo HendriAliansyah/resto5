@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:resto2/models/role_permission_model.dart';
 import 'package:resto2/providers/auth_providers.dart';
-import 'package:resto2/providers/restaurant_provider.dart';
 import 'package:resto2/utils/constants.dart';
 
 class AppDrawer extends ConsumerWidget {
@@ -14,7 +13,6 @@ class AppDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider).asData?.value;
     final authController = ref.read(authControllerProvider.notifier);
-    final restaurant = ref.watch(restaurantStreamProvider).asData?.value;
 
     if (currentUser == null) {
       return const Drawer(); // Return an empty drawer if user is not loaded
@@ -29,50 +27,22 @@ class AppDrawer extends ConsumerWidget {
           : false;
     }
 
-    ImageProvider? getBackgroundImage() {
-      if (restaurant?.logoUrl != null) {
-        return NetworkImage(restaurant!.logoUrl!);
-      }
-      return null;
-    }
-
-    // Helper to create a navigation list tile
-    Widget buildTile(
-      BuildContext context,
-      String title,
-      IconData icon,
-      String route,
-    ) {
-      return ListTile(
-        leading: Icon(icon),
-        title: Text(title),
-        onTap: () {
-          Navigator.pop(context);
-          context.go(route);
-        },
-      );
-    }
-
-    // Custom header widget that replaces UserAccountsDrawerHeader
-    Widget buildDrawerHeader() {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 16.0),
-        decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              radius: 32,
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          UserAccountsDrawerHeader(
+            accountName: Text(
+              currentUser.displayName ?? UIStrings.defaultUserName,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            accountEmail: Text(currentUser.email),
+            currentAccountPicture: CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.surface,
-              backgroundImage: getBackgroundImage(),
-              child: getBackgroundImage() == null
-                  ? Text(
-                      currentUser.displayName?.substring(0, 1).toUpperCase() ??
-                          'U',
-                      style: const TextStyle(fontSize: 32.0),
-                    )
-                  : null,
+              child: Text(
+                currentUser.displayName?.substring(0, 1).toUpperCase() ?? 'U',
+                style: const TextStyle(fontSize: 40.0),
+              ),
             ),
             const SizedBox(height: 12),
             Text(
@@ -95,7 +65,7 @@ class AppDrawer extends ConsumerWidget {
     }
 
     return SafeArea(
-      child: Drawer(
+      child = Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -255,25 +225,24 @@ class AppDrawer extends ConsumerWidget {
                   ),
               ],
             ),
-
-            // --- App Settings & Logout ---
-            const Divider(),
-            buildTile(
-              context,
-              UIStrings.settings,
-              Icons.settings_outlined,
-              AppRoutes.settings,
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text(UIStrings.logoutTitle),
-              onTap: () {
-                Navigator.pop(context);
-                authController.signOut();
-              },
-            ),
-          ],
-        ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.settings_outlined),
+            title: const Text(UIStrings.settings),
+            onTap: () {
+              Navigator.pop(context);
+              context.push(AppRoutes.settings);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text(UIStrings.loginTitle),
+            onTap: () {
+              Navigator.pop(context);
+              authController.signOut();
+            },
+          ),
+        ],
       ),
     );
   }
