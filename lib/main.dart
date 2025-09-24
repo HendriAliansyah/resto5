@@ -17,6 +17,7 @@ import 'firebase_options.dart';
 import 'utils/constants.dart';
 import 'utils/snackbar.dart';
 
+//
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
